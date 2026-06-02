@@ -61,6 +61,22 @@
   font-weight: 500;
 }
 
+.domains-section__delete {
+  background: transparent;
+  border: 1px solid var(--tertiary-background-color);
+  border-radius: var(--lc-radius-lg);
+  color: var(--font-primary-color);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.domains-section__delete:hover {
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
 .domains-section__empty {
   color: var(--font-secondary-color);
   font-size: 0.9rem;

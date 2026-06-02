@@ -13,7 +13,8 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 | 3 | Contexto + IndexedDB | ✅ |
 | 4 | Dominios | ✅ |
 | 5 | Tareas + TaskCard | ✅ |
-
+| — | Sidebar (escritorio / tabs abajo en móvil) | ✅ |
+| — | FAB + modal shell con blur | ✅ |
 
 ---
 
@@ -24,6 +25,8 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 - **IndexedDB** (`life-control`) y contexto `lifeControl`.
 - **Dominios**: crear, listar, borrar, con color.
 - **Tareas**: `TaskCard` en Home (urgencia, minutos, checkbox).
+- **Sidebar** con Inicio y Dominios; tema abajo del menú.
+- **FAB** (+) abre modal vacío; cierra con ×, fondo o Esc (`ui:modal:open` / `ui:modal:close`).
 - Servicios en `Service/Nombre/Nombre.js` (ruta que pide Slice).
 
 ---
@@ -36,13 +39,17 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 
 **Actualizar Slice** — `pnpm slice update` falla (usa npm). Mejor `pnpm add` de framework y cli.
 
-**/domains vacío** — `MultiRoute` no renderizaba. `render()` al iniciar + al cambiar ruta.
+**/domains vacío** — `MultiRoute` no renderizaba. `render()` al iniciar + evento `router:change`.
 
-**Dominios no guardaban** — archivos sueltos en `Service/`. Los moví a subcarpetas.
+**Dominios no guardaban** — servicios en carpeta plana; Slice pide subcarpeta `Service/X/X.js`.
 
-**Dominios duplicados** — doble submit (botón + form). Un solo `requestSubmit()` + candado `_submitting`.
+**Al crear, dominios duplicados** — botón y form hacían doble submit. `requestSubmit()` + `_submitting`.
 
-**Home sin tareas** — mismo tema del form + hace falta dominio en el select.
+**Home sin tareas** — mismo doble submit; hace falta un dominio en el select.
+
+**Al borrar, se vacía toda la lista** — `destroyByContainer` / barrido de `activeComponents` rompía cosas (servicios, secciones). En dominios: solo `innerHTML = ''`. En tareas: destruir solo `task-card-*`.
+
+**Datos raros en IndexedDB** — pruebas viejas con duplicados. Borrar DB en DevTools → Application → `life-control` y volver a crear.
 
 ---
 
@@ -59,4 +66,4 @@ Dominios primero, luego Home. Si algo falla: `Ctrl+Shift+R`.
 
 ## Siguiente
 
-Modal con eventos.
+Formularios dentro del modal (tareas, dominios, etc.).

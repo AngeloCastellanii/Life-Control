@@ -103,8 +103,24 @@ export default class HomeSection extends HTMLElement {
       return domain?.color ?? '#71717a';
    }
 
+   _destroyTaskCards() {
+      const ids = [];
+      for (const sliceId of slice.controller.activeComponents.keys()) {
+         if (!sliceId.startsWith('task-card-')) {
+            continue;
+         }
+         const comp = slice.controller.getComponent(sliceId);
+         if (comp && this.$tasks.contains(comp)) {
+            ids.push(sliceId);
+         }
+      }
+      if (ids.length) {
+         slice.controller.destroyComponent(ids);
+      }
+   }
+
    async renderTasks() {
-      slice.controller.destroyByContainer(this.$tasks);
+      this._destroyTaskCards();
       this.$tasks.innerHTML = '';
 
       const tasks = this.taskService.getAll();
@@ -132,7 +148,9 @@ export default class HomeSection extends HTMLElement {
             draggable: true,
             onToggleComplete: (completed) => this.taskService.toggleComplete(task.id, completed)
          });
-         this.$tasks.appendChild(card);
+         if (card) {
+            this.$tasks.appendChild(card);
+         }
       }
    }
 }

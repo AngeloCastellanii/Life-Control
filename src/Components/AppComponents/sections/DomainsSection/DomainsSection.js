@@ -68,14 +68,14 @@ export default class DomainsSection extends HTMLElement {
       this.$colorInput.value = '#2563eb';
    }
 
-   async renderList(domains = this.domainService.getAll()) {
-      slice.controller.destroyByContainer(this.$list);
+   async renderList(domains) {
+      const list = Array.isArray(domains) ? domains : this.domainService.getAll();
       this.$list.innerHTML = '';
 
-      const hasItems = domains.length > 0;
+      const hasItems = list.length > 0;
       this.$empty.hidden = hasItems;
 
-      for (const domain of domains) {
+      for (const domain of list) {
          const item = document.createElement('li');
          item.className = 'domains-section__item';
 
@@ -94,11 +94,11 @@ export default class DomainsSection extends HTMLElement {
          meta.appendChild(name);
          item.appendChild(meta);
 
-         const deleteBtn = await slice.build('Button', {
-            value: 'Eliminar',
-            variant: 'outlined',
-            onClick: () => this.domainService.remove(domain.id)
-         });
+         const deleteBtn = document.createElement('button');
+         deleteBtn.type = 'button';
+         deleteBtn.className = 'domains-section__delete';
+         deleteBtn.textContent = 'Eliminar';
+         deleteBtn.addEventListener('click', () => this.domainService.remove(domain.id));
          item.appendChild(deleteBtn);
          this.$list.appendChild(item);
       }
