@@ -3,6 +3,7 @@ const components = {
   "AppShell": "AppComponents",
   "HomeSection": "AppComponents",
   "ThemeSelector": "atoms",
+  "TaskCard": "atoms",
   "DomainsSection": "sections",
   "Button": "Visual",
   "Link": "Visual",
@@ -12,7 +13,8 @@ const components = {
   "NotFound": "Visual",
   "Route": "Visual",
   "StorageService": "Service",
-  "DomainService": "Service"
+  "DomainService": "Service",
+  "TaskService": "Service"
 };
 
 export default components;

@@ -33,6 +33,9 @@ export default class AppShell extends HTMLElement {
          ]
       });
       this.$content.appendChild(content);
+      if (typeof content.render === 'function') {
+         await content.render();
+      }
    }
 }
 

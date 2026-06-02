@@ -1,8 +1,5 @@
 {
   "name": "life-control",
-  "dependencies": {
-    "slicejs-web-framework": "^3.3.1"
-  },
   "scripts": {
     "dev": "node ./node_modules/slicejs-cli/client.js dev",
     "start": "node ./node_modules/slicejs-cli/client.js start",
@@ -31,6 +28,7 @@
     "node": ">=20.0.0"
   },
   "devDependencies": {
-    "slicejs-cli": "^3.4.1"
+    "slicejs-cli": "^3.5.0",
+    "slicejs-web-framework": "^3.3.1"
   }
 }

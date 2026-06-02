@@ -1,10 +1,31 @@
-<section class="home">
-  <h1 class="home__title">Welcome to your Slice app</h1>
-  <p class="home__lead">
-    This is the App Shell + MultiRoute starter. Edit
-    <code>src/Components/AppComponents/HomeSection/</code> to change this page, or add a
-    section: create an AppComponent, then register it in <code>src/routes.js</code> and in
-    the AppShell's MultiRoute.
-  </p>
-  <div class="home__cta"></div>
+<section class="home lc-card">
+  <h1 class="lc-section-title">Life Control</h1>
+  <p class="lc-section-subtitle">Vista previa del inbox de tareas (ordenadas por urgencia).</p>
+
+  <form class="home__form" data-role="form" method="post" action="#">
+    <div class="home__field">
+      <label class="lc-label" for="task-title">Título</label>
+      <input class="lc-input" id="task-title" name="title" type="text" placeholder="Estudiar capítulo 3…" required />
+    </div>
+    <div class="home__field">
+      <label class="lc-label" for="task-domain">Dominio</label>
+      <select class="lc-input" id="task-domain" name="domainId" required></select>
+    </div>
+    <div class="home__field">
+      <label class="lc-label" for="task-urgency">Urgencia</label>
+      <select class="lc-input" id="task-urgency" name="urgency">
+        <option value="high">Alta</option>
+        <option value="medium" selected>Media</option>
+        <option value="low">Baja</option>
+      </select>
+    </div>
+    <div class="home__field">
+      <label class="lc-label" for="task-minutes">Minutos</label>
+      <input class="lc-input" id="task-minutes" name="minutes" type="number" min="1" value="30" />
+    </div>
+    <div class="home__actions" data-role="form-actions"></div>
+  </form>
+
+  <div class="home__tasks" data-role="tasks"></div>
+  <p class="home__empty" data-role="empty" hidden>Crea un dominio en Dominios y luego añade tareas aquí.</p>
 </section>

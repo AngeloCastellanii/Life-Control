@@ -1,15 +1,19 @@
 export default class MultiRoute extends HTMLElement {
    constructor(props) {
       super();
-      this.props = props;
-      this.renderedComponents = new Map(); // Cache para componentes renderizados
+      this.renderedComponents = new Map();
+      slice.controller.setComponentProps(this, props);
    }
 
-   init() {
-      if (!this.props.routes || !Array.isArray(this.props.routes)) {
+   async init() {
+      if (!this.routes || !Array.isArray(this.routes)) {
          slice.logger.logError('MultiRoute', 'No valid routes array provided in props.');
          return;
       }
+
+      this.events = slice.events.bind(this);
+      this.events.subscribe('router:change', () => this.render());
+      await this.render();
       // NOTE: MultiRoute does NOT register its routes in the Router. `routes.js` is the single
       // source of truth for what the Router knows. The Router resolves the URL on first load /
       // refresh / deep-link BEFORE this component mounts, so a path that only lived inside a
@@ -27,7 +31,7 @@ export default class MultiRoute extends HTMLElement {
 
       // 1. Match exacto, case-insensitive ('/About' coincide con '/about')
       const lowerPath = currentPath.toLowerCase();
-      const exactMatch = this.props.routes.find(
+      const exactMatch = this.routes.find(
          (route) => (route.path.length > 1 ? route.path.replace(/\/+$/, '') : route.path).toLowerCase() === lowerPath
       );
       if (exactMatch) {
@@ -35,7 +39,7 @@ export default class MultiRoute extends HTMLElement {
       }
 
       // 2. Si no hay match exacto, buscar rutas dinámicas
-      for (const route of this.props.routes) {
+      for (const route of this.routes) {
          if (route.path.includes('${')) {
             const { regex, paramNames } = this.compilePathPattern(route.path);
             const match = currentPath.match(regex);

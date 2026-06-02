@@ -1,20 +1,33 @@
 .home {
-  text-align: center;
-  padding: 32px 0;
+  text-align: left;
 }
 
-.home__title {
-  font-size: 2rem;
-  margin-bottom: 12px;
+.home__form {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  margin-bottom: 1.5rem;
 }
 
-.home__lead {
+.home__actions {
+  grid-column: 1 / -1;
+}
+
+.home__tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.home__empty {
   color: var(--font-secondary-color);
-  max-width: 60ch;
-  margin: 0 auto 24px;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  margin: 0;
+  text-align: center;
 }
 
-.home__lead code {
-  color: var(--font-primary-color);
+@media (min-width: 640px) {
+  .home__form {
+    grid-template-columns: 1fr 1fr;
+  }
 }

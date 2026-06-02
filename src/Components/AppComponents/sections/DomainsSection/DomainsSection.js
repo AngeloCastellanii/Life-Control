@@ -17,12 +17,16 @@ export default class DomainsSection extends HTMLElement {
 
    async init() {
       this.domainService = slice.getComponent('domain-service');
+      if (!this.domainService) {
+         slice.logger.logError('DomainsSection', 'DomainService no disponible');
+         return;
+      }
       this.events = slice.events.bind(this);
 
       this.submitBtn = await slice.build('Button', {
          value: 'Agregar dominio',
          variant: 'filled',
-         onClick: () => this.handleSubmit()
+         onClick: () => this.$form.requestSubmit()
       });
       this.$formActions.appendChild(this.submitBtn);
 
@@ -30,8 +34,6 @@ export default class DomainsSection extends HTMLElement {
          event.preventDefault();
          this.handleSubmit();
       });
-
-      this.events.subscribe('domain:changed', () => this.renderList());
 
       slice.context.watch(
          'lifeControl',
@@ -44,6 +46,18 @@ export default class DomainsSection extends HTMLElement {
    }
 
    async handleSubmit() {
+      if (this._submitting) {
+         return;
+      }
+      this._submitting = true;
+      try {
+         await this._createDomain();
+      } finally {
+         this._submitting = false;
+      }
+   }
+
+   async _createDomain() {
       const name = this.$nameInput.value;
       const color = this.$colorInput.value;
       const created = await this.domainService.create({ name, color });

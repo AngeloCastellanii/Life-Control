@@ -3,7 +3,10 @@ const STORE = 'domains';
 export default class DomainService {
    async init() {
       this.storage = slice.getComponent('storage-service');
-      if (!this.storage?.db) {
+      if (!this.storage) {
+         throw new Error('StorageService no está disponible');
+      }
+      if (!this.storage.db) {
          await this.storage.init();
       }
       await this.syncToContext();
