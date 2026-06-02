@@ -34,6 +34,12 @@ export default class AppShell extends HTMLElement {
       if (typeof content.render === 'function') {
          await content.render();
       }
+
+      const modalShell = await slice.build('ModalShell', { sliceId: 'modal-shell' });
+      this.appendChild(modalShell);
+
+      const fab = await slice.build('Fab', { sliceId: 'app-fab' });
+      this.appendChild(fab);
    }
 }
 

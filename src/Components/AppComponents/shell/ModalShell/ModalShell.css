@@ -1,0 +1,76 @@
+.modal-shell {
+  inset: 0;
+  position: fixed;
+  z-index: 300;
+}
+
+.modal-shell__backdrop {
+  backdrop-filter: blur(6px);
+  background: rgb(9 9 11 / 45%);
+  inset: 0;
+  position: absolute;
+}
+
+.modal-shell__dialog {
+  background: var(--secondary-background-color);
+  border: 1px solid var(--tertiary-background-color);
+  border-radius: var(--lc-radius-xl);
+  box-shadow: var(--lc-shadow);
+  left: 50%;
+  max-height: min(85vh, 520px);
+  max-width: min(92vw, 440px);
+  overflow: auto;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+}
+
+.modal-shell__header {
+  align-items: center;
+  border-bottom: 1px solid var(--tertiary-background-color);
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+}
+
+.modal-shell__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.modal-shell__close {
+  background: transparent;
+  border: none;
+  color: var(--font-secondary-color);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+}
+
+.modal-shell__close:hover {
+  color: var(--font-primary-color);
+}
+
+.modal-shell__body {
+  padding: 1.25rem;
+}
+
+.modal-shell__placeholder {
+  color: var(--font-secondary-color);
+  font-size: 0.9rem;
+  margin: 0;
+  text-align: center;
+}
+
+.app-shell--modal-open .app-shell__stage {
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.app-shell--modal-open .app-shell__sidebar {
+  filter: blur(4px);
+  pointer-events: none;
+}
