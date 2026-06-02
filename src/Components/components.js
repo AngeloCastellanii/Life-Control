@@ -4,6 +4,7 @@ const components = {
   "HomeSection": "AppComponents",
   "ThemeSelector": "atoms",
   "TaskCard": "atoms",
+  "Sidebar": "shell",
   "DomainsSection": "sections",
   "Button": "Visual",
   "Link": "Visual",

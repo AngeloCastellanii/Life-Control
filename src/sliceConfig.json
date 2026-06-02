@@ -54,6 +54,10 @@
             "path": "/Components/AppComponents/sections",
             "type": "Visual"
          },
+         "shell": {
+            "path": "/Components/AppComponents/shell",
+            "type": "Visual"
+         },
          "Visual": {
             "path": "/Components/Visual",
             "type": "Visual"

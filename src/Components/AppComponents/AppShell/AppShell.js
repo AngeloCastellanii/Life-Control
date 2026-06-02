@@ -2,27 +2,25 @@ export default class AppShell extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
-      this.$header = this.querySelector('.app-shell__header');
+      this.$sidebar = this.querySelector('[data-role="sidebar"]');
       this.$content = this.querySelector('.app-shell__content');
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
-      const themeSelector = await slice.build('ThemeSelector', {
-         sliceId: 'theme-selector'
-      });
-      this.$header.appendChild(themeSelector);
-
-      const navbar = await slice.build('Navbar', {
-         sliceId: 'app-navbar',
-         position: 'fixed',
+      const sidebar = await slice.build('Sidebar', {
+         sliceId: 'app-sidebar',
          items: [
-            { text: 'Home', path: '/' },
-            { text: 'About', path: '/about' },
+            { text: 'Inicio', path: '/' },
             { text: 'Dominios', path: '/domains' }
          ]
       });
-      this.$header.appendChild(navbar);
+      this.$sidebar.appendChild(sidebar);
+
+      const themeSelector = await slice.build('ThemeSelector', {
+         sliceId: 'theme-selector'
+      });
+      sidebar.querySelector('[data-role="footer"]').appendChild(themeSelector);
 
       const content = await slice.build('MultiRoute', {
          sliceId: 'app-content',
