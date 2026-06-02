@@ -1,0 +1,4 @@
+allowBuilds:
+  slicejs-cli: true
+minimumReleaseAgeExclude:
+  - slicejs-web-framework@3.3.1

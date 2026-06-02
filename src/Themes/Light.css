@@ -1,0 +1,33 @@
+:root {
+  --font-family: "Inter", system-ui, -apple-system, sans-serif;
+  --font-primary-color: #18181b;
+  --font-secondary-color: #71717a;
+
+  --primary-color: #2563eb;
+  --primary-color-rgb: 37, 99, 235;
+  --primary-background-color: #fafafa;
+  --primary-color-contrast: #ffffff;
+  --primary-color-shade: #dbeafe;
+
+  --secondary-background-color: #ffffff;
+  --secondary-color: #2563eb;
+  --secondary-color-rgb: 37, 99, 235;
+  --secondary-color-contrast: #ffffff;
+
+  --tertiary-background-color: #e4e4e7;
+
+  --success-color: #10b981;
+  --success-contrast: #ffffff;
+  --warning-color: #eab308;
+  --warning-contrast: #18181b;
+  --danger-color: #ef4444;
+  --danger-contrast: #ffffff;
+  --accent-warning-soft: #f97316;
+
+  --medium-color: #a1a1aa;
+  --disabled-color: #a1a1aa;
+
+  --lc-radius-lg: 1rem;
+  --lc-radius-xl: 1.5rem;
+  --lc-shadow: 0 1px 3px rgb(24 24 27 / 8%);
+}

@@ -1,0 +1,36 @@
+{
+  "name": "life-control",
+  "dependencies": {
+    "slicejs-web-framework": "^3.3.1"
+  },
+  "scripts": {
+    "dev": "node ./node_modules/slicejs-cli/client.js dev",
+    "start": "node ./node_modules/slicejs-cli/client.js start",
+    "component:create": "node ./node_modules/slicejs-cli/client.js component create",
+    "component:list": "node ./node_modules/slicejs-cli/client.js component list",
+    "component:delete": "node ./node_modules/slicejs-cli/client.js component delete",
+    "get": "node ./node_modules/slicejs-cli/client.js get",
+    "browse": "node ./node_modules/slicejs-cli/client.js browse",
+    "sync": "node ./node_modules/slicejs-cli/client.js sync",
+    "slice:version": "node ./node_modules/slicejs-cli/client.js version",
+    "slice:update": "node ./node_modules/slicejs-cli/client.js update",
+    "slice:types": "node ./node_modules/slicejs-cli/client.js types generate",
+    "slice:init": "node ./node_modules/slicejs-cli/client.js init",
+    "slice:start": "node ./node_modules/slicejs-cli/client.js start",
+    "slice:dev": "node ./node_modules/slicejs-cli/client.js dev",
+    "slice:create": "node ./node_modules/slicejs-cli/client.js component create",
+    "slice:list": "node ./node_modules/slicejs-cli/client.js component list",
+    "slice:delete": "node ./node_modules/slicejs-cli/client.js component delete",
+    "slice:get": "node ./node_modules/slicejs-cli/client.js get",
+    "slice:browse": "node ./node_modules/slicejs-cli/client.js browse",
+    "slice:sync": "node ./node_modules/slicejs-cli/client.js sync",
+    "run": "node ./node_modules/slicejs-cli/client.js dev"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "slicejs-cli": "^3.4.1"
+  }
+}
