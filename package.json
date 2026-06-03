@@ -1,7 +1,9 @@
 {
   "name": "life-control",
   "scripts": {
-    "dev": "node ./node_modules/slicejs-cli/client.js dev",
+    "dev": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js dev",
+    "css:build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify",
+    "css:watch": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --watch",
     "start": "node ./node_modules/slicejs-cli/client.js start",
     "component:create": "node ./node_modules/slicejs-cli/client.js component create",
     "component:list": "node ./node_modules/slicejs-cli/client.js component list",
@@ -28,7 +30,9 @@
     "node": ">=20.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
     "slicejs-cli": "^3.5.0",
-    "slicejs-web-framework": "^3.3.1"
+    "slicejs-web-framework": "^3.3.1",
+    "tailwindcss": "^4.3.0"
   }
 }

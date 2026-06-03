@@ -1,22 +1,22 @@
-<section class="planner-section">
-  <div class="planner-section__head">
+<section>
+  <div class="mb-4 flex items-start justify-between gap-4">
     <div>
       <h1 class="lc-section-title">Planificador</h1>
       <p class="lc-section-subtitle">Bloques de tiempo e inbox. Arrastra tareas al lienzo.</p>
     </div>
-    <button type="button" class="planner-section__add-block" data-role="add-block">Agregar bloque</button>
+    <button type="button" class="lc-btn-outline whitespace-nowrap" data-role="add-block">Agregar bloque</button>
   </div>
 
-  <div class="planner-section__layout">
-    <div class="planner-section__canvas lc-card">
-      <h2 class="planner-section__panel-title">Lienzo</h2>
-      <div class="planner-section__blocks" data-role="blocks"></div>
-      <p class="planner-section__placeholder" data-role="blocks-empty" hidden>Sin bloques. Agrega uno arriba.</p>
+  <div class="grid min-h-[360px] gap-4 lg:grid-cols-[7fr_3fr]">
+    <div class="lc-card">
+      <h2 class="mb-3 text-base font-semibold">Lienzo</h2>
+      <div class="flex flex-col gap-3" data-role="blocks"></div>
+      <p class="lc-empty" data-role="blocks-empty" hidden>Sin bloques. Agrega uno arriba.</p>
     </div>
-    <aside class="planner-section__inbox lc-card">
-      <h2 class="planner-section__panel-title">Inbox</h2>
-      <div class="planner-section__tasks" data-role="tasks"></div>
-      <p class="planner-section__empty" data-role="empty" hidden>Sin tareas. Pulsa +.</p>
+    <aside class="lc-card">
+      <h2 class="mb-3 text-base font-semibold">Inbox</h2>
+      <div class="flex flex-col gap-2.5" data-role="tasks"></div>
+      <p class="lc-empty" data-role="empty" hidden>Sin tareas. Pulsa +.</p>
     </aside>
   </div>
 </section>

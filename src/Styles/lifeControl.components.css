@@ -1,0 +1,326 @@
+@layer components {
+  /* AppShell */
+  .app-shell {
+    @apply min-h-screen;
+  }
+
+  .app-shell__sidebar {
+    @apply fixed left-0 top-0 z-[100] shrink-0 border-r;
+    width: min(280px, 20vw);
+    border-color: var(--tertiary-background-color);
+  }
+
+  .app-shell__stage {
+    @apply min-h-screen;
+    margin-left: min(280px, 20vw);
+  }
+
+  .app-shell__content {
+    @apply mx-auto max-w-[1100px] px-5 pb-8 pt-5;
+  }
+
+  @media (max-width: 768px) {
+    .app-shell__sidebar {
+      @apply bottom-0 left-0 right-0 top-auto w-full border-r-0;
+    }
+
+    .app-shell__stage {
+      @apply ml-0 pb-[4.5rem];
+    }
+  }
+
+  /* Sidebar */
+  .sidebar {
+    @apply flex min-h-screen flex-col;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+  }
+
+  .sidebar__brand {
+    @apply flex items-center gap-3 border-b px-4 py-5;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .sidebar__logo {
+    @apply flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold;
+    background-color: var(--primary-color);
+    color: var(--primary-color-contrast);
+  }
+
+  .sidebar__title {
+    @apply text-base font-bold;
+  }
+
+  .sidebar__list {
+    @apply m-0 flex flex-1 list-none flex-col gap-1 px-3 py-4;
+  }
+
+  .sidebar__link {
+    @apply block rounded-xl px-3.5 py-2.5 text-sm font-medium no-underline transition-colors;
+    color: var(--font-secondary-color);
+  }
+
+  .sidebar__link:hover {
+    background-color: var(--primary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .sidebar__item--active .sidebar__link {
+    background-color: var(--primary-color-shade);
+    color: var(--primary-color);
+  }
+
+  .sidebar__footer {
+    @apply border-t p-4;
+    border-color: var(--tertiary-background-color);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      @apply min-h-0 flex-row border-t;
+    }
+
+    .sidebar__brand {
+      @apply border-b-0 border-r px-3 py-3;
+    }
+
+    .sidebar__title {
+      @apply hidden;
+    }
+
+    .sidebar__list {
+      @apply flex-row items-center gap-0.5 overflow-x-auto p-2;
+    }
+
+    .sidebar__link {
+      @apply whitespace-nowrap px-2.5 py-2 text-xs;
+    }
+
+    .sidebar__footer {
+      @apply border-l border-t-0 p-2;
+    }
+  }
+
+  /* TaskCard */
+  .task-card {
+    @apply relative grid cursor-grab gap-2.5 rounded-xl border px-3.5 py-3 transition-opacity active:cursor-grabbing;
+    grid-template-columns: auto auto 1fr auto auto auto;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+  }
+
+  .task-card--completed {
+    @apply opacity-65;
+  }
+
+  .task-card--completed .task-card__title {
+    @apply line-through;
+  }
+
+  .task-card--locked {
+    @apply cursor-default active:cursor-default;
+  }
+
+  .task-card__title {
+    @apply m-0 mb-1 truncate text-[0.95rem] font-medium;
+  }
+
+  .task-card__meta {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .task-card__urgency {
+    @apply rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide;
+  }
+
+  .task-card__urgency--high {
+    background: color-mix(in srgb, var(--danger-color) 18%, transparent);
+    color: var(--danger-color);
+  }
+
+  .task-card__urgency--medium {
+    background: color-mix(in srgb, var(--warning-color) 22%, transparent);
+    color: var(--warning-color);
+  }
+
+  .task-card__urgency--low {
+    background: color-mix(in srgb, var(--medium-color) 22%, transparent);
+    color: var(--font-secondary-color);
+  }
+
+  .task-card__minutes {
+    @apply text-xs text-lc-muted;
+  }
+
+  .task-card__accent {
+    @apply w-1 rounded-full;
+  }
+
+  .task-card__check {
+    @apply absolute h-0 w-0 opacity-0;
+  }
+
+  .task-card__check-ui {
+    @apply block h-[1.1rem] w-[1.1rem] rounded-md border-2 transition-colors;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .task-card__check:checked + .task-card__check-ui {
+    background: var(--success-color);
+    border-color: var(--success-color);
+  }
+
+  .task-card__check:checked + .task-card__check-ui::after {
+    @apply block text-center text-[0.7rem] leading-[1.1rem];
+    color: var(--success-contrast);
+    content: "✓";
+  }
+
+  .task-card__check-wrap {
+    @apply flex cursor-pointer self-center;
+  }
+
+  .task-card__body {
+    @apply min-w-0;
+  }
+
+  .task-card__grip {
+    @apply self-center select-none text-xs tracking-tighter text-lc-muted;
+  }
+
+  .task-card__actions {
+    @apply flex items-center gap-0.5 self-center;
+  }
+
+  .task-card__action,
+  .task-card__remove {
+    @apply cursor-pointer border-0 bg-transparent p-1 text-sm transition-colors;
+    color: var(--font-secondary-color);
+  }
+
+  .task-card__action:hover,
+  .task-card__remove:hover {
+    color: var(--primary-color);
+  }
+
+  .task-card__action--danger:hover {
+    color: var(--danger-color);
+  }
+
+  /* TimeBlock */
+  .time-block {
+    @apply rounded-xl border p-3.5;
+    background-color: var(--primary-background-color);
+    border-color: var(--tertiary-background-color);
+  }
+
+  .time-block--overflow {
+    border-color: var(--danger-color);
+    box-shadow: inset 0 0 0 1px var(--danger-color);
+  }
+
+  .time-block__dropzone--active {
+    background: var(--primary-color-shade);
+    border-color: var(--primary-color);
+  }
+
+  .time-block__dropzone {
+    @apply min-h-14 rounded-xl border-2 border-dashed p-2 transition-colors;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .time-block__dropzone:has(.time-block__tasks:not(:empty)) .time-block__hint {
+    @apply hidden;
+  }
+
+  /* Modal + Fab */
+  .modal-shell {
+    @apply fixed inset-0 z-[300];
+  }
+
+  .modal-shell__backdrop {
+    @apply absolute inset-0 backdrop-blur-sm;
+    background: rgb(9 9 11 / 45%);
+  }
+
+  .modal-shell__dialog {
+    @apply absolute left-1/2 top-1/2 w-full max-w-[440px] -translate-x-1/2 -translate-y-1/2 overflow-auto rounded-2xl border shadow-lg;
+    max-height: min(85vh, 520px);
+    background: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+  }
+
+  .fab {
+    @apply fixed bottom-6 right-6 z-[200] flex h-14 w-14 items-center justify-center rounded-full border-0 text-3xl leading-none shadow-lg transition-transform hover:scale-105;
+    background: var(--primary-color);
+    color: var(--primary-color-contrast);
+    box-shadow: 0 8px 24px rgb(var(--primary-color-rgb) / 35%);
+  }
+
+  @media (max-width: 768px) {
+    .fab {
+      @apply bottom-[5.25rem] right-4;
+    }
+  }
+
+  .app-shell--modal-open .app-shell__stage,
+  .app-shell--modal-open .app-shell__sidebar {
+    @apply pointer-events-none blur-sm;
+  }
+
+  /* CapacityRing */
+  .capacity-ring__svg {
+    @apply h-20 w-20 -rotate-90;
+  }
+
+  .capacity-ring__track {
+    fill: none;
+    stroke: var(--tertiary-background-color);
+    stroke-width: 6;
+  }
+
+  .capacity-ring__progress {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-linecap: round;
+    stroke-width: 6;
+    stroke-dasharray: 213.6;
+    stroke-dashoffset: 213.6;
+    transition: stroke-dashoffset 0.35s ease, stroke 0.2s ease;
+  }
+
+  .capacity-ring--full .capacity-ring__progress {
+    stroke: var(--danger-color);
+  }
+
+  /* Domains list items (JS) */
+  .domains-section__item {
+    @apply flex items-center justify-between gap-3 rounded-xl border px-4 py-3;
+    background-color: var(--primary-background-color);
+    border-color: var(--tertiary-background-color);
+  }
+
+  .domains-section__meta {
+    @apply flex items-center gap-3;
+  }
+
+  .domains-section__name {
+    @apply font-medium;
+  }
+
+  .domains-section__delete {
+    @apply cursor-pointer rounded-xl border px-3 py-1.5 text-sm transition-colors;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .domains-section__delete:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+  }
+
+  .domains-section__swatch {
+    @apply h-4 w-4 shrink-0 rounded-full;
+  }
+}

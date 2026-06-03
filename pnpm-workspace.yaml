@@ -1,4 +1,5 @@
 allowBuilds:
+  '@parcel/watcher': false
   slicejs-cli: true
 minimumReleaseAgeExclude:
   - slicejs-web-framework@3.3.1

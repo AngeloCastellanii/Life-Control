@@ -1,13 +1,13 @@
-<form class="task-form" data-role="form">
-  <div class="task-form__field">
+<form class="flex flex-col gap-4" data-role="form">
+  <div>
     <label class="lc-label" for="task-form-title">Título</label>
     <input class="lc-input" id="task-form-title" type="text" placeholder="Estudiar capítulo 3…" required />
   </div>
-  <div class="task-form__field">
+  <div>
     <label class="lc-label" for="task-form-domain">Dominio</label>
     <select class="lc-input" id="task-form-domain" required></select>
   </div>
-  <div class="task-form__field">
+  <div>
     <label class="lc-label" for="task-form-urgency">Urgencia</label>
     <select class="lc-input" id="task-form-urgency">
       <option value="high">Alta</option>
@@ -15,10 +15,10 @@
       <option value="low">Baja</option>
     </select>
   </div>
-  <div class="task-form__field">
+  <div>
     <label class="lc-label" for="task-form-minutes">Duración (min)</label>
     <input class="lc-input" id="task-form-minutes" type="number" min="1" step="1" value="30" required />
   </div>
-  <p class="task-form__hint" data-role="hint" hidden>Crea un dominio antes de añadir tareas.</p>
-  <div class="task-form__actions" data-role="actions"></div>
+  <p class="lc-empty" data-role="hint" hidden>Crea un dominio antes de añadir tareas.</p>
+  <div class="flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>
 </form>

@@ -22,7 +22,7 @@
       }
    },
    "stylesManager": {
-      "requestedStyles": ["sliceStyles", "lifeControlBase"]
+      "requestedStyles": ["sliceStyles", "tailwind", "lifeControlBase"]
    },
    "themeManager": {
       "enabled": true,

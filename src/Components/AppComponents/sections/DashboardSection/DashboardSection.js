@@ -111,7 +111,7 @@ export default class DashboardSection extends HTMLElement {
       listEl.innerHTML = '';
       for (const task of tasks) {
          const item = document.createElement('li');
-         item.className = 'dashboard-section__list-item';
+         item.className = 'text-sm';
          item.textContent = task.title;
          listEl.appendChild(item);
       }

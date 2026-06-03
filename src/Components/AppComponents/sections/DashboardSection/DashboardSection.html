@@ -1,33 +1,33 @@
-<section class="dashboard-section">
+<section>
   <h1 class="lc-section-title">Dashboard</h1>
   <p class="lc-section-subtitle">Resumen del día.</p>
 
-  <div class="dashboard-section__kpis">
-    <div class="dashboard-section__kpi dashboard-section__kpi--ring lc-card">
-      <span class="dashboard-section__kpi-label">Capacidad hoy</span>
+  <div class="mb-5 grid gap-4 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
+    <div class="lc-card flex flex-col items-center gap-1.5">
+      <span class="text-[0.7rem] font-medium uppercase tracking-wider text-lc-muted">Capacidad hoy</span>
       <div data-role="capacity-ring"></div>
     </div>
-    <div class="dashboard-section__kpi lc-card">
-      <span class="dashboard-section__kpi-label">Tareas pendientes</span>
-      <span class="dashboard-section__kpi-value" data-role="tasks-count">0</span>
+    <div class="lc-card flex flex-col gap-1.5">
+      <span class="text-[0.7rem] font-medium uppercase tracking-wider text-lc-muted">Tareas pendientes</span>
+      <span class="text-3xl font-bold" data-role="tasks-count">0</span>
     </div>
-    <div class="dashboard-section__kpi lc-card">
-      <span class="dashboard-section__kpi-label">Tipo de cambio</span>
-      <span class="dashboard-section__kpi-value dashboard-section__kpi-value--rate" data-role="rate">—</span>
-      <button type="button" class="dashboard-section__retry" data-role="rate-retry" hidden>Reintentar</button>
+    <div class="lc-card flex flex-col gap-1.5">
+      <span class="text-[0.7rem] font-medium uppercase tracking-wider text-lc-muted">Tipo de cambio</span>
+      <span class="text-lg font-bold leading-snug" data-role="rate">—</span>
+      <button type="button" class="lc-btn-ghost text-left text-sm" data-role="rate-retry" hidden>Reintentar</button>
     </div>
   </div>
 
-  <div class="dashboard-section__columns">
-    <div class="dashboard-section__col lc-card">
-      <h2 class="dashboard-section__col-title">Prioridad</h2>
-      <ul class="dashboard-section__list" data-role="priority-list"></ul>
-      <p class="dashboard-section__placeholder" data-role="priority-empty" hidden>Sin tareas urgentes.</p>
+  <div class="grid gap-4 md:grid-cols-2">
+    <div class="lc-card">
+      <h2 class="mb-3 text-base font-semibold">Prioridad</h2>
+      <ul class="flex list-none flex-col gap-2 p-0 m-0" data-role="priority-list"></ul>
+      <p class="lc-empty" data-role="priority-empty" hidden>Sin tareas urgentes.</p>
     </div>
-    <div class="dashboard-section__col lc-card">
-      <h2 class="dashboard-section__col-title">Recientes</h2>
-      <ul class="dashboard-section__list" data-role="recent-list"></ul>
-      <p class="dashboard-section__placeholder" data-role="recent-empty" hidden>Sin tareas recientes.</p>
+    <div class="lc-card">
+      <h2 class="mb-3 text-base font-semibold">Recientes</h2>
+      <ul class="flex list-none flex-col gap-2 p-0 m-0" data-role="recent-list"></ul>
+      <p class="lc-empty" data-role="recent-empty" hidden>Sin tareas recientes.</p>
     </div>
   </div>
 </section>

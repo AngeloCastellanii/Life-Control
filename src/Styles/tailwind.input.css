@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import "./lifeControl.components.css";
+
+@source "../Components/**/*.{html,js,css}";
+@source "../App/**/*.{html,js}";
+
+@theme {
+  --color-lc-primary: var(--primary-color);
+  --color-lc-bg: var(--primary-background-color);
+  --color-lc-surface: var(--secondary-background-color);
+  --color-lc-border: var(--tertiary-background-color);
+  --color-lc-text: var(--font-primary-color);
+  --color-lc-muted: var(--font-secondary-color);
+  --color-lc-danger: var(--danger-color);
+  --color-lc-success: var(--success-color);
+  --color-lc-warning: var(--warning-color);
+  --font-sans: var(--font-family, "Inter", system-ui, sans-serif);
+  --radius-lc: var(--lc-radius-lg, 1rem);
+  --radius-lc-xl: var(--lc-radius-xl, 1.5rem);
+}
+
+@layer base {
+  body {
+    @apply m-0 font-sans;
+    background-color: var(--primary-background-color);
+    color: var(--font-primary-color);
+  }
+}
+
+@layer components {
+  .lc-card {
+    @apply rounded-2xl border p-5 shadow-sm;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+  }
+
+  .lc-section-title {
+    @apply m-0 mb-2 text-2xl font-bold text-lc-text;
+  }
+
+  .lc-section-subtitle {
+    @apply mb-5 text-sm text-lc-muted;
+  }
+
+  .lc-label {
+    @apply mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-wider text-lc-muted;
+  }
+
+  .lc-input {
+    @apply w-full rounded-xl border px-3.5 py-2.5 text-[0.95rem] outline-none transition-colors;
+    background-color: var(--primary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .lc-input:focus {
+    border-color: var(--primary-color);
+  }
+
+  .lc-btn-ghost {
+    @apply cursor-pointer border-0 bg-transparent p-1 text-lc-muted transition-colors hover:text-lc-primary;
+  }
+
+  .lc-btn-outline {
+    @apply cursor-pointer rounded-xl border px-3 py-2 text-sm transition-colors;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .lc-btn-outline:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .lc-empty {
+    @apply m-0 text-center text-sm text-lc-muted;
+  }
+}
