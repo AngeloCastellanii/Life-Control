@@ -16,6 +16,7 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 | — | Sidebar (escritorio / tabs abajo en móvil) | ✅ |
 | — | FAB + modal shell con blur | ✅ |
 | — | Formularios en modal (DomainForm, TaskForm) | ✅ |
+| — | 5 rutas + sections placeholder | ✅ |
 
 ---
 
@@ -68,4 +69,4 @@ Dominios primero, luego Home. Si algo falla: `Ctrl+Shift+R`.
 
 ## Siguiente
 
-Rutas y vistas (dashboard, planner, finanzas, compras).
+Dashboard con API de tipo de cambio.

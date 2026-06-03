@@ -11,7 +11,10 @@ export default class AppShell extends HTMLElement {
       const sidebar = await slice.build('Sidebar', {
          sliceId: 'app-sidebar',
          items: [
-            { text: 'Inicio', path: '/' },
+            { text: 'Dashboard', path: '/' },
+            { text: 'Planificador', path: '/planner' },
+            { text: 'Finanzas', path: '/finances' },
+            { text: 'Compras', path: '/shopping' },
             { text: 'Dominios', path: '/domains' }
          ]
       });
@@ -25,8 +28,10 @@ export default class AppShell extends HTMLElement {
       const content = await slice.build('MultiRoute', {
          sliceId: 'app-content',
          routes: [
-            { path: '/', component: 'HomeSection' },
-            { path: '/about', component: 'AboutSection' },
+            { path: '/', component: 'DashboardSection' },
+            { path: '/planner', component: 'PlannerSection' },
+            { path: '/finances', component: 'FinancesSection' },
+            { path: '/shopping', component: 'ShoppingSection' },
             { path: '/domains', component: 'DomainsSection' }
          ]
       });

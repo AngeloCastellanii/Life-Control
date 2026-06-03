@@ -1,0 +1,49 @@
+.dashboard-section__kpis {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: 1.25rem;
+}
+
+.dashboard-section__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dashboard-section__kpi-label {
+  color: var(--font-secondary-color);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dashboard-section__kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.dashboard-section__columns {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.dashboard-section__col-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.dashboard-section__placeholder {
+  color: var(--font-secondary-color);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .dashboard-section__columns {
+    grid-template-columns: 1fr;
+  }
+}

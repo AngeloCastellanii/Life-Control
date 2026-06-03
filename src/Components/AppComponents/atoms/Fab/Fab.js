@@ -1,6 +1,6 @@
 const MODAL_BY_PATH = {
    '/domains': { title: 'Nuevo dominio', form: 'DomainForm' },
-   '/': { title: 'Nueva tarea', form: 'TaskForm' }
+   '/planner': { title: 'Nueva tarea', form: 'TaskForm' }
 };
 
 export default class Fab extends HTMLElement {
@@ -16,11 +16,24 @@ export default class Fab extends HTMLElement {
    }
 
    init() {
+      this.syncVisibility();
+
       this.$btn.addEventListener('click', () => {
          const path = window.location.pathname.replace(/\/+$/, '') || '/';
-         const payload = MODAL_BY_PATH[path] ?? MODAL_BY_PATH['/'];
-         slice.events.emit('ui:modal:open', payload);
+         const payload = MODAL_BY_PATH[path];
+         if (payload) {
+            slice.events.emit('ui:modal:open', payload);
+         }
       });
+
+      slice.events.subscribe('router:change', () => this.syncVisibility());
+   }
+
+   syncVisibility() {
+      const path = window.location.pathname.replace(/\/+$/, '') || '/';
+      const hasForm = Boolean(MODAL_BY_PATH[path]);
+      this.$btn.hidden = !hasForm;
+      this.hidden = !hasForm;
    }
 }
 

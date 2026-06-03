@@ -1,7 +1,9 @@
 const components = {
-  "AboutSection": "AppComponents",
   "AppShell": "AppComponents",
-  "HomeSection": "AppComponents",
+  "DashboardSection": "sections",
+  "PlannerSection": "sections",
+  "FinancesSection": "sections",
+  "ShoppingSection": "sections",
   "ThemeSelector": "atoms",
   "TaskCard": "atoms",
   "Fab": "atoms",

@@ -1,0 +1,37 @@
+.planner-section__layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 7fr 3fr;
+  min-height: 360px;
+}
+
+.planner-section__panel-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.planner-section__placeholder {
+  color: var(--font-secondary-color);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.planner-section__tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.planner-section__empty {
+  color: var(--font-secondary-color);
+  font-size: 0.85rem;
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .planner-section__layout {
+    grid-template-columns: 1fr;
+  }
+}
