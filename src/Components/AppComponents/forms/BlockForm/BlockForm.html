@@ -1,0 +1,45 @@
+<form class="block-form" data-role="form">
+  <div class="block-form__field">
+    <label class="block-form__label" for="block-form-label">Nombre del bloque</label>
+    <input
+      class="lc-input block-form__input"
+      id="block-form-label"
+      type="text"
+      placeholder="Ej. Trabajo Profundo, Mañana, Clases…"
+      required
+    />
+  </div>
+
+  <div class="block-form__row">
+    <div class="block-form__field block-form__field--time">
+      <label class="block-form__label" for="block-form-start">Inicia</label>
+      <input class="lc-input block-form__input" id="block-form-start" type="time" value="08:00" required />
+    </div>
+    <div class="block-form__field block-form__field--time">
+      <label class="block-form__label" for="block-form-end">Termina</label>
+      <input class="lc-input block-form__input" id="block-form-end" type="time" value="10:00" required />
+    </div>
+    <div class="block-form__field block-form__field--cap">
+      <label class="block-form__label" for="block-form-capacity">Cap. (min)</label>
+      <input
+        class="lc-input block-form__input block-form__input--readonly"
+        id="block-form-capacity"
+        type="number"
+        readonly
+        tabindex="-1"
+        value="120"
+      />
+    </div>
+  </div>
+
+  <div class="block-form__field">
+    <label class="block-form__label" for="block-form-rule">Regla del bloque</label>
+    <select class="lc-input block-form__input" id="block-form-rule">
+      <option value="flexible" selected>🔓 Flexible </option>
+    </select>
+  </div>
+
+  <p class="block-form__error" data-role="error" hidden>La hora de término debe ser posterior a la de inicio.</p>
+
+  <div class="block-form__actions" data-role="actions"></div>
+</form>

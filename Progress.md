@@ -17,6 +17,8 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 | — | FAB + modal shell con blur | ✅ |
 | — | Formularios en modal (DomainForm, TaskForm) | ✅ |
 | — | 5 rutas + sections placeholder | ✅ |
+| — | Dashboard + API tipo de cambio | ✅ |
+| — | Planner: time blocks + drag & drop | ✅ |
 
 ---
 
@@ -26,7 +28,9 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 - Temas **Light/Dark**, botón de tema, estilos `.lc-*`.
 - **IndexedDB** (`life-control`) y contexto `lifeControl`.
 - **Dominios**: crear, listar, borrar, con color.
-- **Tareas**: `TaskCard` en Home (urgencia, minutos, checkbox).
+- **Tareas**: `TaskCard` en Planificador (urgencia, minutos, checkbox).
+- **Dashboard**: anillo de capacidad, contador pendientes, tipo de cambio USD→VES (API), listas prioridad/recientes.
+- **Planificador**: bloques de tiempo, drag & drop inbox→bloque, `BlockForm` en modal.
 - **Sidebar** con Inicio y Dominios; tema abajo del menú.
 - **FAB** (+) abre modal con formulario según la ruta (`DomainForm` / `TaskForm`).
 - Cierra con ×, fondo, Esc o `ui:modal:close` al guardar.
@@ -54,6 +58,10 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 
 **Datos raros en IndexedDB** — pruebas viejas con duplicados. Borrar DB en DevTools → Application → `life-control` y volver a crear.
 
+**sliceId duplicado (task-card, sections)** — re-build sin destruir instancias. MultiRoute usa `section-Nombre` fijo; Planner destruye `task-card-{sectionId}-*` antes de re-render.
+
+**Bloques no se guardaban** — `renderBlocks` destruía `time-block-service` porque su id empezaba con `time-block-`. Los bloques visuales ahora usan `planner-block-{id}`.
+
 ---
 
 ## Probar
@@ -69,4 +77,4 @@ Dominios primero, luego Home. Si algo falla: `Ctrl+Shift+R`.
 
 ## Siguiente
 
-Dashboard con API de tipo de cambio.
+Finanzas: transacciones pagar/cobrar.

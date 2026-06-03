@@ -6,7 +6,10 @@ const components = {
   "ShoppingSection": "sections",
   "ThemeSelector": "atoms",
   "TaskCard": "atoms",
+  "CapacityRing": "atoms",
+  "TimeBlock": "atoms",
   "Fab": "atoms",
+  "BlockForm": "forms",
   "Sidebar": "shell",
   "ModalShell": "shell",
   "DomainForm": "forms",
@@ -21,7 +24,9 @@ const components = {
   "Route": "Visual",
   "StorageService": "Service",
   "DomainService": "Service",
-  "TaskService": "Service"
+  "TaskService": "Service",
+  "ExchangeRateService": "Service",
+  "TimeBlockService": "Service"
 };
 
 export default components;

@@ -11,5 +11,12 @@
 }
 
 .task-form__actions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: flex-end;
   margin-top: 0.25rem;
+}
+
+.task-form__actions slice-button {
+  flex: 1;
 }

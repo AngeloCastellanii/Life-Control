@@ -1,11 +1,11 @@
 <section class="dashboard-section">
   <h1 class="lc-section-title">Dashboard</h1>
-  <p class="lc-section-subtitle">Resumen del día. KPIs y listas rápidas.</p>
+  <p class="lc-section-subtitle">Resumen del día.</p>
 
   <div class="dashboard-section__kpis">
-    <div class="dashboard-section__kpi lc-card">
+    <div class="dashboard-section__kpi dashboard-section__kpi--ring lc-card">
       <span class="dashboard-section__kpi-label">Capacidad hoy</span>
-      <span class="dashboard-section__kpi-value">—</span>
+      <div data-role="capacity-ring"></div>
     </div>
     <div class="dashboard-section__kpi lc-card">
       <span class="dashboard-section__kpi-label">Tareas pendientes</span>
@@ -13,18 +13,21 @@
     </div>
     <div class="dashboard-section__kpi lc-card">
       <span class="dashboard-section__kpi-label">Tipo de cambio</span>
-      <span class="dashboard-section__kpi-value">—</span>
+      <span class="dashboard-section__kpi-value dashboard-section__kpi-value--rate" data-role="rate">—</span>
+      <button type="button" class="dashboard-section__retry" data-role="rate-retry" hidden>Reintentar</button>
     </div>
   </div>
 
   <div class="dashboard-section__columns">
     <div class="dashboard-section__col lc-card">
       <h2 class="dashboard-section__col-title">Prioridad</h2>
-      <p class="dashboard-section__placeholder">Lista resumen</p>
+      <ul class="dashboard-section__list" data-role="priority-list"></ul>
+      <p class="dashboard-section__placeholder" data-role="priority-empty" hidden>Sin tareas urgentes.</p>
     </div>
     <div class="dashboard-section__col lc-card">
       <h2 class="dashboard-section__col-title">Recientes</h2>
-      <p class="dashboard-section__placeholder">Lista resumen</p>
+      <ul class="dashboard-section__list" data-role="recent-list"></ul>
+      <p class="dashboard-section__placeholder" data-role="recent-empty" hidden>Sin tareas recientes.</p>
     </div>
   </div>
 </section>

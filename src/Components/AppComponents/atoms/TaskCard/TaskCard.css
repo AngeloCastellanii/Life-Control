@@ -6,7 +6,7 @@
   cursor: grab;
   display: grid;
   gap: 0.65rem;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto auto auto;
   padding: 0.75rem 0.85rem;
   position: relative;
   transition: opacity 0.15s ease, box-shadow 0.15s ease;
@@ -22,6 +22,53 @@
 
 .task-card--completed .task-card__title {
   text-decoration: line-through;
+}
+
+.task-card--locked {
+  cursor: default;
+}
+
+.task-card--locked:active {
+  cursor: default;
+}
+
+.task-card__actions {
+  align-items: center;
+  align-self: center;
+  display: flex;
+  gap: 0.1rem;
+}
+
+.task-card__action {
+  background: transparent;
+  border: none;
+  color: var(--font-secondary-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.15rem 0.25rem;
+}
+
+.task-card__action:hover {
+  color: var(--primary-color);
+}
+
+.task-card__action--danger:hover {
+  color: var(--danger-color);
+}
+
+.task-card__remove {
+  align-self: center;
+  background: transparent;
+  border: none;
+  color: var(--font-secondary-color);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0.15rem 0.25rem;
+}
+
+.task-card__remove:hover {
+  color: var(--primary-color);
 }
 
 .task-card__grip {

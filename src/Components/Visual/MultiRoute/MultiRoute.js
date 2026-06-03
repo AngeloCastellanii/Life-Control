@@ -111,10 +111,21 @@ export default class MultiRoute extends HTMLElement {
             }
 
             // Crear el componente con los parámetros y metadata de la ruta
+            const sectionSliceId = `section-${component}`;
+
+            if (slice.controller.activeComponents.has(sectionSliceId)) {
+               slice.controller.destroyComponent(sectionSliceId);
+            }
+
             const newComponent = await slice.build(component, {
+               sliceId: sectionSliceId,
                params: params,
                metadata: metadata || {}
             });
+
+            if (!newComponent) {
+               return;
+            }
             
             this.innerHTML = '';
             this.appendChild(newComponent);

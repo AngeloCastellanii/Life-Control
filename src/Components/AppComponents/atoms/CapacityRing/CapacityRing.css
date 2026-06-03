@@ -1,0 +1,38 @@
+.capacity-ring {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  position: relative;
+}
+
+.capacity-ring__svg {
+  height: 5rem;
+  transform: rotate(-90deg);
+  width: 5rem;
+}
+
+.capacity-ring__track {
+  fill: none;
+  stroke: var(--tertiary-background-color);
+  stroke-width: 6;
+}
+
+.capacity-ring__progress {
+  fill: none;
+  stroke: var(--primary-color);
+  stroke-linecap: round;
+  stroke-width: 6;
+  stroke-dasharray: 213.6;
+  stroke-dashoffset: 213.6;
+  transition: stroke-dashoffset 0.35s ease, stroke 0.2s ease;
+}
+
+.capacity-ring--full .capacity-ring__progress {
+  stroke: var(--danger-color);
+}
+
+.capacity-ring__value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}

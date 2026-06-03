@@ -1,3 +1,5 @@
+const THEMES = ['Light', 'Dark', 'Slice'];
+
 export default class ThemeSelector extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'theme-selector' }
@@ -6,30 +8,26 @@ export default class ThemeSelector extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
-      this.$btn = this.querySelector('.theme-selector__btn');
-      this.$icon = this.querySelector('[data-role="icon"]');
+      this.$select = this.querySelector('[data-role="select"]');
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
-      this.$btn.addEventListener('click', () => this.toggleTheme());
-      this.syncIcon();
+      this.syncSelect();
+
+      this.$select.addEventListener('change', async () => {
+         const next = this.$select.value;
+         if (!THEMES.includes(next)) {
+            return;
+         }
+         await slice.setTheme(next);
+         slice.events.emit('theme:changed', { theme: next });
+      });
    }
 
-   async toggleTheme() {
-      const next = slice.theme === 'Dark' ? 'Light' : 'Dark';
-      await slice.setTheme(next);
-      this.syncIcon();
-      slice.events.emit('theme:changed', { theme: next });
-   }
-
-   syncIcon() {
-      const isDark = slice.theme === 'Dark';
-      this.$icon.textContent = isDark ? '☀' : '☾';
-      this.$btn.setAttribute(
-         'aria-label',
-         isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
-      );
+   syncSelect() {
+      const current = THEMES.includes(slice.theme) ? slice.theme : 'Light';
+      this.$select.value = current;
    }
 }
 

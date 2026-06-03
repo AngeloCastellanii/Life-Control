@@ -1,3 +1,34 @@
+.planner-section__head {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.planner-section__add-block {
+  background: var(--secondary-background-color);
+  border: 1px solid var(--tertiary-background-color);
+  border-radius: var(--lc-radius-lg);
+  color: var(--font-primary-color);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.85rem;
+  white-space: nowrap;
+}
+
+.planner-section__add-block:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.planner-section__blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .planner-section__layout {
   display: grid;
   gap: 1rem;

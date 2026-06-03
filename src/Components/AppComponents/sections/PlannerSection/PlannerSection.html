@@ -1,11 +1,17 @@
 <section class="planner-section">
-  <h1 class="lc-section-title">Planificador</h1>
-  <p class="lc-section-subtitle">Bloques de tiempo a la izquierda, inbox a la derecha. Pulsa + para tareas.</p>
+  <div class="planner-section__head">
+    <div>
+      <h1 class="lc-section-title">Planificador</h1>
+      <p class="lc-section-subtitle">Bloques de tiempo e inbox. Arrastra tareas al lienzo.</p>
+    </div>
+    <button type="button" class="planner-section__add-block" data-role="add-block">Agregar bloque</button>
+  </div>
 
   <div class="planner-section__layout">
     <div class="planner-section__canvas lc-card">
       <h2 class="planner-section__panel-title">Lienzo</h2>
-      <p class="planner-section__placeholder">Time blocks y drag & drop</p>
+      <div class="planner-section__blocks" data-role="blocks"></div>
+      <p class="planner-section__placeholder" data-role="blocks-empty" hidden>Sin bloques. Agrega uno arriba.</p>
     </div>
     <aside class="planner-section__inbox lc-card">
       <h2 class="planner-section__panel-title">Inbox</h2>

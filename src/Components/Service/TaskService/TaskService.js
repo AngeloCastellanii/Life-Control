@@ -41,6 +41,10 @@ export default class TaskService {
       return slice.context.getState('lifeControl')?.tasks ?? [];
    }
 
+   getById(id) {
+      return this.getAll().find((t) => t.id === id) ?? null;
+   }
+
    async create({ title, urgency, minutes, domainId, blockId = null }) {
       const trimmed = title?.trim();
       if (!trimmed || !domainId) {
@@ -74,7 +78,8 @@ export default class TaskService {
          ...existing,
          ...patch,
          id,
-         title: patch.title?.trim() ?? existing.title
+         title: patch.title?.trim() ?? existing.title,
+         minutes: patch.minutes !== undefined ? Math.max(1, Number(patch.minutes) || 30) : existing.minutes
       };
 
       await this.storage.put(STORE, updated);
@@ -88,8 +93,32 @@ export default class TaskService {
    }
 
    async remove(id) {
+      const tasks = await this.storage.getAll(STORE);
+      const existing = tasks.find((t) => t.id === id);
+      if (!existing) {
+         return false;
+      }
+
+      if (existing.blockId) {
+         const blocks = await this.storage.getAll('timeBlocks');
+         const block = blocks.find((b) => b.id === existing.blockId);
+         if (block) {
+            await this.storage.put('timeBlocks', {
+               ...block,
+               taskIds: block.taskIds.filter((taskId) => taskId !== id)
+            });
+         }
+      }
+
       await this.storage.delete(STORE, id);
       await this.syncToContext();
+
+      const timeBlockService = slice.getComponent('time-block-service');
+      if (existing.blockId && timeBlockService) {
+         await timeBlockService.syncToContext();
+         slice.events.emit('time-block:changed', { action: 'task-removed', id });
+      }
+
       slice.events.emit('task:changed', { action: 'delete', id });
       return true;
    }

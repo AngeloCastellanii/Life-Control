@@ -26,6 +26,20 @@ async function bootstrapLifeControl() {
       throw new Error('No se pudo crear TaskService');
    }
    await taskService.init();
+
+   const exchangeRateService = await slice.build('ExchangeRateService', {
+      sliceId: 'exchange-rate-service'
+   });
+   if (!exchangeRateService) {
+      throw new Error('No se pudo crear ExchangeRateService');
+   }
+   await exchangeRateService.init();
+
+   const timeBlockService = await slice.build('TimeBlockService', { sliceId: 'time-block-service' });
+   if (!timeBlockService) {
+      throw new Error('No se pudo crear TimeBlockService');
+   }
+   await timeBlockService.init();
 }
 
 slice.router.afterEach((to) => {

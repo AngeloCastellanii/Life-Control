@@ -1,6 +1,8 @@
 export default class DomainsSection extends HTMLElement {
    static props = {
-      sliceId: { type: 'string', default: 'domains-section' }
+      sliceId: { type: 'string', default: 'domains-section' },
+      params: { type: 'object', default: {} },
+      metadata: { type: 'object', default: {} }
    };
 
    constructor(props) {

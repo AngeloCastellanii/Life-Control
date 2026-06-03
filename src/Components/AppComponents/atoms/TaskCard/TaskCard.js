@@ -1,16 +1,13 @@
-const URGENCY_LABELS = {
-   high: 'Alta',
-   medium: 'Media',
-   low: 'Baja'
-};
-
 export default class TaskCard extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'task-card' },
       task: { type: 'object', default: null },
       domainColor: { type: 'string', default: '#71717a' },
       draggable: { type: 'boolean', default: true },
-      onToggleComplete: { type: 'function', default: null }
+      onToggleComplete: { type: 'function', default: null },
+      onRemoveFromBlock: { type: 'function', default: null },
+      onEdit: { type: 'function', default: null },
+      onDelete: { type: 'function', default: null }
    };
 
    constructor(props) {
@@ -23,6 +20,9 @@ export default class TaskCard extends HTMLElement {
       this.$minutes = this.querySelector('[data-role="minutes"]');
       this.$accent = this.querySelector('[data-role="accent"]');
       this.$grip = this.querySelector('[data-role="grip"]');
+      this.$remove = this.querySelector('[data-role="remove"]');
+      this.$edit = this.querySelector('[data-role="edit"]');
+      this.$delete = this.querySelector('[data-role="delete"]');
       slice.controller.setComponentProps(this, props);
    }
 
@@ -32,6 +32,34 @@ export default class TaskCard extends HTMLElement {
             this.onToggleComplete(this.$check.checked);
          }
       });
+
+      if (this.draggable) {
+         this.addEventListener('dragstart', (event) => {
+            if (this.task?.id) {
+               event.dataTransfer.setData('text/task-id', this.task.id);
+               event.dataTransfer.effectAllowed = 'move';
+            }
+         });
+      }
+
+      this.$remove.addEventListener('click', () => {
+         if (typeof this.onRemoveFromBlock === 'function') {
+            this.onRemoveFromBlock(this.task?.id);
+         }
+      });
+
+      this.$edit.addEventListener('click', () => {
+         if (typeof this.onEdit === 'function') {
+            this.onEdit(this.task?.id);
+         }
+      });
+
+      this.$delete.addEventListener('click', () => {
+         if (typeof this.onDelete === 'function') {
+            this.onDelete(this.task?.id);
+         }
+      });
+
       this.paint();
    }
 
@@ -51,13 +79,23 @@ export default class TaskCard extends HTMLElement {
       this.$accent.style.backgroundColor = this.domainColor;
       this.$check.checked = completed;
       this.classList.toggle('task-card--completed', completed);
+      this.classList.toggle('task-card--locked', !this.draggable);
       this.setAttribute('draggable', this.draggable ? 'true' : 'false');
       this.$grip.hidden = !this.draggable;
+      this.$remove.hidden = typeof this.onRemoveFromBlock !== 'function';
+      this.$edit.hidden = typeof this.onEdit !== 'function';
+      this.$delete.hidden = typeof this.onDelete !== 'function';
    }
 
    async update() {
       this.paint();
    }
 }
+
+const URGENCY_LABELS = {
+   high: 'Alta',
+   medium: 'Media',
+   low: 'Baja'
+};
 
 customElements.define('slice-task-card', TaskCard);
