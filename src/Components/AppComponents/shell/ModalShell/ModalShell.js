@@ -10,6 +10,8 @@ export default class ModalShell extends HTMLElement {
       this.$backdrop = this.querySelector('[data-role="backdrop"]');
       this.$close = this.querySelector('[data-role="close"]');
       this.$title = this.querySelector('[data-role="title"]');
+      this.$body = this.querySelector('[data-role="body"]');
+      this._currentForm = null;
       slice.controller.setComponentProps(this, props);
    }
 
@@ -31,16 +33,35 @@ export default class ModalShell extends HTMLElement {
       return this.closest('.app-shell');
    }
 
-   open(payload = {}) {
-      if (payload.title) {
-         this.$title.textContent = payload.title;
+   unmountForm() {
+      if (this._currentForm?.sliceId) {
+         slice.controller.destroyComponent(this._currentForm.sliceId);
       }
+      this._currentForm = null;
+      this.$body.innerHTML = '';
+   }
+
+   async open(payload = {}) {
+      this.unmountForm();
+      this.$title.textContent = payload.title ?? 'Nuevo';
+
+      if (payload.form) {
+         const form = await slice.build(payload.form, {
+            sliceId: `modal-${payload.form.toLowerCase()}`
+         });
+         if (form) {
+            this._currentForm = form;
+            this.$body.appendChild(form);
+         }
+      }
+
       this.$root.hidden = false;
       document.addEventListener('keydown', this._onKeydown);
       this.getAppShell()?.classList.add('app-shell--modal-open');
    }
 
    close() {
+      this.unmountForm();
       this.$root.hidden = true;
       document.removeEventListener('keydown', this._onKeydown);
       this.getAppShell()?.classList.remove('app-shell--modal-open');

@@ -6,12 +6,8 @@ export default class DomainsSection extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
-      this.$form = this.querySelector('[data-role="form"]');
       this.$list = this.querySelector('[data-role="list"]');
       this.$empty = this.querySelector('[data-role="empty"]');
-      this.$formActions = this.querySelector('[data-role="form-actions"]');
-      this.$nameInput = this.querySelector('#domain-name');
-      this.$colorInput = this.querySelector('#domain-color');
       slice.controller.setComponentProps(this, props);
    }
 
@@ -21,19 +17,6 @@ export default class DomainsSection extends HTMLElement {
          slice.logger.logError('DomainsSection', 'DomainService no disponible');
          return;
       }
-      this.events = slice.events.bind(this);
-
-      this.submitBtn = await slice.build('Button', {
-         value: 'Agregar dominio',
-         variant: 'filled',
-         onClick: () => this.$form.requestSubmit()
-      });
-      this.$formActions.appendChild(this.submitBtn);
-
-      this.$form.addEventListener('submit', (event) => {
-         event.preventDefault();
-         this.handleSubmit();
-      });
 
       slice.context.watch(
          'lifeControl',
@@ -43,29 +26,6 @@ export default class DomainsSection extends HTMLElement {
       );
 
       this.renderList(this.domainService.getAll());
-   }
-
-   async handleSubmit() {
-      if (this._submitting) {
-         return;
-      }
-      this._submitting = true;
-      try {
-         await this._createDomain();
-      } finally {
-         this._submitting = false;
-      }
-   }
-
-   async _createDomain() {
-      const name = this.$nameInput.value;
-      const color = this.$colorInput.value;
-      const created = await this.domainService.create({ name, color });
-      if (!created) {
-         return;
-      }
-      this.$nameInput.value = '';
-      this.$colorInput.value = '#2563eb';
    }
 
    async renderList(domains) {

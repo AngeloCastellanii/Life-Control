@@ -1,0 +1,24 @@
+<form class="task-form" data-role="form">
+  <div class="task-form__field">
+    <label class="lc-label" for="task-form-title">Título</label>
+    <input class="lc-input" id="task-form-title" type="text" placeholder="Estudiar capítulo 3…" required />
+  </div>
+  <div class="task-form__field">
+    <label class="lc-label" for="task-form-domain">Dominio</label>
+    <select class="lc-input" id="task-form-domain" required></select>
+  </div>
+  <div class="task-form__field">
+    <label class="lc-label" for="task-form-urgency">Urgencia</label>
+    <select class="lc-input" id="task-form-urgency">
+      <option value="high">Alta</option>
+      <option value="medium" selected>Media</option>
+      <option value="low">Baja</option>
+    </select>
+  </div>
+  <div class="task-form__field">
+    <label class="lc-label" for="task-form-minutes">Minutos</label>
+    <input class="lc-input" id="task-form-minutes" type="number" min="1" value="30" />
+  </div>
+  <p class="task-form__hint" data-role="hint" hidden>Crea un dominio antes de añadir tareas.</p>
+  <div class="task-form__actions" data-role="actions"></div>
+</form>

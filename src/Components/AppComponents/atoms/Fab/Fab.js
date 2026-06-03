@@ -1,3 +1,8 @@
+const MODAL_BY_PATH = {
+   '/domains': { title: 'Nuevo dominio', form: 'DomainForm' },
+   '/': { title: 'Nueva tarea', form: 'TaskForm' }
+};
+
 export default class Fab extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'app-fab' }
@@ -12,7 +17,9 @@ export default class Fab extends HTMLElement {
 
    init() {
       this.$btn.addEventListener('click', () => {
-         slice.events.emit('ui:modal:open', {});
+         const path = window.location.pathname.replace(/\/+$/, '') || '/';
+         const payload = MODAL_BY_PATH[path] ?? MODAL_BY_PATH['/'];
+         slice.events.emit('ui:modal:open', payload);
       });
    }
 }

@@ -1,0 +1,19 @@
+.domain-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.domain-form__color {
+  background: transparent;
+  border: 1px solid var(--tertiary-background-color);
+  border-radius: var(--lc-radius-lg);
+  cursor: pointer;
+  height: 42px;
+  padding: 0.2rem;
+  width: 100%;
+}
+
+.domain-form__actions {
+  margin-top: 0.25rem;
+}

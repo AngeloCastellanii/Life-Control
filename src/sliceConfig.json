@@ -58,6 +58,10 @@
             "path": "/Components/AppComponents/shell",
             "type": "Visual"
          },
+         "forms": {
+            "path": "/Components/AppComponents/forms",
+            "type": "Visual"
+         },
          "Visual": {
             "path": "/Components/Visual",
             "type": "Visual"

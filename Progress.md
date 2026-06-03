@@ -15,6 +15,7 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 | 5 | Tareas + TaskCard | ✅ |
 | — | Sidebar (escritorio / tabs abajo en móvil) | ✅ |
 | — | FAB + modal shell con blur | ✅ |
+| — | Formularios en modal (DomainForm, TaskForm) | ✅ |
 
 ---
 
@@ -26,7 +27,8 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 - **Dominios**: crear, listar, borrar, con color.
 - **Tareas**: `TaskCard` en Home (urgencia, minutos, checkbox).
 - **Sidebar** con Inicio y Dominios; tema abajo del menú.
-- **FAB** (+) abre modal vacío; cierra con ×, fondo o Esc (`ui:modal:open` / `ui:modal:close`).
+- **FAB** (+) abre modal con formulario según la ruta (`DomainForm` / `TaskForm`).
+- Cierra con ×, fondo, Esc o `ui:modal:close` al guardar.
 - Servicios en `Service/Nombre/Nombre.js` (ruta que pide Slice).
 
 ---
@@ -66,4 +68,4 @@ Dominios primero, luego Home. Si algo falla: `Ctrl+Shift+R`.
 
 ## Siguiente
 
-Formularios dentro del modal (tareas, dominios, etc.).
+Rutas y vistas (dashboard, planner, finanzas, compras).

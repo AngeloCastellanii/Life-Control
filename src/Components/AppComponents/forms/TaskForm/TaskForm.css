@@ -1,0 +1,15 @@
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-form__hint {
+  color: var(--font-secondary-color);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.task-form__actions {
+  margin-top: 0.25rem;
+}

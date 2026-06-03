@@ -7,6 +7,8 @@ const components = {
   "Fab": "atoms",
   "Sidebar": "shell",
   "ModalShell": "shell",
+  "DomainForm": "forms",
+  "TaskForm": "forms",
   "DomainsSection": "sections",
   "Button": "Visual",
   "Link": "Visual",
