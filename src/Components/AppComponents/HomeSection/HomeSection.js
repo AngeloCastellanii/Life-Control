@@ -72,7 +72,6 @@ export default class HomeSection extends HTMLElement {
             sliceId: `task-card-${task.id}`,
             task,
             domainColor: this.domainColorFor(task.domainId),
-            draggable: true,
             onToggleComplete: (completed) => this.taskService.toggleComplete(task.id, completed)
          });
          if (card) {

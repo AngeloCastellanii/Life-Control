@@ -90,7 +90,7 @@ export default class Navbar extends HTMLElement {
 
    set logo(value) {
       this._logo = value;
-      // ✅ CORREGIDO: Validar que value no sea null antes de usarlo
+      // Validar que value no sea null antes de usarlo
       if (!value) return;
       
       const img = document.createElement('img');
@@ -121,7 +121,7 @@ export default class Navbar extends HTMLElement {
 
    set direction(value) {
       this._direction = value;
-      // ✅ MEJORADO: Validar valor antes de aplicar clase
+      // Validar valor antes de aplicar clase
       if (value === 'reverse') {
          this.$header.classList.add('direction-row-reverse');
       }

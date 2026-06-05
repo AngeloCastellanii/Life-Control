@@ -11,7 +11,7 @@
   --primary-color-shade: #4E2279;
 
   /** Secondary - Lima vibrante **/
-  --secondary-color: #C6FF00; /* Amarillo lima brillante, capta la atención */
+  --secondary-color: #22b1d5; /* Amarillo lima brillante, capta la atención */
   --secondary-color-rgb: 198, 255, 0;
   --secondary-background-color: #F9FFE1;
   --secondary-color-contrast: #2E2E2E;
@@ -24,7 +24,7 @@
   --success-contrast: #ffffff;
 
   /** Warning - Amarillo más tradicional pero suave **/
-  --warning-color: #FFD54F;
+  --warning-color: #69d5ff;
   --warning-contrast: #3E2723;
 
   /** Danger - Coral vibrante (sin caer en rojo tradicional) **/

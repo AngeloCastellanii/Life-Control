@@ -184,8 +184,12 @@
     @apply min-w-0;
   }
 
-  .task-card__grip {
-    @apply self-center select-none text-xs tracking-tighter text-lc-muted;
+  .task-card__assign {
+    @apply flex items-center gap-1 self-center;
+  }
+
+  .task-card__block-select {
+    @apply max-w-[7.5rem] py-1 text-xs;
   }
 
   .task-card__actions {
@@ -219,18 +223,12 @@
     box-shadow: inset 0 0 0 1px var(--danger-color);
   }
 
-  .time-block__dropzone--active {
-    background: var(--primary-color-shade);
-    border-color: var(--primary-color);
+  .time-block__tasks {
+    @apply mt-2 flex flex-col gap-2;
   }
 
-  .time-block__dropzone {
-    @apply min-h-14 rounded-xl border-2 border-dashed p-2 transition-colors;
-    border-color: var(--tertiary-background-color);
-  }
-
-  .time-block__dropzone:has(.time-block__tasks:not(:empty)) .time-block__hint {
-    @apply hidden;
+  .time-block__empty {
+    @apply mt-2 text-center text-sm;
   }
 
   /* Modal + Fab */

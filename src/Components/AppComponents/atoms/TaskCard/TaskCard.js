@@ -3,8 +3,9 @@ export default class TaskCard extends HTMLElement {
       sliceId: { type: 'string', default: 'task-card' },
       task: { type: 'object', default: null },
       domainColor: { type: 'string', default: '#71717a' },
-      draggable: { type: 'boolean', default: true },
+      assignBlocks: { type: 'array', default: null },
       onToggleComplete: { type: 'function', default: null },
+      onAssignToBlock: { type: 'function', default: null },
       onRemoveFromBlock: { type: 'function', default: null },
       onEdit: { type: 'function', default: null },
       onDelete: { type: 'function', default: null }
@@ -13,13 +14,14 @@ export default class TaskCard extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
-      this.$root = this.querySelector('[data-role="root"]');
       this.$check = this.querySelector('[data-role="check"]');
       this.$title = this.querySelector('[data-role="title"]');
       this.$urgency = this.querySelector('[data-role="urgency"]');
       this.$minutes = this.querySelector('[data-role="minutes"]');
       this.$accent = this.querySelector('[data-role="accent"]');
-      this.$grip = this.querySelector('[data-role="grip"]');
+      this.$assign = this.querySelector('[data-role="assign-wrap"]');
+      this.$blockSelect = this.querySelector('[data-role="block-select"]');
+      this.$assignBtn = this.querySelector('[data-role="assign-btn"]');
       this.$remove = this.querySelector('[data-role="remove"]');
       this.$edit = this.querySelector('[data-role="edit"]');
       this.$delete = this.querySelector('[data-role="delete"]');
@@ -33,14 +35,12 @@ export default class TaskCard extends HTMLElement {
          }
       });
 
-      if (this.draggable) {
-         this.addEventListener('dragstart', (event) => {
-            if (this.task?.id) {
-               event.dataTransfer.setData('text/task-id', this.task.id);
-               event.dataTransfer.effectAllowed = 'move';
-            }
-         });
-      }
+      this.$assignBtn.addEventListener('click', () => {
+         const blockId = this.$blockSelect.value;
+         if (blockId && typeof this.onAssignToBlock === 'function') {
+            this.onAssignToBlock(this.task?.id, blockId);
+         }
+      });
 
       this.$remove.addEventListener('click', () => {
          if (typeof this.onRemoveFromBlock === 'function') {
@@ -63,6 +63,30 @@ export default class TaskCard extends HTMLElement {
       this.paint();
    }
 
+   fillBlockSelect() {
+      const blocks = this.assignBlocks ?? [];
+      this.$blockSelect.innerHTML = '';
+
+      if (blocks.length === 0) {
+         const option = document.createElement('option');
+         option.value = '';
+         option.textContent = 'Sin bloques';
+         this.$blockSelect.appendChild(option);
+         this.$blockSelect.disabled = true;
+         this.$assignBtn.disabled = true;
+         return;
+      }
+
+      this.$blockSelect.disabled = false;
+      this.$assignBtn.disabled = false;
+      for (const block of blocks) {
+         const option = document.createElement('option');
+         option.value = block.id;
+         option.textContent = block.label;
+         this.$blockSelect.appendChild(option);
+      }
+   }
+
    paint() {
       const task = this.task;
       if (!task) {
@@ -79,9 +103,13 @@ export default class TaskCard extends HTMLElement {
       this.$accent.style.backgroundColor = this.domainColor;
       this.$check.checked = completed;
       this.classList.toggle('task-card--completed', completed);
-      this.classList.toggle('task-card--locked', !this.draggable);
-      this.setAttribute('draggable', this.draggable ? 'true' : 'false');
-      this.$grip.hidden = !this.draggable;
+
+      const canAssign = typeof this.onAssignToBlock === 'function';
+      this.$assign.hidden = !canAssign;
+      if (canAssign) {
+         this.fillBlockSelect();
+      }
+
       this.$remove.hidden = typeof this.onRemoveFromBlock !== 'function';
       this.$edit.hidden = typeof this.onEdit !== 'function';
       this.$delete.hidden = typeof this.onDelete !== 'function';

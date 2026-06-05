@@ -102,10 +102,12 @@ export default class PlannerSection extends HTMLElement {
 
       for (const block of blocks) {
          const usedMinutes = this.timeBlockService.usedMinutes(block.id);
+         const blockTasks = this.taskService.getAll().filter((t) => t.blockId === block.id);
          const blockEl = await slice.build('TimeBlock', {
             sliceId: `planner-block-${block.id}`,
             block,
             usedMinutes,
+            taskCount: blockTasks.length,
             onRemove: (id) => this.timeBlockService.remove(id),
             onEdit: (id) => {
                slice.events.emit('ui:modal:open', {
@@ -113,8 +115,7 @@ export default class PlannerSection extends HTMLElement {
                   form: 'BlockForm',
                   blockId: id
                });
-            },
-            onDropTask: (taskId, blockId) => this.timeBlockService.assignTask(blockId, taskId)
+            }
          });
 
          if (!blockEl) {
@@ -122,26 +123,17 @@ export default class PlannerSection extends HTMLElement {
          }
 
          const tasksHost = blockEl.querySelector('[data-role="tasks"]');
-         const blockTasks = this.taskService.getAll().filter((t) => t.blockId === block.id);
 
          for (const task of blockTasks) {
             const card = await slice.build('TaskCard', {
                sliceId: `task-card-block-${block.id}-${task.id}`,
                task,
                domainColor: this.domainColorFor(task.domainId),
-               draggable: false,
                ...this.taskCardActions(task),
                onRemoveFromBlock: () => this.timeBlockService.unassignTask(block.id, task.id)
             });
             if (card) {
                tasksHost.appendChild(card);
-            }
-         }
-
-         if (blockTasks.length > 0) {
-            const hint = blockEl.querySelector('.time-block__hint');
-            if (hint) {
-               hint.hidden = true;
             }
          }
 
@@ -160,6 +152,7 @@ export default class PlannerSection extends HTMLElement {
 
          const tasks = this.taskService.getAll().filter((t) => !t.blockId);
          const domains = this.domainService.getAll();
+         const blockOptions = this.timeBlockService.getAll().map((b) => ({ id: b.id, label: b.label }));
 
          if (domains.length === 0) {
             this.$empty.textContent = 'Crea un dominio en Dominios primero.';
@@ -180,8 +173,9 @@ export default class PlannerSection extends HTMLElement {
                sliceId: `${this._taskCardPrefix()}${task.id}`,
                task,
                domainColor: this.domainColorFor(task.domainId),
-               draggable: true,
-               ...this.taskCardActions(task)
+               assignBlocks: blockOptions,
+               ...this.taskCardActions(task),
+               onAssignToBlock: (taskId, blockId) => this.timeBlockService.assignTask(blockId, taskId)
             });
             if (card) {
                this.$tasks.appendChild(card);

@@ -168,8 +168,8 @@ export default class Route extends HTMLElement {
       this.rendered = false;
    }
 
-   /**
-    * Cleanup cuando el componente se destruye
+   /*
+    Cleanup cuando el componente se destruye
     */
    destroy() {
       this.removeComponent();
