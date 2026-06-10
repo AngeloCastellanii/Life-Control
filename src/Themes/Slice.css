@@ -1,71 +1,106 @@
 :root {
   --font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 
-  /* Amethyst Geode — equilibrado */
-  /* Midnight Violet #240A24 · Blue Violet #9932CC · Lavender #E6E6FA */
+  /* Slice — fondo verde, superficies grises, texto negro */
+  --slice-bg: #d4dfd8;
+  --slice-accent: #3f7359;
+  --slice-surface: #f0f1ef;
+  --slice-surface-muted: #e4e5e3;
+  --slice-border: #d8d9d7;
 
-  /* Tipografía — lavender dominante, secundario apagado */
-  --font-primary-color: #E6E6FA;
-  --font-secondary-color: #9A8FAD;
+  /* Texto siempre oscuro */
+  --font-primary-color: #171717;
+  --font-secondary-color: #525252;
 
-  /* Primary — Blue Violet solo en acentos (botones, FAB, activo) */
-  --primary-color: #9932CC;
-  --primary-color-rgb: 153, 50, 204;
-  --primary-background-color: #1C1424;
-  --primary-color-contrast: #E6E6FA;
-  --primary-color-shade: #5C3D7A;
+  --primary-color: var(--slice-accent);
+  --primary-color-rgb: 63, 115, 89;
+  --primary-background-color: var(--slice-bg);
+  --primary-color-contrast: #ffffff;
+  --primary-color-shade: #2f5642;
 
-  /* Secondary — superficies con tinte lavender, no morado puro */
-  --secondary-color: #7A5F9E;
-  --secondary-color-rgb: 122, 95, 158;
-  --secondary-background-color: #221A2C;
-  --secondary-color-contrast: #E6E6FA;
+  --secondary-color: var(--slice-accent);
+  --secondary-color-rgb: 63, 115, 89;
+  --secondary-background-color: var(--slice-surface);
+  --secondary-color-contrast: #ffffff;
 
-  /* Tertiary — bordes neutros violeta-gris */
-  --tertiary-background-color: #3D3548;
+  --tertiary-background-color: var(--slice-border);
 
-  /* Estados */
-  --success-color: #6BC9A0;
-  --success-contrast: #240A24;
-  --warning-color: #C9A8E0;
-  --warning-contrast: #240A24;
-  --danger-color: #D47A9A;
-  --danger-contrast: #E6E6FA;
+  --success-color: #2f8f5b;
+  --success-contrast: #ffffff;
+  --warning-color: #b8860b;
+  --warning-contrast: #171717;
+  --danger-color: #c44d4d;
+  --danger-contrast: #ffffff;
 
-  /* Neutros */
-  --medium-color: #7A7088;
-  --medium-contrast: #E6E6FA;
-  --disabled-color: #3A3345;
+  --medium-color: #737373;
+  --medium-contrast: #171717;
+  --disabled-color: #a3a3a3;
 
-  /* Acento — violeta suave entre los tres tonos */
-  --accent-color: #8B6BB8;
+  --accent-color: var(--slice-accent);
 
-  /* Superficies glass — un poco más claras para combinar con el fondo */
-  --surface-glass: color-mix(in srgb, #FFFFFF 22%, #240A24 78%);
-  --surface-elevated: #2A2235;
-  --surface-blur: blur(18px);
-  --border-glow: color-mix(in srgb, #9932CC 18%, #E6E6FA 82%);
+  --surface-glass: var(--slice-surface);
+  --surface-elevated: var(--slice-surface-muted);
+  --surface-blur: none;
+  --border-glow: var(--slice-border);
 
-  /* Fondo — claro con toques violeta; blanco y lavender dominan */
-  --app-background:
-    radial-gradient(ellipse 70% 50% at 90% 8%, color-mix(in srgb, #9932CC 14%, #FFFFFF) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 45% at 5% 95%, color-mix(in srgb, #E6E6FA 40%, #FFFFFF) 0%, transparent 45%),
-    linear-gradient(
-      155deg,
-      #4A3858 0%,
-      #7A7090 16%,
-      #B0A8C4 32%,
-      #D8D4E8 50%,
-      #EDEAF5 68%,
-      #F8F7FC 84%,
-      #FFFFFF 100%
-    );
+  --app-background: var(--slice-bg);
 
-  /* Sombras */
-  --box-shadow-primary: 0 8px 32px rgba(36, 10, 36, 0.35);
-  --box-shadow-secondary: 0 4px 16px rgba(36, 10, 36, 0.2);
-
+  --box-shadow-primary: 0 8px 24px rgb(63 115 89 / 12%);
+  --box-shadow-secondary: 0 4px 12px rgb(63 115 89 / 8%);
   --lc-radius-lg: 0.875rem;
   --lc-radius-xl: 1.25rem;
-  --lc-shadow: 0 4px 24px rgb(36 10 36 / 28%);
+  --lc-shadow: 0 2px 12px rgb(0 0 0 / 6%);
+}
+
+/* Superficies que antes eran blancas → gris */
+:root .lc-card,
+:root .sidebar,
+:root .task-card,
+:root .time-block,
+:root .modal-shell__dialog,
+:root .domains-section__item,
+:root .finances-section__wallet,
+:root .finances-section__col,
+:root .shopping-section__col,
+:root .shopping-section__detail,
+:root .dashboard-section__due-item {
+  background: var(--slice-surface);
+}
+
+:root .lc-input,
+:root .lc-btn-outline,
+:root .domains-section__edit,
+:root .domains-section__delete,
+:root .finances-section__wallet-adjust,
+:root .shopping-section__col-btn,
+:root .planner-section__nav-btn {
+  background-color: var(--slice-surface-muted);
+  border-color: var(--slice-border);
+  color: #171717;
+}
+
+:root .lc-btn-outline:hover,
+:root .domains-section__edit:hover,
+:root .finances-section__wallet-adjust:hover,
+:root .shopping-section__col-btn:hover,
+:root .planner-section__nav-btn:hover {
+  border-color: var(--slice-accent);
+  color: var(--slice-accent);
+}
+
+:root .domains-section__delete:hover,
+:root .shopping-section__col-btn--danger:hover {
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+:root .sidebar .sidebar__item--active .sidebar__link,
+:root .sidebar .sidebar__link:hover {
+  color: var(--slice-accent);
+  background: var(--slice-surface-muted);
+}
+
+:root .planner-section__view-btn--active {
+  background: var(--slice-accent);
+  color: #ffffff;
 }
