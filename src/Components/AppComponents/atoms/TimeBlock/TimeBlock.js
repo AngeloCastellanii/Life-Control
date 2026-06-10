@@ -1,4 +1,4 @@
-import { BLOCK_RULE } from '/Components/Service/TimeBlockService/TimeBlockService.js';
+import { BLOCK_RULE } from '../../sections/lifeControlConstants.js';
 
 const RULE_LABELS = {
    [BLOCK_RULE.FLEXIBLE]: 'FLEXIBLE',

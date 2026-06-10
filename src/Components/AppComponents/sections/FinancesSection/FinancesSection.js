@@ -1,4 +1,4 @@
-import { FINANCE_TYPE } from '/Components/Service/FinanceService/FinanceService.js';
+import { FINANCE_TYPE } from '../lifeControlConstants.js';
 
 export default class FinancesSection extends HTMLElement {
    static props = {

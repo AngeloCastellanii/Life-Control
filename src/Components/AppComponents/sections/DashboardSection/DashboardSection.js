@@ -1,6 +1,6 @@
-import { FINANCE_TYPE } from '/Components/Service/FinanceService/FinanceService.js';
-import { getDueStatus } from '/Components/Service/ShoppingService/ShoppingService.js';
-import { formatDayLong, todayISO } from '/Components/AppComponents/sections/plannerDates.js';
+import { FINANCE_TYPE } from '../lifeControlConstants.js';
+import { getDueStatus } from '../shoppingDue.js';
+import { formatDayLong, todayISO } from '../plannerDates.js';
 
 const FREQUENCY_LABELS = {
    daily: 'Diaria',

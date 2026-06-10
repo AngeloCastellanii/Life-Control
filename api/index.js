@@ -23,6 +23,28 @@ const args = process.argv.slice(2);
 
 const runMode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 const folderDeployed = runMode === 'production' ? 'dist' : 'src';
+
+function resolveDeployRoot() {
+   if (runMode === 'development') {
+      return path.join(__dirname, '../src');
+   }
+
+   const candidates = [
+      path.join(__dirname, '../dist'),
+      path.join(__dirname, '_dist'),
+      path.join(process.cwd(), 'dist')
+   ];
+
+   for (const root of candidates) {
+      if (fs.existsSync(path.join(root, 'App', 'index.html'))) {
+         return root;
+      }
+   }
+
+   return path.join(__dirname, '../dist');
+}
+
+const deployRoot = resolveDeployRoot();
 const publicEnvProvider = createPublicEnvProvider({
   mode: runMode,
   envFilePath: path.join(__dirname, '..', '.env')
@@ -126,7 +148,7 @@ if (runMode === 'production') {
 app.use('/bundles/', (req, res, next) => {
   // Solo procesar archivos .js
   if (req.path.endsWith('.js')) {
-    const filePath = path.join(__dirname, `../${folderDeployed}`, 'bundles', req.path);
+    const filePath = path.join(deployRoot, 'bundles', req.path);
     console.log(`📂 Processing bundle: ${req.path} -> ${filePath}`);
 
     // Verificar que el archivo existe
@@ -155,8 +177,8 @@ app.use('/bundles/', (req, res, next) => {
 });
 
 // Servir otros archivos de bundles (JSON, CSS, etc.) con el middleware estático normal
-app.use('/bundles/', express.static(path.join(__dirname, `../${folderDeployed}`, 'bundles')));
-console.log(`📦 Serving bundles from /${folderDeployed}/bundles`);
+app.use('/bundles/', express.static(path.join(deployRoot, 'bundles')));
+console.log(`📦 Serving bundles from ${deployRoot}/bundles`);
 
 // Servir framework Slice.js (solo development)
 if (runMode === 'development') {
@@ -172,11 +194,11 @@ const normalizedPublicFolders = publicFolders
   .map((entry) => (entry.startsWith('/') ? entry : `/${entry}`));
 
 if (runMode === 'development') {
-  app.use(express.static(path.join(__dirname, `../${folderDeployed}`)));
+  app.use(express.static(deployRoot));
 } else {
-  app.use('/App', express.static(path.join(__dirname, `../${folderDeployed}`, 'App')));
+  app.use('/App', express.static(path.join(deployRoot, 'App')));
   app.get('/manifest.json', (req, res) => {
-    const manifestPath = path.join(__dirname, `../${folderDeployed}`, 'manifest.json');
+    const manifestPath = path.join(deployRoot, 'manifest.json');
     if (fs.existsSync(manifestPath)) {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       return res.send(fs.readFileSync(manifestPath, 'utf8'));
@@ -184,7 +206,7 @@ if (runMode === 'development') {
     return res.status(404).send('manifest.json not found');
   });
   app.get('/service-worker.js', (req, res) => {
-    const workerPath = path.join(__dirname, `../${folderDeployed}`, 'service-worker.js');
+    const workerPath = path.join(deployRoot, 'service-worker.js');
     if (fs.existsSync(workerPath)) {
       res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
       return res.send(fs.readFileSync(workerPath, 'utf8'));
@@ -192,7 +214,7 @@ if (runMode === 'development') {
     return res.status(404).send('service-worker.js not found');
   });
   app.get('/routes.js', (req, res) => {
-    const routesPath = path.join(__dirname, `../${folderDeployed}`, 'routes.js');
+    const routesPath = path.join(deployRoot, 'routes.js');
     if (fs.existsSync(routesPath)) {
       res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
       return res.send(fs.readFileSync(routesPath, 'utf8'));
@@ -200,7 +222,7 @@ if (runMode === 'development') {
     return res.status(404).send('routes.js not found');
   });
   app.get('/sliceConfig.json', (req, res) => {
-    const configPath = path.join(__dirname, `../${folderDeployed}`, 'sliceConfig.json');
+    const configPath = path.join(deployRoot, 'sliceConfig.json');
     if (fs.existsSync(configPath)) {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       return res.send(fs.readFileSync(configPath, 'utf8'));
@@ -208,10 +230,10 @@ if (runMode === 'development') {
     return res.status(404).send('sliceConfig.json not found');
   });
   for (const folder of normalizedPublicFolders) {
-    app.use(folder, express.static(path.join(__dirname, `../${folderDeployed}`, folder)));
+    app.use(folder, express.static(path.join(deployRoot, folder.replace(/^\//, ''))));
   }
-  app.use('/bundles/', express.static(path.join(__dirname, `../${folderDeployed}`, 'bundles')));
-  app.use('/dist/', express.static(path.join(__dirname, '..', 'dist')));
+  app.use('/bundles/', express.static(path.join(deployRoot, 'bundles')));
+  app.use('/dist/', express.static(deployRoot));
 }
 
 // ==============================================
@@ -242,12 +264,12 @@ app.get('/api/status', (req, res) => {
 
 // SPA fallback - servir index.html para rutas no encontradas
 app.use((req, res) => {
-  const indexPath = path.join(__dirname, `../${folderDeployed}`, 'App', 'index.html');
+  const indexPath = path.join(deployRoot, 'App', 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
       res.status(404).send(`
         <h1>404 - Page Not Found</h1>
-        <p>The requested file could not be found in /${folderDeployed}</p>
+        <p>The requested file could not be found at ${deployRoot}</p>
         <p>Make sure you've run the appropriate build command:</p>
         <ul>
           <li>For development: Files should be in /src</li>

@@ -4,7 +4,7 @@
     "dev": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js dev",
     "css:build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify",
     "css:watch": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --watch",
-    "build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js build",
+    "build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js build && node scripts/prepare-vercel.js",
     "start": "node ./node_modules/slicejs-cli/client.js start",
     "component:create": "node ./node_modules/slicejs-cli/client.js component create",
     "component:list": "node ./node_modules/slicejs-cli/client.js component list",

@@ -1,7 +1,5 @@
-import {
-   SHOPPING_FREQUENCY,
-   getDueStatus
-} from '/Components/Service/ShoppingService/ShoppingService.js';
+import { SHOPPING_FREQUENCY } from '../lifeControlConstants.js';
+import { getDueStatus } from '../shoppingDue.js';
 
 const COLUMNS = [
    { frequency: SHOPPING_FREQUENCY.DAILY, list: 'daily-list', empty: 'daily-empty' },

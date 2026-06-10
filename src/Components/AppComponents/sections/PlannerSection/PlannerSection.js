@@ -1,4 +1,4 @@
-import { FINANCE_TYPE } from '/Components/Service/FinanceService/FinanceService.js';
+import { FINANCE_TYPE } from '../lifeControlConstants.js';
 import {
    addDays,
    addMonths,
@@ -11,7 +11,7 @@ import {
    getWeekDays,
    isSameDay,
    todayISO
-} from '/Components/AppComponents/sections/plannerDates.js';
+} from '../plannerDates.js';
 
 export default class PlannerSection extends HTMLElement {
    static props = {
