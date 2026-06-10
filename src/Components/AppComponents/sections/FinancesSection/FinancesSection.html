@@ -1,6 +1,17 @@
 <section class="finances-section">
   <h1 class="lc-section-title">Finanzas</h1>
-  <p class="lc-section-subtitle">Pagar y cobrar en dos columnas. Pulsa + para agregar.</p>
+  <p class="lc-section-subtitle">Billetera, pagos y cobros. Pulsa + para agregar.</p>
+
+  <div class="finances-section__wallet lc-card">
+    <div class="finances-section__wallet-info">
+      <span class="finances-section__wallet-label">Dinero actual</span>
+      <p class="finances-section__wallet-hint">Al marcar pagado se descuenta; al cobrar se suma.</p>
+    </div>
+    <div class="finances-section__wallet-actions">
+      <span class="finances-section__wallet-balance" data-role="wallet-balance">$0.00</span>
+      <button type="button" class="lc-btn-outline finances-section__wallet-adjust" data-role="wallet-adjust">Ajustar saldo</button>
+    </div>
+  </div>
 
   <div class="finances-section__balance">
     <div class="finances-section__col finances-section__col--pay lc-card">

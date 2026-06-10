@@ -1,3 +1,14 @@
+import { FINANCE_TYPE } from '/Components/Service/FinanceService/FinanceService.js';
+import { getDueStatus } from '/Components/Service/ShoppingService/ShoppingService.js';
+import { formatDayLong, todayISO } from '/Components/AppComponents/sections/plannerDates.js';
+
+const FREQUENCY_LABELS = {
+   daily: 'Diaria',
+   weekly: 'Semanal',
+   monthly: 'Mensual',
+   yearly: 'Anual'
+};
+
 export default class DashboardSection extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'dashboard-section' },
@@ -8,10 +19,20 @@ export default class DashboardSection extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
+      this.$dateSubtitle = this.querySelector('[data-role="date-subtitle"]');
       this.$capacityMount = this.querySelector('[data-role="capacity-ring"]');
+      this.$capacityText = this.querySelector('[data-role="capacity-text"]');
+      this.$pendingCount = this.querySelector('[data-role="pending-count"]');
       this.$tasksCount = this.querySelector('[data-role="tasks-count"]');
+      this.$blocksCount = this.querySelector('[data-role="blocks-count"]');
       this.$rate = this.querySelector('[data-role="rate"]');
       this.$rateRetry = this.querySelector('[data-role="rate-retry"]');
+      this.$financePay = this.querySelector('[data-role="finance-pay"]');
+      this.$financeReceive = this.querySelector('[data-role="finance-receive"]');
+      this.$shoppingDueList = this.querySelector('[data-role="shopping-due-list"]');
+      this.$shoppingDueEmpty = this.querySelector('[data-role="shopping-due-empty"]');
+      this.$netLiquidity = this.querySelector('[data-role="net-liquidity"]');
+      this.$netBs = this.querySelector('[data-role="net-bs"]');
       this.$priorityList = this.querySelector('[data-role="priority-list"]');
       this.$priorityEmpty = this.querySelector('[data-role="priority-empty"]');
       this.$recentList = this.querySelector('[data-role="recent-list"]');
@@ -24,6 +45,8 @@ export default class DashboardSection extends HTMLElement {
       this.taskService = slice.getComponent('task-service');
       this.timeBlockService = slice.getComponent('time-block-service');
       this.exchangeRateService = slice.getComponent('exchange-rate-service');
+      this.financeService = slice.getComponent('finance-service');
+      this.shoppingService = slice.getComponent('shopping-service');
 
       this._capacityRing = await slice.build('CapacityRing', {
          sliceId: 'dashboard-capacity-ring',
@@ -42,33 +65,50 @@ export default class DashboardSection extends HTMLElement {
          (state) => ({
             tasks: state?.tasks ?? [],
             timeBlocks: state?.timeBlocks ?? [],
-            exchangeRate: state?.exchangeRate ?? {}
+            exchangeRate: state?.exchangeRate ?? {},
+            finances: state?.finances ?? [],
+            shopping: state?.shopping ?? []
          })
       );
 
       this.refresh({
          tasks: this.taskService?.getAll() ?? [],
          timeBlocks: this.timeBlockService?.getAll() ?? [],
-         exchangeRate: slice.context.getState('lifeControl')?.exchangeRate ?? {}
+         exchangeRate: slice.context.getState('lifeControl')?.exchangeRate ?? {},
+         finances: this.financeService?.getAll() ?? [],
+         shopping: this.shoppingService?.getAll() ?? []
       });
    }
 
-   refresh({ tasks, timeBlocks, exchangeRate }) {
-      const pending = tasks.filter((t) => !t.completed);
-      this.$tasksCount.textContent = String(pending.length);
+   formatMoney(value) {
+      return `$${(Number(value) || 0).toFixed(2)}`;
+   }
 
-      const totalCapacity = timeBlocks.reduce((sum, b) => sum + (b.duration ?? 0), 0);
-      const usedCapacity = tasks
-         .filter((t) => t.blockId && t.completed)
-         .reduce((sum, t) => sum + (t.minutes ?? 0), 0);
-      const percent = totalCapacity ? Math.round((usedCapacity / totalCapacity) * 100) : 0;
+   refresh({ tasks, timeBlocks, exchangeRate, finances }) {
+      const today = todayISO();
+      this.$dateSubtitle.textContent = formatDayLong(today);
+
+      const pending = tasks.filter((task) => !task.completed);
+      const todayTasks = tasks.filter((task) => task.scheduledDate === today || (!task.scheduledDate && task.blockId));
+      const completedToday = todayTasks.filter((task) => task.completed).length;
+      const totalToday = todayTasks.length || pending.length;
+      const completedForRing = todayTasks.length ? completedToday : tasks.filter((task) => task.completed).length;
+      const totalForRing = todayTasks.length || tasks.length;
+      const percent = totalForRing ? Math.round((completedForRing / totalForRing) * 100) : 0;
 
       if (this._capacityRing) {
          this._capacityRing.percent = percent;
       }
+      this.$capacityText.textContent = `${completedForRing} / ${totalForRing} tareas completadas`;
+      this.$pendingCount.textContent = `${pending.length} pendientes`;
+      this.$tasksCount.textContent = String(pending.length);
+      this.$blocksCount.textContent = String(timeBlocks.length);
 
       this.renderRate(exchangeRate);
-      this.renderLists(pending);
+      this.renderFinances(finances);
+      this.renderShoppingDue();
+      this.renderIncomingLiquidity(finances, exchangeRate);
+      this.renderLists(pending, tasks);
    }
 
    renderRate(exchangeRate) {
@@ -96,23 +136,86 @@ export default class DashboardSection extends HTMLElement {
       this.$rateRetry.hidden = true;
    }
 
-   renderLists(tasks) {
-      const urgent = tasks.filter((t) => t.urgency === 'high').slice(0, 5);
-      const recent = tasks.filter((t) => t.blockId).slice(0, 5);
+   renderFinances(finances) {
+      const list = Array.isArray(finances) ? finances : [];
+      const payTotal = list
+         .filter((item) => item.type === FINANCE_TYPE.PAY && !item.settled)
+         .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+      const receiveTotal = list
+         .filter((item) => item.type === FINANCE_TYPE.RECEIVE && !item.settled)
+         .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 
-      this.fillList(this.$priorityList, urgent);
-      this.$priorityEmpty.hidden = urgent.length > 0;
-
-      this.fillList(this.$recentList, recent);
-      this.$recentEmpty.hidden = recent.length > 0;
+      this.$financePay.textContent = this.formatMoney(payTotal);
+      this.$financeReceive.textContent = this.formatMoney(receiveTotal);
    }
 
-   fillList(listEl, tasks) {
+   renderIncomingLiquidity(finances, exchangeRate) {
+      const incoming = (Array.isArray(finances) ? finances : [])
+         .filter((item) => item.type === FINANCE_TYPE.RECEIVE && !item.settled)
+         .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+      this.$netLiquidity.textContent = `${this.formatMoney(incoming)} USD`;
+
+      const rate = exchangeRate?.status === 'success' ? exchangeRate.rate : null;
+      if (rate) {
+         this.$netBs.hidden = false;
+         this.$netBs.textContent = `• Bs. ${(incoming * rate).toFixed(2)}`;
+      } else {
+         this.$netBs.hidden = true;
+      }
+   }
+
+   renderShoppingDue() {
+      const items = this.shoppingService?.getDueItems({ withinDays: 14 }) ?? [];
+      this.$shoppingDueList.innerHTML = '';
+      this.$shoppingDueEmpty.hidden = items.length > 0;
+
+      for (const item of items.slice(0, 6)) {
+         const status = getDueStatus(item);
+         const li = document.createElement('li');
+         li.className = `dashboard-section__due-item dashboard-section__due-item--${status.state}`;
+
+         const name = document.createElement('span');
+         name.className = 'dashboard-section__due-name';
+         name.textContent = item.name;
+
+         const meta = document.createElement('span');
+         meta.className = 'dashboard-section__due-meta';
+         meta.textContent = `${FREQUENCY_LABELS[item.frequency] ?? ''} · ${status.label}`;
+
+         li.appendChild(name);
+         li.appendChild(meta);
+         this.$shoppingDueList.appendChild(li);
+      }
+   }
+
+   renderLists(tasks) {
+      const urgent = tasks.filter((task) => task.urgency === 'high').slice(0, 5);
+      const inBlocks = tasks.filter((task) => task.blockId && !task.completed).slice(0, 5);
+
+      this.fillList(this.$priorityList, urgent, true);
+      this.$priorityEmpty.hidden = urgent.length > 0;
+
+      this.fillList(this.$recentList, inBlocks, false);
+      this.$recentEmpty.hidden = inBlocks.length > 0;
+   }
+
+   fillList(listEl, tasks, withFlag) {
       listEl.innerHTML = '';
       for (const task of tasks) {
          const item = document.createElement('li');
-         item.className = 'text-sm';
-         item.textContent = task.title;
+         item.className = withFlag ? 'dashboard-section__urgent-item' : 'text-sm';
+
+         if (withFlag) {
+            const flag = document.createElement('span');
+            flag.className = `dashboard-section__flag dashboard-section__flag--${task.urgency || 'high'}`;
+            const title = document.createElement('span');
+            title.textContent = task.title;
+            item.append(flag, title);
+         } else {
+            item.textContent = task.title;
+         }
+
          listEl.appendChild(item);
       }
    }

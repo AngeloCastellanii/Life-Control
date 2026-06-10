@@ -1,9 +1,9 @@
-const DEFAULT_STORES = ['domains', 'tasks', 'timeBlocks', 'finances', 'shopping'];
+const DEFAULT_STORES = ['domains', 'tasks', 'timeBlocks', 'finances', 'shopping', 'meta'];
 
 export default class StorageService {
    constructor(props = {}) {
       this.dbName = props.dbName ?? 'life-control';
-      this.dbVersion = props.dbVersion ?? 1;
+      this.dbVersion = props.dbVersion ?? 2;
       this.stores = props.stores ?? DEFAULT_STORES;
       this.db = null;
    }

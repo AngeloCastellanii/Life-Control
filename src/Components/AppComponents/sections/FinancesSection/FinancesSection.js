@@ -10,6 +10,8 @@ export default class FinancesSection extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
+      this.$walletBalance = this.querySelector('[data-role="wallet-balance"]');
+      this.$walletAdjust = this.querySelector('[data-role="wallet-adjust"]');
       this.$payList = this.querySelector('[data-role="pay-list"]');
       this.$receiveList = this.querySelector('[data-role="receive-list"]');
       this.$payEmpty = this.querySelector('[data-role="pay-empty"]');
@@ -26,18 +28,42 @@ export default class FinancesSection extends HTMLElement {
          return;
       }
 
+      this.$walletAdjust.addEventListener('click', () => this.adjustWallet());
+
       slice.context.watch(
          'lifeControl',
          this,
-         (finances) => this.render(finances),
-         (state) => state?.finances ?? []
+         (state) => this.render(state),
+         (state) => ({
+            finances: state?.finances ?? [],
+            walletBalance: state?.walletBalance ?? 0
+         })
       );
 
-      this.render(this.financeService.getAll());
+      this.render({
+         finances: this.financeService.getAll(),
+         walletBalance: this.financeService.getWalletBalance()
+      });
    }
 
    formatMoney(value) {
       return `$${(Number(value) || 0).toFixed(2)}`;
+   }
+
+   async adjustWallet() {
+      const current = this.financeService.getWalletBalance();
+      const input = window.prompt('Saldo actual en USD (billetera):', current.toFixed(2));
+      if (input === null) {
+         return;
+      }
+
+      const value = Number(input.replace(',', '.'));
+      if (!Number.isFinite(value) || value < 0) {
+         window.alert('Ingresa un monto válido.');
+         return;
+      }
+
+      await this.financeService.setWalletBalance(value);
    }
 
    renderColumn(listEl, emptyEl, items, settledLabel) {
@@ -96,7 +122,9 @@ export default class FinancesSection extends HTMLElement {
       }
    }
 
-   render(finances) {
+   render({ finances, walletBalance }) {
+      this.$walletBalance.textContent = this.formatMoney(walletBalance);
+
       const list = Array.isArray(finances) ? finances : this.financeService.getAll();
       const payItems = list.filter((item) => item.type === FINANCE_TYPE.PAY);
       const receiveItems = list.filter((item) => item.type === FINANCE_TYPE.RECEIVE);

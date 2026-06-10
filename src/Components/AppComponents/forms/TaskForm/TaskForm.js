@@ -14,6 +14,7 @@ export default class TaskForm extends HTMLElement {
       this.$titleInput = this.querySelector('#task-form-title');
       this.$urgencySelect = this.querySelector('#task-form-urgency');
       this.$minutesInput = this.querySelector('#task-form-minutes');
+      this.$dateInput = this.querySelector('#task-form-date');
       slice.controller.setComponentProps(this, props);
    }
 
@@ -74,6 +75,7 @@ export default class TaskForm extends HTMLElement {
       this.$urgencySelect.value = task.urgency ?? 'medium';
       this.$minutesInput.value = String(task.minutes ?? 30);
       this.$domainSelect.value = task.domainId;
+      this.$dateInput.value = task.scheduledDate ?? '';
    }
 
    async handleSubmit() {
@@ -91,7 +93,8 @@ export default class TaskForm extends HTMLElement {
          title: this.$titleInput.value,
          domainId,
          urgency: this.$urgencySelect.value,
-         minutes: this.$minutesInput.value
+         minutes: this.$minutesInput.value,
+         scheduledDate: this.$dateInput.value || null
       };
 
       this._submitting = true;

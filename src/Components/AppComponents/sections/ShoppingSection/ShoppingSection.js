@@ -1,4 +1,7 @@
-import { SHOPPING_FREQUENCY } from '/Components/Service/ShoppingService/ShoppingService.js';
+import {
+   SHOPPING_FREQUENCY,
+   getDueStatus
+} from '/Components/Service/ShoppingService/ShoppingService.js';
 
 const COLUMNS = [
    { frequency: SHOPPING_FREQUENCY.DAILY, list: 'daily-list', empty: 'daily-empty' },
@@ -144,11 +147,18 @@ export default class ShoppingSection extends HTMLElement {
       this.setSelected(item.frequency, item.id);
 
       const period = FREQUENCY_LABELS[item.frequency] ?? item.frequency;
+      const status = getDueStatus(item);
       this.$detailPeriod.textContent = `Lista ${period.toLowerCase()}`;
       this.$detailName.textContent = item.name;
-      this.$detailMeta.textContent = item.checked
-         ? `Marcado como hecho en el periodo ${period.toLowerCase()}.`
-         : `Pendiente de comprar o pagar en el periodo ${period.toLowerCase()}.`;
+
+      const parts = [status.label];
+      if (item.lastDoneAt) {
+         parts.push(`Última vez: ${item.lastDoneAt}`);
+      }
+      if (item.nextDueAt) {
+         parts.push(`Próxima: ${item.nextDueAt}`);
+      }
+      this.$detailMeta.textContent = parts.join(' · ');
 
       this.$detail.hidden = false;
    }
@@ -189,6 +199,9 @@ export default class ShoppingSection extends HTMLElement {
             this.shoppingService.toggleChecked(item.id, check.checked);
          });
 
+         const body = document.createElement('div');
+         body.className = 'shopping-section__item-body';
+
          const nameBtn = document.createElement('button');
          nameBtn.type = 'button';
          nameBtn.className = 'shopping-section__item-name';
@@ -196,8 +209,16 @@ export default class ShoppingSection extends HTMLElement {
          nameBtn.title = item.name;
          nameBtn.addEventListener('click', () => this.showDetail(item));
 
+         const due = document.createElement('span');
+         const status = getDueStatus(item);
+         due.className = `shopping-section__item-due shopping-section__item-due--${status.state}`;
+         due.textContent = status.label;
+
+         body.appendChild(nameBtn);
+         body.appendChild(due);
+
          row.appendChild(check);
-         row.appendChild(nameBtn);
+         row.appendChild(body);
          listEl.appendChild(row);
       }
    }

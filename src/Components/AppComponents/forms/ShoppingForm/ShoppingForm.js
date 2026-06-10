@@ -1,4 +1,8 @@
-import { SHOPPING_FREQUENCY } from '/Components/Service/ShoppingService/ShoppingService.js';
+import {
+   SHOPPING_FREQUENCY,
+   addPeriod,
+   todayISO
+} from '/Components/Service/ShoppingService/ShoppingService.js';
 
 export default class ShoppingForm extends HTMLElement {
    static props = {
@@ -13,6 +17,10 @@ export default class ShoppingForm extends HTMLElement {
       this.$actions = this.querySelector('[data-role="actions"]');
       this.$frequencySelect = this.querySelector('#shopping-form-frequency');
       this.$nameInput = this.querySelector('#shopping-form-name');
+      this.$lastDoneInput = this.querySelector('#shopping-form-last-done');
+      this.$nextDueInput = this.querySelector('#shopping-form-next-due');
+      this.$nextHint = this.querySelector('[data-role="next-hint"]');
+      this._nextDueTouched = false;
       slice.controller.setComponentProps(this, props);
    }
 
@@ -31,6 +39,15 @@ export default class ShoppingForm extends HTMLElement {
       });
       this.$actions.append(cancelBtn, submitBtn);
 
+      this.$frequencySelect.addEventListener('change', () => this.syncNextDueFromLast());
+      this.$lastDoneInput.addEventListener('change', () => {
+         this._nextDueTouched = false;
+         this.syncNextDueFromLast();
+      });
+      this.$nextDueInput.addEventListener('input', () => {
+         this._nextDueTouched = true;
+      });
+
       this.$form.addEventListener('submit', (event) => {
          event.preventDefault();
          this.handleSubmit();
@@ -38,6 +55,24 @@ export default class ShoppingForm extends HTMLElement {
 
       if (this.shoppingId) {
          this.loadItem(this.shoppingId);
+      } else {
+         this.$nextDueInput.value = todayISO();
+      }
+   }
+
+   syncNextDueFromLast() {
+      const last = this.$lastDoneInput.value;
+      if (!last) {
+         return;
+      }
+
+      const frequency = this.$frequencySelect.value;
+      const next = addPeriod(last, frequency);
+      const currentNext = this.$nextDueInput.value;
+
+      if (!this._nextDueTouched || !currentNext || currentNext <= last) {
+         this.$nextDueInput.value = next;
+         this.$nextHint.textContent = `Calculada según frecuencia: ${next}`;
       }
    }
 
@@ -49,6 +84,14 @@ export default class ShoppingForm extends HTMLElement {
 
       this.$nameInput.value = item.name;
       this.$frequencySelect.value = item.frequency ?? SHOPPING_FREQUENCY.WEEKLY;
+      this.$lastDoneInput.value = item.lastDoneAt ?? '';
+      const frequency = item.frequency ?? SHOPPING_FREQUENCY.WEEKLY;
+      const nextDue =
+         item.lastDoneAt && item.nextDueAt && item.nextDueAt <= item.lastDoneAt
+            ? addPeriod(item.lastDoneAt, frequency)
+            : (item.nextDueAt ?? todayISO());
+      this.$nextDueInput.value = nextDue;
+      this._nextDueTouched = Boolean(item.nextDueAt && item.nextDueAt > (item.lastDoneAt ?? ''));
    }
 
    async handleSubmit() {
@@ -58,7 +101,9 @@ export default class ShoppingForm extends HTMLElement {
 
       const payload = {
          frequency: this.$frequencySelect.value,
-         name: this.$nameInput.value
+         name: this.$nameInput.value,
+         lastDoneAt: this.$lastDoneInput.value || null,
+         nextDueAt: this.$nextDueInput.value || null
       };
 
       this._submitting = true;

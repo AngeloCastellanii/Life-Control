@@ -11,6 +11,7 @@ export default class FinanceForm extends HTMLElement {
       this.$typeSelect = this.querySelector('#finance-form-type');
       this.$descriptionInput = this.querySelector('#finance-form-description');
       this.$amountInput = this.querySelector('#finance-form-amount');
+      this.$dueInput = this.querySelector('#finance-form-due');
       slice.controller.setComponentProps(this, props);
    }
 
@@ -40,7 +41,8 @@ export default class FinanceForm extends HTMLElement {
          const created = await this.financeService.create({
             type: this.$typeSelect.value,
             description: this.$descriptionInput.value,
-            amount: this.$amountInput.value
+            amount: this.$amountInput.value,
+            dueDate: this.$dueInput.value || null
          });
          if (created) {
             slice.events.emit('ui:modal:close');

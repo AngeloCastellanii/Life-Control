@@ -1,3 +1,18 @@
+import { FINANCE_TYPE } from '/Components/Service/FinanceService/FinanceService.js';
+import {
+   addDays,
+   addMonths,
+   dueBadgeLabel,
+   formatDayLong,
+   formatMonthLabel,
+   formatShortDay,
+   formatWeekLabel,
+   getMonthMatrix,
+   getWeekDays,
+   isSameDay,
+   todayISO
+} from '/Components/AppComponents/sections/plannerDates.js';
+
 export default class PlannerSection extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'planner-section' },
@@ -8,11 +23,26 @@ export default class PlannerSection extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
+      this.$periodLabel = this.querySelector('[data-role="period-label"]');
+      this.$prev = this.querySelector('[data-role="prev"]');
+      this.$next = this.querySelector('[data-role="next"]');
+      this.$today = this.querySelector('[data-role="today"]');
+      this.$viewToggle = this.querySelector('[data-role="view-toggle"]');
+      this.$viewDay = this.querySelector('[data-role="view-day"]');
+      this.$viewWeek = this.querySelector('[data-role="view-week"]');
+      this.$viewMonth = this.querySelector('[data-role="view-month"]');
+      this.$cashFlow = this.querySelector('[data-role="cash-flow"]');
+      this.$cashFlowEmpty = this.querySelector('[data-role="cash-flow-empty"]');
       this.$blocks = this.querySelector('[data-role="blocks"]');
       this.$blocksEmpty = this.querySelector('[data-role="blocks-empty"]');
       this.$tasks = this.querySelector('[data-role="tasks"]');
       this.$empty = this.querySelector('[data-role="empty"]');
+      this.$inboxCount = this.querySelector('[data-role="inbox-count"]');
+      this.$weekGrid = this.querySelector('[data-role="week-grid"]');
+      this.$monthGrid = this.querySelector('[data-role="month-grid"]');
       this.$addBlock = this.querySelector('[data-role="add-block"]');
+      this._viewMode = 'day';
+      this._cursorDate = todayISO();
       slice.controller.setComponentProps(this, props);
    }
 
@@ -20,6 +50,8 @@ export default class PlannerSection extends HTMLElement {
       this.taskService = slice.getComponent('task-service');
       this.domainService = slice.getComponent('domain-service');
       this.timeBlockService = slice.getComponent('time-block-service');
+      this.financeService = slice.getComponent('finance-service');
+      this.shoppingService = slice.getComponent('shopping-service');
       if (!this.taskService || !this.domainService || !this.timeBlockService) {
          return;
       }
@@ -31,6 +63,21 @@ export default class PlannerSection extends HTMLElement {
          });
       });
 
+      this.$prev.addEventListener('click', () => this.shiftCursor(-1));
+      this.$next.addEventListener('click', () => this.shiftCursor(1));
+      this.$today.addEventListener('click', () => {
+         this._cursorDate = todayISO();
+         this.renderAll();
+      });
+
+      this.$viewToggle.addEventListener('click', (event) => {
+         const button = event.target.closest('[data-view]');
+         if (!button) {
+            return;
+         }
+         this.setViewMode(button.dataset.view);
+      });
+
       slice.context.watch(
          'lifeControl',
          this,
@@ -38,13 +85,42 @@ export default class PlannerSection extends HTMLElement {
          (state) => ({
             tasks: state?.tasks ?? [],
             domains: state?.domains ?? [],
-            timeBlocks: state?.timeBlocks ?? []
+            timeBlocks: state?.timeBlocks ?? [],
+            finances: state?.finances ?? [],
+            shopping: state?.shopping ?? []
          })
       );
 
       slice.events.subscribe('time-block:changed', () => this.renderAll());
       slice.events.subscribe('task:changed', () => this.renderAll());
+      slice.events.subscribe('finance:changed', () => this.renderAll());
+      slice.events.subscribe('shopping:changed', () => this.renderAll());
 
+      this.renderAll();
+   }
+
+   setViewMode(mode) {
+      if (!['day', 'week', 'month'].includes(mode)) {
+         return;
+      }
+      this._viewMode = mode;
+      this.renderAll();
+   }
+
+   shiftCursor(direction) {
+      if (this._viewMode === 'day') {
+         this._cursorDate = addDays(this._cursorDate, direction);
+      } else if (this._viewMode === 'week') {
+         this._cursorDate = addDays(this._cursorDate, direction * 7);
+      } else {
+         this._cursorDate = addMonths(this._cursorDate, direction);
+      }
+      this.renderAll();
+   }
+
+   goToDay(iso) {
+      this._cursorDate = iso;
+      this._viewMode = 'day';
       this.renderAll();
    }
 
@@ -75,6 +151,11 @@ export default class PlannerSection extends HTMLElement {
       return domain?.color ?? '#71717a';
    }
 
+   domainNameFor(domainId) {
+      const domain = this.domainService.getAll().find((d) => d.id === domainId);
+      return domain?.name ?? 'General';
+   }
+
    _destroyByPrefix(prefix) {
       const ids = [...slice.controller.activeComponents.keys()].filter((id) => id.startsWith(prefix));
       if (ids.length) {
@@ -82,20 +163,113 @@ export default class PlannerSection extends HTMLElement {
       }
    }
 
+   tasksForDay(iso) {
+      return this.taskService.getAll().filter((task) => task.scheduledDate === iso);
+   }
+
+   inboxTasks() {
+      return this.taskService
+         .getAll()
+         .filter((task) => {
+            if (task.blockId) {
+               return false;
+            }
+            if (!task.scheduledDate) {
+               return true;
+            }
+            return task.scheduledDate === this._cursorDate;
+         });
+   }
+
+   updateToolbar() {
+      if (this._viewMode === 'day') {
+         this.$periodLabel.textContent = formatDayLong(this._cursorDate);
+      } else if (this._viewMode === 'week') {
+         this.$periodLabel.textContent = formatWeekLabel(this._cursorDate);
+      } else {
+         this.$periodLabel.textContent = formatMonthLabel(this._cursorDate);
+      }
+
+      for (const button of this.$viewToggle.querySelectorAll('[data-view]')) {
+         button.classList.toggle('planner-section__view-btn--active', button.dataset.view === this._viewMode);
+      }
+
+      this.$viewDay.hidden = this._viewMode !== 'day';
+      this.$viewWeek.hidden = this._viewMode !== 'week';
+      this.$viewMonth.hidden = this._viewMode !== 'month';
+   }
+
    async renderAll() {
+      this.updateToolbar();
+
+      if (this._viewMode === 'day') {
+         await this.renderDayView();
+      } else if (this._viewMode === 'week') {
+         this.renderWeekView();
+      } else {
+         this.renderMonthView();
+      }
+   }
+
+   async renderDayView() {
+      this.renderCashFlow();
       await this.renderBlocks();
       await this.renderInbox();
+   }
+
+   renderCashFlow() {
+      this.$cashFlow.innerHTML = '';
+      const items = [];
+      const finances = this.financeService?.getAll() ?? [];
+
+      for (const finance of finances) {
+         if (finance.settled) {
+            continue;
+         }
+         if (finance.dueDate && finance.dueDate !== this._cursorDate) {
+            continue;
+         }
+         items.push({
+            name: finance.description,
+            amount: finance.amount,
+            kind: finance.type === FINANCE_TYPE.RECEIVE ? 'income' : 'debt'
+         });
+      }
+
+      for (const shopping of this.shoppingService?.getDueOnDate(this._cursorDate) ?? []) {
+         items.push({
+            name: shopping.name,
+            amount: null,
+            kind: 'debt'
+         });
+      }
+
+      this.$cashFlowEmpty.hidden = items.length > 0;
+
+      for (const item of items) {
+         const card = document.createElement('article');
+         card.className = `planner-section__cash-item planner-section__cash-item--${item.kind}`;
+
+         const label = document.createElement('span');
+         label.className = 'planner-section__cash-label';
+         label.textContent = item.kind === 'income' ? 'INGRESO' : 'DEUDA';
+
+         const name = document.createElement('strong');
+         name.textContent = item.name;
+
+         const amount = document.createElement('span');
+         amount.className = 'planner-section__cash-amount';
+         amount.textContent = item.amount != null ? `$${Number(item.amount).toFixed(2)}` : '—';
+
+         card.append(label, name, amount);
+         this.$cashFlow.appendChild(card);
+      }
    }
 
    async renderBlocks() {
       this._destroyByPrefix('planner-block-');
       this._destroyByPrefix('task-card-block-');
       this.$blocks.innerHTML = '';
-
-      this.timeBlockService = slice.getComponent('time-block-service');
-      if (!this.timeBlockService) {
-         return;
-      }
 
       const blocks = this.timeBlockService.getAll();
       this.$blocksEmpty.hidden = blocks.length > 0;
@@ -150,12 +324,14 @@ export default class PlannerSection extends HTMLElement {
          this._destroyByPrefix(this._taskCardPrefix());
          this.$tasks.innerHTML = '';
 
-         const tasks = this.taskService.getAll().filter((t) => !t.blockId);
+         const tasks = this.inboxTasks();
          const domains = this.domainService.getAll();
          const blockOptions = this.timeBlockService
             .getAll()
             .filter((b) => this.timeBlockService.acceptsTasks(b))
             .map((b) => ({ id: b.id, label: b.label }));
+
+         this.$inboxCount.textContent = tasks.length ? String(tasks.length) : '';
 
          if (domains.length === 0) {
             this.$empty.textContent = 'Crea un dominio en Dominios primero.';
@@ -178,7 +354,13 @@ export default class PlannerSection extends HTMLElement {
                domainColor: this.domainColorFor(task.domainId),
                assignBlocks: blockOptions,
                ...this.taskCardActions(task),
-               onAssignToBlock: (taskId, blockId) => this.timeBlockService.assignTask(blockId, taskId)
+               onAssignToBlock: async (taskId, blockId) => {
+                  const current = this.taskService.getById(taskId);
+                  if (current && !current.scheduledDate) {
+                     await this.taskService.update(taskId, { scheduledDate: this._cursorDate });
+                  }
+                  await this.timeBlockService.assignTask(blockId, taskId);
+               }
             });
             if (card) {
                this.$tasks.appendChild(card);
@@ -189,9 +371,161 @@ export default class PlannerSection extends HTMLElement {
       }
    }
 
+   renderWeekView() {
+      this.$weekGrid.innerHTML = '';
+      const days = getWeekDays(this._cursorDate);
+      const tasks = this.taskService.getAll();
+
+      for (const iso of days) {
+         const column = document.createElement('article');
+         column.className = 'planner-week__day';
+         if (isSameDay(iso, todayISO())) {
+            column.classList.add('planner-week__day--today');
+         }
+         if (isSameDay(iso, this._cursorDate) && !isSameDay(iso, todayISO())) {
+            column.classList.add('planner-week__day--selected');
+         }
+
+         const header = document.createElement('button');
+         header.type = 'button';
+         header.className = 'planner-week__day-head';
+         header.textContent = formatShortDay(iso);
+         header.addEventListener('click', () => this.goToDay(iso));
+
+         const tasksSection = document.createElement('div');
+         tasksSection.className = 'planner-week__section';
+         const tasksTitle = document.createElement('span');
+         tasksTitle.className = 'planner-week__section-title';
+         tasksTitle.textContent = 'Tareas';
+         tasksSection.appendChild(tasksTitle);
+
+         const dayTasks = tasks.filter((task) => task.scheduledDate === iso && !task.completed);
+         if (dayTasks.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'planner-week__empty';
+            empty.textContent = 'Día libre';
+            tasksSection.appendChild(empty);
+         } else {
+            for (const task of dayTasks) {
+               tasksSection.appendChild(this.weekTaskChip(task));
+            }
+         }
+
+         const paymentsSection = document.createElement('div');
+         paymentsSection.className = 'planner-week__section';
+         const paymentsTitle = document.createElement('span');
+         paymentsTitle.className = 'planner-week__section-title';
+         paymentsTitle.textContent = 'Pagos';
+         paymentsSection.appendChild(paymentsTitle);
+         this.fillWeekPayments(paymentsSection, iso);
+
+         column.append(header, tasksSection, paymentsSection);
+         this.$weekGrid.appendChild(column);
+      }
+   }
+
+   weekTaskChip(task) {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'planner-week__task';
+      chip.textContent = task.title;
+      chip.addEventListener('click', () => this.openTaskEdit(task.id));
+      return chip;
+   }
+
+   fillWeekPayments(section, iso) {
+      const finances = this.financeService?.getDueOnDate(iso) ?? [];
+      const shopping = this.shoppingService?.getDueOnDate(iso) ?? [];
+      const payments = [
+         ...finances.map((item) => ({
+            name: item.description,
+            kind: item.type === FINANCE_TYPE.RECEIVE ? 'income' : 'debt'
+         })),
+         ...shopping.map((item) => ({ name: item.name, kind: 'debt' }))
+      ];
+
+      if (payments.length === 0) {
+         const empty = document.createElement('p');
+         empty.className = 'planner-week__empty';
+         empty.textContent = '—';
+         section.appendChild(empty);
+         return;
+      }
+
+      for (const payment of payments) {
+         const row = document.createElement('span');
+         row.className = `planner-week__payment planner-week__payment--${payment.kind}`;
+         row.textContent = payment.name;
+         section.appendChild(row);
+      }
+   }
+
+   renderMonthView() {
+      this.$monthGrid.innerHTML = '';
+      const tasks = this.taskService.getAll();
+      const weeks = getMonthMatrix(this._cursorDate);
+
+      for (const week of weeks) {
+         for (const cell of week) {
+            const dayEl = document.createElement('button');
+            dayEl.type = 'button';
+            dayEl.className = 'planner-month__cell';
+            if (!cell.inMonth) {
+               dayEl.classList.add('planner-month__cell--muted');
+            }
+            if (isSameDay(cell.iso, todayISO())) {
+               dayEl.classList.add('planner-month__cell--today');
+            }
+
+            const dayNumber = document.createElement('span');
+            dayNumber.className = 'planner-month__day-num';
+            dayNumber.textContent = String(parseISO(cell.iso).getDate());
+
+            const list = document.createElement('div');
+            list.className = 'planner-month__list';
+
+            const dayTasks = tasks.filter((task) => task.scheduledDate === cell.iso && !task.completed);
+            for (const task of dayTasks.slice(0, 3)) {
+               list.appendChild(this.monthTaskLine(task));
+            }
+            if (dayTasks.length > 3) {
+               const more = document.createElement('span');
+               more.className = 'planner-month__more';
+               more.textContent = `+${dayTasks.length - 3} más`;
+               list.appendChild(more);
+            }
+
+            const paymentCount =
+               (this.financeService?.getDueOnDate(cell.iso)?.length ?? 0) +
+               (this.shoppingService?.getDueOnDate(cell.iso)?.length ?? 0);
+            if (paymentCount > 0) {
+               const badge = document.createElement('span');
+               badge.className = 'planner-month__payment-dot';
+               badge.textContent = `${paymentCount} pago${paymentCount > 1 ? 's' : ''}`;
+               list.appendChild(badge);
+            }
+
+            dayEl.append(dayNumber, list);
+            dayEl.addEventListener('click', () => this.goToDay(cell.iso));
+            this.$monthGrid.appendChild(dayEl);
+         }
+      }
+   }
+
+   monthTaskLine(task) {
+      const line = document.createElement('span');
+      line.className = 'planner-month__task';
+      line.textContent = task.title;
+      return line;
+   }
+
    _taskCardPrefix() {
       return `task-card-${this.sliceId}-`;
    }
+}
+
+function parseISO(iso) {
+   return new Date(`${iso}T12:00:00`);
 }
 
 customElements.define('slice-planner-section', PlannerSection);

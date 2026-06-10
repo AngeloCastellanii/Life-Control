@@ -1,8 +1,8 @@
 import { BLOCK_RULE } from '/Components/Service/TimeBlockService/TimeBlockService.js';
 
 const RULE_LABELS = {
-   [BLOCK_RULE.FLEXIBLE]: '🔓 Flexible',
-   [BLOCK_RULE.LOCKED]: '🔒 Bloqueada'
+   [BLOCK_RULE.FLEXIBLE]: 'FLEXIBLE',
+   [BLOCK_RULE.LOCKED]: 'FIJO'
 };
 
 export default class TimeBlock extends HTMLElement {
@@ -20,7 +20,9 @@ export default class TimeBlock extends HTMLElement {
       slice.attachTemplate(this);
       this.$label = this.querySelector('[data-role="label"]');
       this.$time = this.querySelector('[data-role="time"]');
-      this.$capacity = this.querySelector('[data-role="capacity"]');
+      this.$usage = this.querySelector('[data-role="usage"]');
+      this.$free = this.querySelector('[data-role="free"]');
+      this.$progressBar = this.querySelector('[data-role="progress-bar"]');
       this.$tasks = this.querySelector('[data-role="tasks"]');
       this.$empty = this.querySelector('[data-role="empty"]');
       this.$rule = this.querySelector('[data-role="rule"]');
@@ -56,15 +58,20 @@ export default class TimeBlock extends HTMLElement {
       const remaining = Math.max(0, duration - used);
       const overflow = used > duration;
       const count = Number(this.taskCount) || 0;
+      const percent = duration ? Math.min(100, Math.round((used / duration) * 100)) : 0;
 
       const end = block.end ?? block.start;
       const rule = block.rule ?? BLOCK_RULE.FLEXIBLE;
       const locked = rule === BLOCK_RULE.LOCKED;
 
       this.$label.textContent = block.label;
-      this.$time.textContent = `${block.start} – ${end}`;
-      this.$rule.textContent = RULE_LABELS[rule] ?? RULE_LABELS[BLOCK_RULE.FLEXIBLE];
-      this.$capacity.textContent = `${remaining} min restantes · ${used}/${duration}`;
+      this.$time.textContent = `${block.start} — ${end}`;
+      this.$rule.textContent = locked ? '🔒 FIJO' : RULE_LABELS[BLOCK_RULE.FLEXIBLE];
+      this.$rule.classList.toggle('time-block__rule--flexible', !locked);
+      this.$rule.classList.toggle('time-block__rule--fixed', locked);
+      this.$usage.textContent = `${used} / ${duration} min`;
+      this.$free.textContent = `${remaining}M LIBRES`;
+      this.$progressBar.style.width = `${percent}%`;
       this.classList.toggle('time-block--overflow', overflow);
       this.classList.toggle('time-block--locked', locked);
       this.$empty.hidden = count > 0;

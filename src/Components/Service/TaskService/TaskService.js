@@ -45,7 +45,7 @@ export default class TaskService {
       return this.getAll().find((t) => t.id === id) ?? null;
    }
 
-   async create({ title, urgency, minutes, domainId, blockId = null }) {
+   async create({ title, urgency, minutes, domainId, blockId = null, scheduledDate = null }) {
       const trimmed = title?.trim();
       if (!trimmed || !domainId) {
          return null;
@@ -58,6 +58,7 @@ export default class TaskService {
          minutes: Math.max(1, Number(minutes) || 30),
          domainId,
          blockId,
+         scheduledDate: scheduledDate || null,
          completed: false
       };
 
