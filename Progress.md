@@ -70,7 +70,7 @@ Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: 
 
 **Tema Slice no actualiza** — caché en `localStorage` (`sliceTheme-Slice`). Borrar y recargar.
 
-**Deploy en Vercel** — No basta con rewrites de SPA estático: hace falta `vercel.json` que envíe todo a `/api` (Express). Variable `NODE_ENV=production` en el panel. Borrar caché y redeploy. Alternativa más simple: **Render** con `pnpm start`.
+**Deploy en Vercel** — Igual que el repo del profe: `vercel.json` con rewrite a `/api/`, script **`build`** en `package.json`, carpeta `api/index.js`. **Output Directory vacío** en el panel. `includeFiles: dist/**` en functions. Alternativa: **Render** con `pnpm start`.
 
 ---
 

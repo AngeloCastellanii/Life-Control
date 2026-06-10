@@ -1,23 +1,14 @@
 {
   "version": 2,
-  "installCommand": "pnpm install --prod=false",
-  "buildCommand": "pnpm run vercel-build",
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": "dist/**"
-      }
+      "source": "/(.*)",
+      "destination": "/api/"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "dist/**"
     }
-  ]
+  }
 }
