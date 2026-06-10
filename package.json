@@ -4,7 +4,7 @@
     "dev": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js dev",
     "css:build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify",
     "css:watch": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --watch",
-    "build": "pnpm css:build && pnpm exec slice build",
+    "build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js build",
     "start": "node ./node_modules/slicejs-cli/client.js start",
     "component:create": "node ./node_modules/slicejs-cli/client.js component create",
     "component:list": "node ./node_modules/slicejs-cli/client.js component list",
@@ -24,19 +24,18 @@
     "slice:get": "node ./node_modules/slicejs-cli/client.js get",
     "slice:browse": "node ./node_modules/slicejs-cli/client.js browse",
     "slice:sync": "node ./node_modules/slicejs-cli/client.js sync",
-    "run": "node ./node_modules/slicejs-cli/client.js dev",
-    "vercel-build": "pnpm css:build && pnpm exec slice build"
+    "run": "node ./node_modules/slicejs-cli/client.js dev"
   },
   "type": "module",
+  "packageManager": "pnpm@11.2.2",
   "engines": {
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "slicejs-web-framework": "^3.3.4"
-  },
-  "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
+    "express": "^4.19.2",
     "slicejs-cli": "^3.6.3",
+    "slicejs-web-framework": "^3.3.4",
     "tailwindcss": "^4.3.0"
   }
 }

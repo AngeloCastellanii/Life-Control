@@ -21,9 +21,7 @@ const app = express();
 // Parsear argumentos de línea de comandos
 const args = process.argv.slice(2);
 
-const isVercel = process.env.VERCEL === '1';
-const isProduction = process.env.NODE_ENV === 'production' || isVercel;
-const runMode = isProduction ? 'production' : 'development';
+const runMode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 const folderDeployed = runMode === 'production' ? 'dist' : 'src';
 const publicEnvProvider = createPublicEnvProvider({
   mode: runMode,
@@ -243,8 +241,8 @@ app.get('/api/status', (req, res) => {
 // ==============================================
 
 // SPA fallback - servir index.html para rutas no encontradas
-app.get('*', (req, res) => {
-  const indexPath = path.join(__dirname, `../${folderDeployed}`, "App", 'index.html');
+app.use((req, res) => {
+  const indexPath = path.join(__dirname, `../${folderDeployed}`, 'App', 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
       res.status(404).send(`
@@ -282,8 +280,7 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
-// En Vercel (serverless) solo exportar la app; en local/Render escuchar puerto
-if (!isVercel) {
+if (!process.env.VERCEL) {
   startServer();
 }
 
