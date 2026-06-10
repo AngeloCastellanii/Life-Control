@@ -1,8 +1,16 @@
 {
-  "installCommand": "pnpm install",
-  "buildCommand": "pnpm css:build && pnpm exec slice build",
+  "installCommand": "pnpm install --prod=false",
+  "buildCommand": "pnpm run vercel-build",
   "framework": null,
-  "outputDirectory": null,
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30,
+      "includeFiles": "dist/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",

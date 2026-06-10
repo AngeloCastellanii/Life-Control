@@ -21,7 +21,9 @@ const app = express();
 // Parsear argumentos de línea de comandos
 const args = process.argv.slice(2);
 
-const runMode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+const isVercel = process.env.VERCEL === '1';
+const isProduction = process.env.NODE_ENV === 'production' || isVercel;
+const runMode = isProduction ? 'production' : 'development';
 const folderDeployed = runMode === 'production' ? 'dist' : 'src';
 const publicEnvProvider = createPublicEnvProvider({
   mode: runMode,
@@ -281,7 +283,7 @@ process.on('SIGTERM', () => {
 });
 
 // En Vercel (serverless) solo exportar la app; en local/Render escuchar puerto
-if (!process.env.VERCEL) {
+if (!isVercel) {
   startServer();
 }
 

@@ -23,7 +23,8 @@
     "slice:get": "node ./node_modules/slicejs-cli/client.js get",
     "slice:browse": "node ./node_modules/slicejs-cli/client.js browse",
     "slice:sync": "node ./node_modules/slicejs-cli/client.js sync",
-    "run": "node ./node_modules/slicejs-cli/client.js dev"
+    "run": "node ./node_modules/slicejs-cli/client.js dev",
+    "vercel-build": "pnpm css:build && pnpm exec slice build"
   },
   "type": "module",
   "engines": {

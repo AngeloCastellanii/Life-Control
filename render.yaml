@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: life-control
+    runtime: node
+    plan: free
+    buildCommand: pnpm install --prod=false && pnpm run vercel-build
+    startCommand: NODE_ENV=production pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
