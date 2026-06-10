@@ -280,7 +280,9 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
-// Iniciar servidor
-startServer();
+// En Vercel (serverless) solo exportar la app; en local/Render escuchar puerto
+if (!process.env.VERCEL) {
+  startServer();
+}
 
 export default app;

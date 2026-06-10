@@ -29,10 +29,12 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "dependencies": {
+    "slicejs-web-framework": "^3.3.4"
+  },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
     "slicejs-cli": "^3.6.3",
-    "slicejs-web-framework": "^3.3.4",
     "tailwindcss": "^4.3.0"
   }
 }
