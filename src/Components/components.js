@@ -14,6 +14,8 @@ const components = {
   "ModalShell": "shell",
   "DomainForm": "forms",
   "TaskForm": "forms",
+  "FinanceForm": "forms",
+  "ShoppingForm": "forms",
   "DomainsSection": "sections",
   "Button": "Visual",
   "Link": "Visual",
@@ -26,7 +28,9 @@ const components = {
   "DomainService": "Service",
   "TaskService": "Service",
   "ExchangeRateService": "Service",
-  "TimeBlockService": "Service"
+  "TimeBlockService": "Service",
+  "FinanceService": "Service",
+  "ShoppingService": "Service"
 };
 
 export default components;

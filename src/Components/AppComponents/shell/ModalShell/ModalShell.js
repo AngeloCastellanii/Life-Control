@@ -46,11 +46,14 @@ export default class ModalShell extends HTMLElement {
       this.$title.textContent = payload.title ?? 'Nuevo';
 
       if (payload.form) {
-         const resourceId = payload.blockId ?? payload.taskId ?? null;
+         const resourceId =
+            payload.blockId ?? payload.taskId ?? payload.domainId ?? payload.shoppingId ?? null;
          const form = await slice.build(payload.form, {
             sliceId: `modal-${payload.form.toLowerCase()}${resourceId ? `-${resourceId}` : ''}`,
             blockId: payload.blockId ?? null,
-            taskId: payload.taskId ?? null
+            taskId: payload.taskId ?? null,
+            domainId: payload.domainId ?? null,
+            shoppingId: payload.shoppingId ?? null
          });
          if (form) {
             this._currentForm = form;

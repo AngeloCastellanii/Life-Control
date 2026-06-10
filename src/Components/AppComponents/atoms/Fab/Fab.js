@@ -1,6 +1,8 @@
 const MODAL_BY_PATH = {
    '/domains': { title: 'Nuevo dominio', form: 'DomainForm' },
-   '/planner': { title: 'Nueva tarea', form: 'TaskForm' }
+   '/planner': { title: 'Nueva tarea', form: 'TaskForm' },
+   '/finances': { title: 'Nueva transacción', form: 'FinanceForm' },
+   '/shopping': { title: 'Nuevo artículo', form: 'ShoppingForm' }
 };
 
 export default class Fab extends HTMLElement {

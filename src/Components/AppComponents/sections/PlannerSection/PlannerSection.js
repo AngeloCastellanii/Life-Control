@@ -152,7 +152,10 @@ export default class PlannerSection extends HTMLElement {
 
          const tasks = this.taskService.getAll().filter((t) => !t.blockId);
          const domains = this.domainService.getAll();
-         const blockOptions = this.timeBlockService.getAll().map((b) => ({ id: b.id, label: b.label }));
+         const blockOptions = this.timeBlockService
+            .getAll()
+            .filter((b) => this.timeBlockService.acceptsTasks(b))
+            .map((b) => ({ id: b.id, label: b.label }));
 
          if (domains.length === 0) {
             this.$empty.textContent = 'Crea un dominio en Dominios primero.';

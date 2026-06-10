@@ -1,5 +1,10 @@
 const STORE = 'timeBlocks';
 
+export const BLOCK_RULE = {
+   LOCKED: 'locked',
+   FLEXIBLE: 'flexible'
+};
+
 export function minutesBetween(start, end) {
    const [sh, sm] = start.split(':').map(Number);
    const [eh, em] = end.split(':').map(Number);
@@ -57,6 +62,10 @@ export default class TimeBlockService {
       return this.getAll().find((b) => b.id === id) ?? null;
    }
 
+   acceptsTasks(block) {
+      return (block?.rule ?? BLOCK_RULE.FLEXIBLE) === BLOCK_RULE.FLEXIBLE;
+   }
+
    usedMinutes(blockId) {
       const tasks = slice.context.getState('lifeControl')?.tasks ?? [];
       return tasks
@@ -86,7 +95,7 @@ export default class TimeBlockService {
          start,
          end,
          duration,
-         rule: rule ?? existing.rule ?? 'flexible'
+         rule: rule ?? existing.rule ?? BLOCK_RULE.FLEXIBLE
       };
 
       await this.storage.put(STORE, block);
@@ -95,7 +104,7 @@ export default class TimeBlockService {
       return block;
    }
 
-   async create({ label, start, end, rule = 'flexible' }) {
+   async create({ label, start, end, rule = BLOCK_RULE.FLEXIBLE }) {
       const trimmed = label?.trim();
       if (!trimmed || !start || !end) {
          return null;
@@ -126,6 +135,11 @@ export default class TimeBlockService {
       const block = this.getById(blockId);
       const task = this.taskService.getAll().find((t) => t.id === taskId);
       if (!block || !task) {
+         return null;
+      }
+
+      if (!this.acceptsTasks(block)) {
+         slice.events.emit('time-block:assign-blocked', { blockId, taskId, reason: 'locked' });
          return null;
       }
 

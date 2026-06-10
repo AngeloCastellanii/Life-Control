@@ -1,47 +1,71 @@
 :root {
-  /* Tipografía */
-  --font-primary-color: #2E1A47; /* Uva oscuro, elegante para lectura */
-  --font-secondary-color: #7D3AC1; /* Uva brillante para títulos y resaltes */
+  --font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 
-  /** Primary - Uva intenso **/
-  --primary-color: #7D3AC1;
-  --primary-color-rgb: 125, 58, 193;
-  --primary-background-color: #F8F4FF; /* Lila muy claro como fondo principal */
-  --primary-color-contrast: #ffffff;
-  --primary-color-shade: #4E2279;
+  /* Amethyst Geode — equilibrado */
+  /* Midnight Violet #240A24 · Blue Violet #9932CC · Lavender #E6E6FA */
 
-  /** Secondary - Lima vibrante **/
-  --secondary-color: #22b1d5; /* Amarillo lima brillante, capta la atención */
-  --secondary-color-rgb: 198, 255, 0;
-  --secondary-background-color: #F9FFE1;
-  --secondary-color-contrast: #2E2E2E;
+  /* Tipografía — lavender dominante, secundario apagado */
+  --font-primary-color: #E6E6FA;
+  --font-secondary-color: #9A8FAD;
 
-  /** Tertiary - Turquesa suave **/
-  --tertiary-background-color: #D0F4F2; /* Fondo suave, fresco y moderno */
+  /* Primary — Blue Violet solo en acentos (botones, FAB, activo) */
+  --primary-color: #9932CC;
+  --primary-color-rgb: 153, 50, 204;
+  --primary-background-color: #1C1424;
+  --primary-color-contrast: #E6E6FA;
+  --primary-color-shade: #5C3D7A;
 
-  /** Success - Verde esmeralda claro **/
-  --success-color: #00B894;
-  --success-contrast: #ffffff;
+  /* Secondary — superficies con tinte lavender, no morado puro */
+  --secondary-color: #7A5F9E;
+  --secondary-color-rgb: 122, 95, 158;
+  --secondary-background-color: #221A2C;
+  --secondary-color-contrast: #E6E6FA;
 
-  /** Warning - Amarillo más tradicional pero suave **/
-  --warning-color: #69d5ff;
-  --warning-contrast: #3E2723;
+  /* Tertiary — bordes neutros violeta-gris */
+  --tertiary-background-color: #3D3548;
 
-  /** Danger - Coral vibrante (sin caer en rojo tradicional) **/
-  --danger-color: #FF6F61;
-  --danger-contrast: #ffffff;
+  /* Estados */
+  --success-color: #6BC9A0;
+  --success-contrast: #240A24;
+  --warning-color: #C9A8E0;
+  --warning-contrast: #240A24;
+  --danger-color: #D47A9A;
+  --danger-contrast: #E6E6FA;
 
-  /** Medium - Gris lavanda para texto secundario **/
-  --medium-color: #A89FB5;
-  --medium-contrast: #000000;
+  /* Neutros */
+  --medium-color: #7A7088;
+  --medium-contrast: #E6E6FA;
+  --disabled-color: #3A3345;
 
-  /** Disabled - Gris pastel lavanda **/
-  --disabled-color: #E6E0F1;
+  /* Acento — violeta suave entre los tres tonos */
+  --accent-color: #8B6BB8;
 
-  /** Accent - Turquesa brillante para detalles elegantes **/
-  --accent-color: #00CFC1;
+  /* Superficies glass — un poco más claras para combinar con el fondo */
+  --surface-glass: color-mix(in srgb, #FFFFFF 22%, #240A24 78%);
+  --surface-elevated: #2A2235;
+  --surface-blur: blur(18px);
+  --border-glow: color-mix(in srgb, #9932CC 18%, #E6E6FA 82%);
+
+  /* Fondo — claro con toques violeta; blanco y lavender dominan */
+  --app-background:
+    radial-gradient(ellipse 70% 50% at 90% 8%, color-mix(in srgb, #9932CC 14%, #FFFFFF) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 45% at 5% 95%, color-mix(in srgb, #E6E6FA 40%, #FFFFFF) 0%, transparent 45%),
+    linear-gradient(
+      155deg,
+      #4A3858 0%,
+      #7A7090 16%,
+      #B0A8C4 32%,
+      #D8D4E8 50%,
+      #EDEAF5 68%,
+      #F8F7FC 84%,
+      #FFFFFF 100%
+    );
 
   /* Sombras */
-  --box-shadow-primary: 0px 4px 12px rgba(125, 58, 193, 0.15);
-  --box-shadow-secondary: 0px 3px 8px rgba(198, 255, 0, 0.1);
+  --box-shadow-primary: 0 8px 32px rgba(36, 10, 36, 0.35);
+  --box-shadow-secondary: 0 4px 16px rgba(36, 10, 36, 0.2);
+
+  --lc-radius-lg: 0.875rem;
+  --lc-radius-xl: 1.25rem;
+  --lc-shadow: 0 4px 24px rgb(36 10 36 / 28%);
 }

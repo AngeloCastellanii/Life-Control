@@ -14,47 +14,80 @@
   --color-lc-danger: var(--danger-color);
   --color-lc-success: var(--success-color);
   --color-lc-warning: var(--warning-color);
-  --font-sans: var(--font-family, "Inter", system-ui, sans-serif);
+  --font-sans: var(--font-family, "Plus Jakarta Sans", system-ui, sans-serif);
   --radius-lc: var(--lc-radius-lg, 1rem);
   --radius-lc-xl: var(--lc-radius-xl, 1.5rem);
+  --tracking-lc-tight: -0.02em;
+  --tracking-lc-label: 0.12em;
 }
 
 @layer base {
+  html {
+    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply m-0 font-sans;
-    background-color: var(--primary-background-color);
+    @apply m-0 min-h-screen font-sans text-[0.9375rem] leading-relaxed;
+    background: var(--app-background, var(--primary-background-color));
+    background-attachment: fixed;
     color: var(--font-primary-color);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold tracking-tight;
+    text-wrap: balance;
   }
 }
 
 @layer components {
   .lc-card {
-    @apply rounded-2xl border p-5 shadow-sm;
-    background-color: var(--secondary-background-color);
-    border-color: var(--tertiary-background-color);
+    @apply rounded-2xl border p-5;
+    background: var(--surface-glass, var(--secondary-background-color));
+    backdrop-filter: var(--surface-blur, none);
+    -webkit-backdrop-filter: var(--surface-blur, none);
+    border-color: var(--border-glow, var(--tertiary-background-color));
+    box-shadow: var(--lc-shadow, 0 1px 3px rgb(0 0 0 / 8%));
   }
 
   .lc-section-title {
-    @apply m-0 mb-2 text-2xl font-bold text-lc-text;
+    @apply m-0 mb-1.5 text-[1.75rem] font-semibold leading-[1.15] tracking-tight text-lc-text;
+    letter-spacing: var(--tracking-lc-tight, -0.02em);
   }
 
   .lc-section-subtitle {
-    @apply mb-5 text-sm text-lc-muted;
+    @apply mb-6 max-w-2xl text-[0.9rem] leading-relaxed text-lc-muted;
+  }
+
+  .lc-card-title {
+    @apply mb-3 text-[0.68rem] font-semibold uppercase text-lc-muted;
+    letter-spacing: var(--tracking-lc-label, 0.12em);
   }
 
   .lc-label {
-    @apply mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-wider text-lc-muted;
+    @apply mb-1.5 block text-[0.68rem] font-semibold uppercase text-lc-muted;
+    letter-spacing: var(--tracking-lc-label, 0.12em);
   }
 
   .lc-input {
-    @apply w-full rounded-xl border px-3.5 py-2.5 text-[0.95rem] outline-none transition-colors;
-    background-color: var(--primary-background-color);
+    @apply w-full rounded-xl border px-3.5 py-2.5 text-[0.95rem] outline-none transition-[border-color,box-shadow];
+    background-color: var(--surface-elevated, var(--primary-background-color));
     border-color: var(--tertiary-background-color);
     color: var(--font-primary-color);
   }
 
   .lc-input:focus {
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 28%, transparent);
+  }
+
+  .lc-input::placeholder {
+    color: var(--font-secondary-color);
+    opacity: 0.7;
   }
 
   .lc-btn-ghost {

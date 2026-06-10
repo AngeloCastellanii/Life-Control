@@ -1,0 +1,16 @@
+<form class="flex flex-col gap-4" data-role="form">
+  <div>
+    <label class="lc-label" for="shopping-form-frequency">Frecuencia</label>
+    <select class="lc-input" id="shopping-form-frequency">
+      <option value="daily">Diaria</option>
+      <option value="weekly" selected>Semanal</option>
+      <option value="monthly">Mensual</option>
+      <option value="yearly">Anual</option>
+    </select>
+  </div>
+  <div>
+    <label class="lc-label" for="shopping-form-name">Artículo</label>
+    <input class="lc-input" id="shopping-form-name" type="text" placeholder="Leche, detergente…" required />
+  </div>
+  <div class="flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>
+</form>

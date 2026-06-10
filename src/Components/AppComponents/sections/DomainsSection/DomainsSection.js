@@ -30,6 +30,14 @@ export default class DomainsSection extends HTMLElement {
       this.renderList(this.domainService.getAll());
    }
 
+   openEdit(domainId) {
+      slice.events.emit('ui:modal:open', {
+         title: 'Editar dominio',
+         form: 'DomainForm',
+         domainId
+      });
+   }
+
    async renderList(domains) {
       const list = Array.isArray(domains) ? domains : this.domainService.getAll();
       this.$list.innerHTML = '';
@@ -56,12 +64,24 @@ export default class DomainsSection extends HTMLElement {
          meta.appendChild(name);
          item.appendChild(meta);
 
+         const actions = document.createElement('div');
+         actions.className = 'domains-section__actions';
+
+         const editBtn = document.createElement('button');
+         editBtn.type = 'button';
+         editBtn.className = 'domains-section__edit';
+         editBtn.textContent = 'Editar';
+         editBtn.addEventListener('click', () => this.openEdit(domain.id));
+         actions.appendChild(editBtn);
+
          const deleteBtn = document.createElement('button');
          deleteBtn.type = 'button';
          deleteBtn.className = 'domains-section__delete';
          deleteBtn.textContent = 'Eliminar';
          deleteBtn.addEventListener('click', () => this.domainService.remove(domain.id));
-         item.appendChild(deleteBtn);
+         actions.appendChild(deleteBtn);
+
+         item.appendChild(actions);
          this.$list.appendChild(item);
       }
    }

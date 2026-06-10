@@ -51,11 +51,16 @@ export default class DomainService {
          return null;
       }
 
+      const trimmed = patch.name !== undefined ? patch.name?.trim() : existing.name;
+      if (!trimmed) {
+         return null;
+      }
+
       const updated = {
          ...existing,
-         ...patch,
-         id,
-         name: patch.name?.trim() ?? existing.name
+         name: trimmed,
+         color: patch.color ?? existing.color,
+         id
       };
 
       await this.storage.put(STORE, updated);

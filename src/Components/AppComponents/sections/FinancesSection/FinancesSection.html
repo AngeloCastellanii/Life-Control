@@ -1,15 +1,23 @@
 <section class="finances-section">
   <h1 class="lc-section-title">Finanzas</h1>
-  <p class="lc-section-subtitle">Pagar y cobrar en dos columnas.</p>
+  <p class="lc-section-subtitle">Pagar y cobrar en dos columnas. Pulsa + para agregar.</p>
 
   <div class="finances-section__balance">
     <div class="finances-section__col finances-section__col--pay lc-card">
-      <h2 class="finances-section__col-title">Por pagar</h2>
-      <p class="finances-section__placeholder">Transacciones</p>
+      <div class="finances-section__col-head">
+        <h2 class="finances-section__col-title">Por pagar</h2>
+        <p class="finances-section__total" data-role="pay-total">$0.00</p>
+      </div>
+      <ul class="finances-section__list" data-role="pay-list"></ul>
+      <p class="finances-section__empty lc-empty" data-role="pay-empty" hidden>Sin pendientes por pagar.</p>
     </div>
     <div class="finances-section__col finances-section__col--receive lc-card">
-      <h2 class="finances-section__col-title">Por cobrar</h2>
-      <p class="finances-section__placeholder">Transacciones</p>
+      <div class="finances-section__col-head">
+        <h2 class="finances-section__col-title">Por cobrar</h2>
+        <p class="finances-section__total" data-role="receive-total">$0.00</p>
+      </div>
+      <ul class="finances-section__list" data-role="receive-list"></ul>
+      <p class="finances-section__empty lc-empty" data-role="receive-empty" hidden>Sin pendientes por cobrar.</p>
     </div>
   </div>
 </section>

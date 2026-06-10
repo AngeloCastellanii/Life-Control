@@ -1,23 +1,57 @@
 <section class="shopping-section">
   <h1 class="lc-section-title">Compras</h1>
-  <p class="lc-section-subtitle">Listas por frecuencia.</p>
+  <p class="lc-section-subtitle">Listas por frecuencia. Selecciona un artículo y usa ✎ o × arriba de cada columna.</p>
 
   <div class="shopping-section__board">
-    <div class="shopping-section__col lc-card">
-      <h2 class="shopping-section__col-title">Diaria</h2>
-      <p class="shopping-section__placeholder">—</p>
+    <div class="shopping-section__col lc-card" data-frequency="daily">
+      <div class="shopping-section__col-head">
+        <div class="shopping-section__col-actions">
+          <button type="button" class="shopping-section__col-btn" data-action="edit" aria-label="Editar seleccionado">✎</button>
+          <button type="button" class="shopping-section__col-btn shopping-section__col-btn--danger" data-action="delete" aria-label="Eliminar seleccionado">×</button>
+        </div>
+        <h2 class="shopping-section__col-title">Diaria</h2>
+      </div>
+      <ul class="shopping-section__list" data-role="daily-list"></ul>
+      <p class="shopping-section__empty lc-empty" data-role="daily-empty" hidden>Sin artículos.</p>
     </div>
-    <div class="shopping-section__col lc-card">
-      <h2 class="shopping-section__col-title">Semanal</h2>
-      <p class="shopping-section__placeholder">—</p>
+    <div class="shopping-section__col lc-card" data-frequency="weekly">
+      <div class="shopping-section__col-head">
+        <div class="shopping-section__col-actions">
+          <button type="button" class="shopping-section__col-btn" data-action="edit" aria-label="Editar seleccionado">✎</button>
+          <button type="button" class="shopping-section__col-btn shopping-section__col-btn--danger" data-action="delete" aria-label="Eliminar seleccionado">×</button>
+        </div>
+        <h2 class="shopping-section__col-title">Semanal</h2>
+      </div>
+      <ul class="shopping-section__list" data-role="weekly-list"></ul>
+      <p class="shopping-section__empty lc-empty" data-role="weekly-empty" hidden>Sin artículos.</p>
     </div>
-    <div class="shopping-section__col lc-card">
-      <h2 class="shopping-section__col-title">Mensual</h2>
-      <p class="shopping-section__placeholder">—</p>
+    <div class="shopping-section__col lc-card" data-frequency="monthly">
+      <div class="shopping-section__col-head">
+        <div class="shopping-section__col-actions">
+          <button type="button" class="shopping-section__col-btn" data-action="edit" aria-label="Editar seleccionado">✎</button>
+          <button type="button" class="shopping-section__col-btn shopping-section__col-btn--danger" data-action="delete" aria-label="Eliminar seleccionado">×</button>
+        </div>
+        <h2 class="shopping-section__col-title">Mensual</h2>
+      </div>
+      <ul class="shopping-section__list" data-role="monthly-list"></ul>
+      <p class="shopping-section__empty lc-empty" data-role="monthly-empty" hidden>Sin artículos.</p>
     </div>
-    <div class="shopping-section__col lc-card">
-      <h2 class="shopping-section__col-title">Anual</h2>
-      <p class="shopping-section__placeholder">—</p>
+    <div class="shopping-section__col lc-card" data-frequency="yearly">
+      <div class="shopping-section__col-head">
+        <div class="shopping-section__col-actions">
+          <button type="button" class="shopping-section__col-btn" data-action="edit" aria-label="Editar seleccionado">✎</button>
+          <button type="button" class="shopping-section__col-btn shopping-section__col-btn--danger" data-action="delete" aria-label="Eliminar seleccionado">×</button>
+        </div>
+        <h2 class="shopping-section__col-title">Anual</h2>
+      </div>
+      <ul class="shopping-section__list" data-role="yearly-list"></ul>
+      <p class="shopping-section__empty lc-empty" data-role="yearly-empty" hidden>Sin artículos.</p>
     </div>
   </div>
+
+  <aside class="shopping-section__detail lc-card" data-role="detail" hidden>
+    <p class="lc-card-title" data-role="detail-period"></p>
+    <h3 class="shopping-section__detail-name" data-role="detail-name"></h3>
+    <p class="shopping-section__detail-meta" data-role="detail-meta"></p>
+  </aside>
 </section>

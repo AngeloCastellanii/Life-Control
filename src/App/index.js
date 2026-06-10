@@ -40,6 +40,18 @@ async function bootstrapLifeControl() {
       throw new Error('No se pudo crear TimeBlockService');
    }
    await timeBlockService.init();
+
+   const financeService = await slice.build('FinanceService', { sliceId: 'finance-service' });
+   if (!financeService) {
+      throw new Error('No se pudo crear FinanceService');
+   }
+   await financeService.init();
+
+   const shoppingService = await slice.build('ShoppingService', { sliceId: 'shopping-service' });
+   if (!shoppingService) {
+      throw new Error('No se pudo crear ShoppingService');
+   }
+   await shoppingService.init();
 }
 
 slice.router.afterEach((to) => {
