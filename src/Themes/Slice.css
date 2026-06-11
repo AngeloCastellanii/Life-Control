@@ -69,6 +69,7 @@
 
 :root .lc-input,
 :root .lc-btn-outline,
+:root .task-card__assign-btn,
 :root .domains-section__edit,
 :root .domains-section__delete,
 :root .finances-section__wallet-adjust,
@@ -80,6 +81,7 @@
 }
 
 :root .lc-btn-outline:hover,
+:root .task-card__assign-btn:hover:not(:disabled),
 :root .domains-section__edit:hover,
 :root .finances-section__wallet-adjust:hover,
 :root .shopping-section__col-btn:hover,

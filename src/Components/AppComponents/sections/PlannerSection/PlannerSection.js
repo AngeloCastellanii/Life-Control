@@ -91,11 +91,6 @@ export default class PlannerSection extends HTMLElement {
          })
       );
 
-      slice.events.subscribe('time-block:changed', () => this.renderAll());
-      slice.events.subscribe('task:changed', () => this.renderAll());
-      slice.events.subscribe('finance:changed', () => this.renderAll());
-      slice.events.subscribe('shopping:changed', () => this.renderAll());
-
       this.renderAll();
    }
 
@@ -200,14 +195,27 @@ export default class PlannerSection extends HTMLElement {
    }
 
    async renderAll() {
-      this.updateToolbar();
+      if (this._renderingAll) {
+         this._renderPending = true;
+         return;
+      }
 
-      if (this._viewMode === 'day') {
-         await this.renderDayView();
-      } else if (this._viewMode === 'week') {
-         this.renderWeekView();
-      } else {
-         this.renderMonthView();
+      this._renderingAll = true;
+      try {
+         do {
+            this._renderPending = false;
+            this.updateToolbar();
+
+            if (this._viewMode === 'day') {
+               await this.renderDayView();
+            } else if (this._viewMode === 'week') {
+               this.renderWeekView();
+            } else {
+               this.renderMonthView();
+            }
+         } while (this._renderPending);
+      } finally {
+         this._renderingAll = false;
       }
    }
 
@@ -267,6 +275,18 @@ export default class PlannerSection extends HTMLElement {
    }
 
    async renderBlocks() {
+      if (this._renderingBlocks) {
+         return;
+      }
+      this._renderingBlocks = true;
+      try {
+         await this._renderBlocksContent();
+      } finally {
+         this._renderingBlocks = false;
+      }
+   }
+
+   async _renderBlocksContent() {
       this._destroyByPrefix('planner-block-');
       this._destroyByPrefix('task-card-block-');
       this.$blocks.innerHTML = '';

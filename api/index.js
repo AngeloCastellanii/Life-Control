@@ -284,9 +284,16 @@ app.use((req, res) => {
 // ==============================================
 
 function startServer() {
-  server = app.listen(PORT, () => {
+  const host = '0.0.0.0';
+  server = app.listen(PORT, host, () => {
     console.log(`🔒 Security middleware: active (zero-config, automatic)`);
-    console.log(`🚀 Slice.js server running on port ${PORT}`);
+    console.log(`🚀 Slice.js server running on http://${host}:${PORT}`);
+    console.log(`📁 Serving from: ${deployRoot}`);
+    console.log(`⚙️  Mode: ${runMode}`);
+  });
+  server.on('error', (error) => {
+    console.error('❌ Server failed to start:', error.message);
+    process.exit(1);
   });
 }
 

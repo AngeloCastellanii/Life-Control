@@ -106,6 +106,7 @@ export default class TaskCard extends HTMLElement {
 
       const canAssign = typeof this.onAssignToBlock === 'function';
       this.$assign.hidden = !canAssign;
+      this.classList.toggle('task-card--inbox', canAssign);
       if (canAssign) {
          this.fillBlockSelect();
       }
