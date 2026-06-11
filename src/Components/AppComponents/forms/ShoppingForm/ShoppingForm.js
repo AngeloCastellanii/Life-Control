@@ -2,7 +2,7 @@ import {
    SHOPPING_FREQUENCY,
    addPeriod,
    todayISO
-} from '/Components/Service/ShoppingService/ShoppingService.js';
+} from '../../../Service/ShoppingService/ShoppingService.js';
 
 export default class ShoppingForm extends HTMLElement {
    static props = {
