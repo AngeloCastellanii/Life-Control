@@ -1,0 +1,1 @@
+export default class AboutSection extends HTMLElement{constructor(props){super(),slice.attachTemplate(this),slice.controller.setComponentProps(this,props)}}customElements.define("slice-about-section",AboutSection);

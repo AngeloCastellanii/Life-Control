@@ -1,0 +1,191 @@
+{
+  "version": "2.0.0",
+  "format": "v2",
+  "loadingPolicy": "enabled",
+  "strategy": "hybrid",
+  "minified": true,
+  "obfuscated": true,
+  "production": true,
+  "generated": "2026-06-10T22:04:47.479Z",
+  "stats": {
+    "totalComponents": 41,
+    "totalRoutes": 6,
+    "sharedComponents": 1,
+    "sharedPercentage": "2.4",
+    "totalSize": 196187,
+    "criticalSize": 41589
+  },
+  "bundles": {
+    "framework": {
+      "file": "slice-bundle.framework.js",
+      "size": 135519,
+      "hash": "79470a79d18c35eec0122175cf47d0c7f7f5b693f28f01709f94d51bd47d4597",
+      "integrity": "sha256:79470a79d18c35eec0122175cf47d0c7f7f5b693f28f01709f94d51bd47d4597",
+      "components": [
+        "Framework/Structural/ContextManager",
+        "Framework/Structural/Controller",
+        "Framework/Structural/EventManager",
+        "Framework/Structural/Logger",
+        "Framework/Structural/Router",
+        "Framework/Structural/StylesManager",
+        "Framework/Structural/EventManagerDebugger",
+        "Framework/Structural/ContextManagerDebugger",
+        "Framework/Structural/ThemeManager"
+      ]
+    },
+    "vendorShared": null,
+    "critical": {
+      "file": "slice-bundle.critical.js",
+      "size": 41589,
+      "hash": "f7431315cd2c26d76ad6a8702c0f8eb1bc728317aede2263815935087b4c27eb",
+      "integrity": "sha256:f7431315cd2c26d76ad6a8702c0f8eb1bc728317aede2263815935087b4c27eb",
+      "components": [
+        "Loading"
+      ]
+    },
+    "routes": {
+      "misc": {
+        "path": [
+          "/404"
+        ],
+        "file": "slice-bundle.misc.js",
+        "size": 405,
+        "hash": "429ff882b2c0ebc368d2148cf13a45c0c16593b8c493b7a4dccdf05e37b35821",
+        "integrity": "sha256:429ff882b2c0ebc368d2148cf13a45c0c16593b8c493b7a4dccdf05e37b35821",
+        "components": [
+          "NotFound"
+        ],
+        "dependencies": [
+          "critical"
+        ]
+      },
+      "multiroute-AppShell": {
+        "path": [
+          "/",
+          "/planner",
+          "/finances",
+          "/shopping",
+          "/domains"
+        ],
+        "file": "slice-bundle.multiroute-appshell.js",
+        "size": 83987,
+        "hash": "46f818be61a2341b1b7735d039f1ea37653205c08496a1fdf38ebc6741939edc",
+        "integrity": "sha256:46f818be61a2341b1b7735d039f1ea37653205c08496a1fdf38ebc6741939edc",
+        "components": [
+          "AppShell",
+          "CapacityRing",
+          "DashboardSection",
+          "DomainsSection",
+          "Fab",
+          "FinancesSection",
+          "Link",
+          "ModalShell",
+          "MultiRoute",
+          "PlannerSection",
+          "ShoppingSection",
+          "Sidebar",
+          "TaskCard",
+          "ThemeSelector",
+          "TimeBlock"
+        ],
+        "dependencies": [
+          "critical"
+        ]
+      }
+    }
+  },
+  "routeBundles": {
+    "/404": [
+      "critical",
+      "misc"
+    ],
+    "/": [
+      "critical",
+      "multiroute-AppShell"
+    ],
+    "/planner": [
+      "critical",
+      "multiroute-AppShell"
+    ],
+    "/finances": [
+      "critical",
+      "multiroute-AppShell"
+    ],
+    "/shopping": [
+      "critical",
+      "multiroute-AppShell"
+    ],
+    "/domains": [
+      "critical",
+      "multiroute-AppShell"
+    ]
+  },
+  "routeDependencyGraph": {
+    "/404": {
+      "bundles": [
+        "misc"
+      ],
+      "edges": [
+        {
+          "from": "critical",
+          "to": "misc"
+        }
+      ]
+    },
+    "/": {
+      "bundles": [
+        "multiroute-AppShell"
+      ],
+      "edges": [
+        {
+          "from": "critical",
+          "to": "multiroute-AppShell"
+        }
+      ]
+    },
+    "/planner": {
+      "bundles": [
+        "multiroute-AppShell"
+      ],
+      "edges": [
+        {
+          "from": "critical",
+          "to": "multiroute-AppShell"
+        }
+      ]
+    },
+    "/finances": {
+      "bundles": [
+        "multiroute-AppShell"
+      ],
+      "edges": [
+        {
+          "from": "critical",
+          "to": "multiroute-AppShell"
+        }
+      ]
+    },
+    "/shopping": {
+      "bundles": [
+        "multiroute-AppShell"
+      ],
+      "edges": [
+        {
+          "from": "critical",
+          "to": "multiroute-AppShell"
+        }
+      ]
+    },
+    "/domains": {
+      "bundles": [
+        "multiroute-AppShell"
+      ],
+      "edges": [
+        {
+          "from": "critical",
+          "to": "multiroute-AppShell"
+        }
+      ]
+    }
+  }
+}

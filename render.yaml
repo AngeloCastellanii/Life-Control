@@ -3,8 +3,9 @@ services:
     name: life-control
     runtime: node
     plan: free
-    buildCommand: pnpm install --prod=false && pnpm run vercel-build
-    startCommand: NODE_ENV=production pnpm start
+    buildCommand: pnpm run build
+    startCommand: node api/index.js
+    healthCheckPath: /api/status
     envVars:
       - key: NODE_ENV
         value: production

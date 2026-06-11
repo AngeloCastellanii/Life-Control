@@ -1,0 +1,8 @@
+:root{--font-family:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;--font-primary-color:#E5E4E2;--font-secondary-color:#9AABB8;--primary-color:#536878;--primary-color-rgb:83,104,120;--primary-background-color:#121416;--primary-color-contrast:#E5E4E2;--primary-color-shade:#3A4A56;--secondary-color:#536878;--secondary-color-rgb:83,104,120;--secondary-background-color:#14171A;--secondary-color-contrast:#E5E4E2;--tertiary-background-color:#2A3239;--success-color:#5B9A6F;--success-contrast:#E5E4E2;--warning-color:#C9A227;--warning-contrast:#0A0A0A;--danger-color:#C75C5C;--danger-contrast:#E5E4E2;--medium-color:#6B7B87;--medium-contrast:#E5E4E2;--disabled-color:#3A4048;--accent-color:#7A8FA0;--surface-glass:color-mix(in srgb, #14171A 82%, transparent);--surface-elevated:#1A1E23;--surface-blur:blur(18px);--border-glow:color-mix(in srgb, var(--primary-color) 40%, transparent);--app-background:linear-gradient(
+    155deg,
+    #0A0A0A 0%,
+    #1C2530 28%,
+    #536878 58%,
+    #B8B6B3 85%,
+    #E5E4E2 100%
+  );--box-shadow-primary:0 8px 32px rgba(10, 10, 10, 0.45);--box-shadow-secondary:0 4px 16px rgba(83, 104, 120, 0.25);--lc-radius-lg:0.875rem;--lc-radius-xl:1.25rem;--lc-shadow:0 4px 24px rgb(10 10 10 / 35%)}

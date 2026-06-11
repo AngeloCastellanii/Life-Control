@@ -31,7 +31,6 @@ function resolveDeployRoot() {
 
    const candidates = [
       path.join(__dirname, '../dist'),
-      path.join(__dirname, '_dist'),
       path.join(process.cwd(), 'dist')
    ];
 
