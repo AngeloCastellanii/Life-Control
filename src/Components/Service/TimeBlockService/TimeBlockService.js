@@ -1,5 +1,11 @@
 const STORE = 'timeBlocks';
 
+const DEFAULT_BLOCKS = [
+   { label: 'Mañana', start: '06:00', end: '11:59' },
+   { label: 'Tarde', start: '12:00', end: '18:59' },
+   { label: 'Noche', start: '19:00', end: '00:00' }
+];
+
 export const BLOCK_RULE = {
    LOCKED: 'locked',
    FLEXIBLE: 'flexible'
@@ -41,7 +47,28 @@ export default class TimeBlockService {
          await this.storage.init();
       }
       this.taskService = slice.getComponent('task-service');
+      await this.seedDefaultBlocks();
       await this.syncToContext();
+   }
+
+   async seedDefaultBlocks() {
+      const existing = await this.storage.getAll(STORE);
+      if (existing.length > 0) {
+         return;
+      }
+
+      for (const def of DEFAULT_BLOCKS) {
+         const block = {
+            id: crypto.randomUUID(),
+            label: def.label,
+            start: def.start,
+            end: def.end,
+            duration: minutesBetween(def.start, def.end),
+            rule: BLOCK_RULE.FLEXIBLE,
+            taskIds: []
+         };
+         await this.storage.put(STORE, block);
+      }
    }
 
    async syncToContext() {

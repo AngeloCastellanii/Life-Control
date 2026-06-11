@@ -25,7 +25,7 @@ export default class AppShell extends HTMLElement {
       });
       sidebar.querySelector('[data-role="footer"]').appendChild(themeSelector);
 
-      const content = await slice.build('MultiRoute', {
+      this.$multiRoute = await slice.build('MultiRoute', {
          sliceId: 'app-content',
          routes: [
             { path: '/', component: 'DashboardSection' },
@@ -35,9 +35,9 @@ export default class AppShell extends HTMLElement {
             { path: '/domains', component: 'DomainsSection' }
          ]
       });
-      this.$content.appendChild(content);
-      if (typeof content.render === 'function') {
-         await content.render();
+      this.$content.appendChild(this.$multiRoute);
+      if (typeof this.$multiRoute.render === 'function') {
+         await this.$multiRoute.render();
       }
 
       const modalShell = await slice.build('ModalShell', { sliceId: 'modal-shell' });
@@ -45,6 +45,17 @@ export default class AppShell extends HTMLElement {
 
       const fab = await slice.build('Fab', { sliceId: 'app-fab' });
       this.appendChild(fab);
+   }
+
+   async update() {
+      const multiRoute =
+         this.$multiRoute ??
+         slice.getComponent('app-content') ??
+         this.querySelector('slice-multi-route');
+
+      if (typeof multiRoute?.render === 'function') {
+         await multiRoute.render();
+      }
    }
 }
 

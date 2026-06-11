@@ -28,7 +28,9 @@ export default class FinancesSection extends HTMLElement {
          return;
       }
 
-      this.$walletAdjust.addEventListener('click', () => this.adjustWallet());
+      if (this.$walletAdjust) {
+         this.$walletAdjust.addEventListener('click', () => this.adjustWallet());
+      }
 
       slice.context.watch(
          'lifeControl',
@@ -40,6 +42,19 @@ export default class FinancesSection extends HTMLElement {
          })
       );
 
+      this.render({
+         finances: this.financeService.getAll(),
+         walletBalance: this.financeService.getWalletBalance()
+      });
+   }
+
+   async update() {
+      if (!this.financeService) {
+         this.financeService = slice.getComponent('finance-service');
+      }
+      if (!this.financeService) {
+         return;
+      }
       this.render({
          finances: this.financeService.getAll(),
          walletBalance: this.financeService.getWalletBalance()
@@ -123,6 +138,10 @@ export default class FinancesSection extends HTMLElement {
    }
 
    render({ finances, walletBalance }) {
+      if (!this.$walletBalance || !this.financeService) {
+         return;
+      }
+
       this.$walletBalance.textContent = this.formatMoney(walletBalance);
 
       const list = Array.isArray(finances) ? finances : this.financeService.getAll();
