@@ -78,10 +78,30 @@ export default class PlannerSection extends HTMLElement {
          this.setViewMode(button.dataset.view);
       });
 
+      this._plannerWatchPrev = null;
       slice.context.watch(
          'lifeControl',
          this,
-         () => this.renderAll(),
+         (selected) => {
+            const prev = this._plannerWatchPrev;
+            this._plannerWatchPrev = selected;
+
+            if (prev) {
+               const layoutUnchanged =
+                  prev.tasks === selected.tasks &&
+                  prev.domains === selected.domains &&
+                  prev.timeBlocks === selected.timeBlocks;
+               const cashChanged =
+                  prev.finances !== selected.finances || prev.shopping !== selected.shopping;
+
+               if (layoutUnchanged && cashChanged && this._viewMode === 'day') {
+                  this.renderCashFlow();
+                  return;
+               }
+            }
+
+            this.renderAll();
+         },
          (state) => ({
             tasks: state?.tasks ?? [],
             domains: state?.domains ?? [],
@@ -300,6 +320,14 @@ export default class PlannerSection extends HTMLElement {
    }
 
    async _renderBlocksContent() {
+      if (typeof this.timeBlockService?.getAll !== 'function') {
+         this.timeBlockService = slice.getComponent('time-block-service');
+      }
+      if (typeof this.timeBlockService?.getAll !== 'function') {
+         this.$blocksEmpty.hidden = false;
+         return;
+      }
+
       this._destroyByPrefix('planner-block-');
       this._destroyByPrefix('task-card-block-');
       this.$blocks.innerHTML = '';
