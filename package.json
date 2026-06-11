@@ -35,7 +35,7 @@
     "@tailwindcss/cli": "^4.3.0",
     "express": "^4.19.2",
     "slicejs-cli": "^3.6.3",
-    "slicejs-web-framework": "^3.3.4",
+    "slicejs-web-framework": "^3.3.6",
     "tailwindcss": "^4.3.0"
   }
 }

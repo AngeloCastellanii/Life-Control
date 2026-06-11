@@ -18,8 +18,8 @@ importers:
         specifier: ^3.6.3
         version: 3.6.3
       slicejs-web-framework:
-        specifier: ^3.3.4
-        version: 3.3.4
+        specifier: ^3.3.6
+        version: 3.3.6
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
@@ -1003,8 +1003,8 @@ packages:
     engines: {node: '>=20.0.0'}
     hasBin: true
 
-  slicejs-web-framework@3.3.4:
-    resolution: {integrity: sha512-Ds/aEMKqtJOY8dOqlYoWHJ+GPfcZWjAyy18EGPQaIirVJTvLKI+0fQiNTZ19hXkNAroLHKm9e7Q6fjletC6nXg==}
+  slicejs-web-framework@3.3.6:
+    resolution: {integrity: sha512-MDYdYUAq64aKBxppHrs+iXI87Oy4pFMiWyhxCRjVbE10PX9hFljTDu1WGaokexZkJ7k5F+wqP7rAC+SsqEgrfA==}
     engines: {node: '>=20'}
 
   source-map-js@1.2.1:
@@ -1994,13 +1994,13 @@ snapshots:
       html-minifier-terser: 7.2.0
       inquirer: 12.11.1
       ora: 8.2.0
-      slicejs-web-framework: 3.3.4
+      slicejs-web-framework: 3.3.6
       terser: 5.48.0
     transitivePeerDependencies:
       - '@types/node'
       - supports-color
 
-  slicejs-web-framework@3.3.4:
+  slicejs-web-framework@3.3.6:
     dependencies:
       express: 4.22.2
     transitivePeerDependencies:

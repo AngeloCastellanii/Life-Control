@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     buildCommand: pnpm install --prod=false && pnpm run build
-    startCommand: pnpm start
+    startCommand: node api/index.js
     healthCheckPath: /api/status
     envVars:
       - key: NODE_ENV
