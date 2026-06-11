@@ -1,4 +1,5 @@
 import { BLOCK_RULE } from '../../sections/lifeControlConstants.js';
+import { closeModal, getService } from '../formHelpers.js';
 
 function minutesBetween(start, end) {
    const [sh, sm] = start.split(':').map(Number);
@@ -52,7 +53,7 @@ export default class BlockForm extends HTMLElement {
          sliceId: `${this.sliceId}-cancel`,
          value: 'Cancelar',
          variant: 'outlined',
-         onClick: () => slice.events.emit('ui:modal:close')
+         onClick: () => closeModal()
       });
       const submitBtn = await slice.build('Button', {
          sliceId: `${this.sliceId}-submit`,
@@ -79,8 +80,7 @@ export default class BlockForm extends HTMLElement {
    }
 
    getTimeBlockService() {
-      const service = slice.getComponent('time-block-service');
-      return typeof service?.getAll === 'function' ? service : null;
+      return getService('time-block-service', ['getAll', 'create', 'update']);
    }
 
    findBlock(blockId) {
@@ -189,7 +189,7 @@ export default class BlockForm extends HTMLElement {
             : await this.timeBlockService.create(payload);
 
          if (saved) {
-            slice.events.emit('ui:modal:close');
+            closeModal();
             return;
          }
 

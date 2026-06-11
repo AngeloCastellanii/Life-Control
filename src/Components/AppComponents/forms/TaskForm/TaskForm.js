@@ -1,3 +1,11 @@
+import {
+   buildModalButtons,
+   closeModal,
+   getService,
+   hideFormError,
+   showFormError
+} from '../formHelpers.js';
+
 export default class TaskForm extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'task-form' },
@@ -15,30 +23,45 @@ export default class TaskForm extends HTMLElement {
       this.$urgencySelect = this.querySelector('#task-form-urgency');
       this.$minutesInput = this.querySelector('#task-form-minutes');
       this.$dateInput = this.querySelector('#task-form-date');
+      this.$error = this.querySelector('[data-role="error"]');
+      this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
-      this.taskService = slice.getComponent('task-service');
-      this.domainService = slice.getComponent('domain-service');
+      await this.ensureButtons();
+      this.bindForm();
+      this.populate();
+   }
 
-      const cancelBtn = await slice.build('Button', {
-         value: 'Cancelar',
-         variant: 'outlined',
-         onClick: () => slice.events.emit('ui:modal:close')
-      });
-      const submitBtn = await slice.build('Button', {
-         value: this.taskId ? 'Guardar cambios' : 'Guardar',
-         variant: 'filled',
-         onClick: () => this.$form.requestSubmit()
-      });
-      this.$actions.append(cancelBtn, submitBtn);
+   async update() {
+      await this.ensureButtons();
+      this.populate();
+   }
 
+   async ensureButtons() {
+      if (this._buttonsReady && this.$actions.childElementCount >= 2) {
+         return;
+      }
+      await buildModalButtons(this, {
+         submitLabel: this.taskId ? 'Guardar cambios' : 'Guardar'
+      });
+      this._buttonsReady = true;
+   }
+
+   bindForm() {
+      if (this._formBound) {
+         return;
+      }
       this.$form.addEventListener('submit', (event) => {
          event.preventDefault();
          this.handleSubmit();
       });
+      this._formBound = true;
+   }
 
+   populate() {
+      hideFormError(this.$error);
       this.fillDomains();
       if (this.taskId) {
          this.loadTask(this.taskId);
@@ -46,7 +69,8 @@ export default class TaskForm extends HTMLElement {
    }
 
    fillDomains() {
-      const domains = this.domainService?.getAll() ?? [];
+      const domainService = getService('domain-service', ['getAll']);
+      const domains = domainService?.getAll() ?? [];
       this.$domainSelect.innerHTML = '';
 
       if (domains.length === 0) {
@@ -66,8 +90,10 @@ export default class TaskForm extends HTMLElement {
    }
 
    loadTask(taskId) {
-      const task = this.taskService?.getById(taskId);
+      const taskService = getService('task-service', ['getById']);
+      const task = taskService?.getById(taskId);
       if (!task) {
+         showFormError(this.$error, 'No se encontró la tarea.');
          return;
       }
 
@@ -79,18 +105,29 @@ export default class TaskForm extends HTMLElement {
    }
 
    async handleSubmit() {
-      this.taskService = slice.getComponent('task-service');
-      if (this._submitting || !this.taskService) {
+      if (this._submitting) {
          return;
       }
 
+      const taskService = getService('task-service', ['create', 'update']);
+      if (!taskService) {
+         showFormError(this.$error, 'Servicio de tareas no disponible. Recarga la página.');
+         return;
+      }
+
+      const title = this.$titleInput.value.trim();
       const domainId = this.$domainSelect.value;
+      if (!title) {
+         showFormError(this.$error, 'Ingresa un título para la tarea.');
+         return;
+      }
       if (!domainId) {
+         showFormError(this.$error, 'Crea un dominio antes de guardar la tarea.');
          return;
       }
 
       const payload = {
-         title: this.$titleInput.value,
+         title,
          domainId,
          urgency: this.$urgencySelect.value,
          minutes: this.$minutesInput.value,
@@ -98,14 +135,21 @@ export default class TaskForm extends HTMLElement {
       };
 
       this._submitting = true;
+      hideFormError(this.$error);
       try {
          const saved = this.taskId
-            ? await this.taskService.update(this.taskId, payload)
-            : await this.taskService.create(payload);
+            ? await taskService.update(this.taskId, payload)
+            : await taskService.create(payload);
 
          if (saved) {
-            slice.events.emit('ui:modal:close');
+            closeModal();
+            return;
          }
+
+         showFormError(this.$error, 'No se pudo guardar la tarea. Revisa los datos.');
+      } catch (error) {
+         console.error('TaskForm submit error:', error);
+         showFormError(this.$error, 'Error al guardar. Intenta de nuevo.');
       } finally {
          this._submitting = false;
       }

@@ -28,8 +28,10 @@ export default class ModalShell extends HTMLElement {
          }
       };
 
-      slice.events.subscribe('ui:modal:open', (payload) => this.open(payload));
-      slice.events.subscribe('ui:modal:close', () => this.close());
+      this._onModalOpen = (payload) => this.open(payload);
+      this._onModalClose = () => this.close();
+      slice.events.subscribe('ui:modal:open', this._onModalOpen, { component: this });
+      slice.events.subscribe('ui:modal:close', this._onModalClose, { component: this });
    }
 
    getAppShell() {

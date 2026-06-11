@@ -62,23 +62,11 @@ export default class FinancesSection extends HTMLElement {
       return `$${(Number(value) || 0).toFixed(2)}`;
    }
 
-   async adjustWallet() {
-      if (typeof this.financeService?.setWalletBalance !== 'function') {
-         return;
-      }
-      const current = slice.context.getState('lifeControl')?.walletBalance ?? 0;
-      const input = window.prompt('Saldo actual en USD (billetera):', current.toFixed(2));
-      if (input === null) {
-         return;
-      }
-
-      const value = Number(input.replace(',', '.'));
-      if (!Number.isFinite(value) || value < 0) {
-         window.alert('Ingresa un monto válido.');
-         return;
-      }
-
-      await this.financeService.setWalletBalance(value);
+   adjustWallet() {
+      slice.events.emit('ui:modal:open', {
+         title: 'Ajustar saldo de billetera',
+         form: 'WalletForm'
+      });
    }
 
    renderColumn(listEl, emptyEl, items, settledLabel) {

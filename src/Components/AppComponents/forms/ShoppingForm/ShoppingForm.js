@@ -3,6 +3,13 @@ import {
    addPeriod,
    todayISO
 } from '../../../Service/ShoppingService/ShoppingService.js';
+import {
+   buildModalButtons,
+   closeModal,
+   getService,
+   hideFormError,
+   showFormError
+} from '../formHelpers.js';
 
 export default class ShoppingForm extends HTMLElement {
    static props = {
@@ -20,24 +27,37 @@ export default class ShoppingForm extends HTMLElement {
       this.$lastDoneInput = this.querySelector('#shopping-form-last-done');
       this.$nextDueInput = this.querySelector('#shopping-form-next-due');
       this.$nextHint = this.querySelector('[data-role="next-hint"]');
+      this.$error = this.querySelector('[data-role="error"]');
       this._nextDueTouched = false;
+      this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
-      this.shoppingService = slice.getComponent('shopping-service');
+      await this.ensureButtons();
+      this.bindForm();
+      this.populate();
+   }
 
-      const cancelBtn = await slice.build('Button', {
-         value: 'Cancelar',
-         variant: 'outlined',
-         onClick: () => slice.events.emit('ui:modal:close')
+   async update() {
+      await this.ensureButtons();
+      this.populate();
+   }
+
+   async ensureButtons() {
+      if (this._buttonsReady && this.$actions.childElementCount >= 2) {
+         return;
+      }
+      await buildModalButtons(this, {
+         submitLabel: this.shoppingId ? 'Guardar cambios' : 'Guardar'
       });
-      const submitBtn = await slice.build('Button', {
-         value: this.shoppingId ? 'Guardar cambios' : 'Guardar',
-         variant: 'filled',
-         onClick: () => this.$form.requestSubmit()
-      });
-      this.$actions.append(cancelBtn, submitBtn);
+      this._buttonsReady = true;
+   }
+
+   bindForm() {
+      if (this._formBound) {
+         return;
+      }
 
       this.$frequencySelect.addEventListener('change', () => this.syncNextDueFromLast());
       this.$lastDoneInput.addEventListener('change', () => {
@@ -47,17 +67,20 @@ export default class ShoppingForm extends HTMLElement {
       this.$nextDueInput.addEventListener('input', () => {
          this._nextDueTouched = true;
       });
-
       this.$form.addEventListener('submit', (event) => {
          event.preventDefault();
          this.handleSubmit();
       });
+      this._formBound = true;
+   }
 
+   populate() {
+      hideFormError(this.$error);
       if (this.shoppingId) {
          this.loadItem(this.shoppingId);
-      } else {
-         this.$nextDueInput.value = todayISO();
+         return;
       }
+      this.$nextDueInput.value = todayISO();
    }
 
    syncNextDueFromLast() {
@@ -77,8 +100,10 @@ export default class ShoppingForm extends HTMLElement {
    }
 
    loadItem(shoppingId) {
-      const item = this.shoppingService?.getById(shoppingId);
+      const shoppingService = getService('shopping-service', ['getById']);
+      const item = shoppingService?.getById(shoppingId);
       if (!item) {
+         showFormError(this.$error, 'No se encontró el artículo.');
          return;
       }
 
@@ -95,26 +120,45 @@ export default class ShoppingForm extends HTMLElement {
    }
 
    async handleSubmit() {
-      if (this._submitting || !this.shoppingService) {
+      if (this._submitting) {
+         return;
+      }
+
+      const shoppingService = getService('shopping-service', ['create', 'update']);
+      if (!shoppingService) {
+         showFormError(this.$error, 'Servicio de compras no disponible. Recarga la página.');
+         return;
+      }
+
+      const name = this.$nameInput.value.trim();
+      if (!name) {
+         showFormError(this.$error, 'Ingresa el nombre del artículo.');
          return;
       }
 
       const payload = {
          frequency: this.$frequencySelect.value,
-         name: this.$nameInput.value,
+         name,
          lastDoneAt: this.$lastDoneInput.value || null,
          nextDueAt: this.$nextDueInput.value || null
       };
 
       this._submitting = true;
+      hideFormError(this.$error);
       try {
          const saved = this.shoppingId
-            ? await this.shoppingService.update(this.shoppingId, payload)
-            : await this.shoppingService.create(payload);
+            ? await shoppingService.update(this.shoppingId, payload)
+            : await shoppingService.create(payload);
 
          if (saved) {
-            slice.events.emit('ui:modal:close');
+            closeModal();
+            return;
          }
+
+         showFormError(this.$error, 'No se pudo guardar. Revisa los datos e intenta de nuevo.');
+      } catch (error) {
+         console.error('ShoppingForm submit error:', error);
+         showFormError(this.$error, 'Error al guardar. Intenta de nuevo.');
       } finally {
          this._submitting = false;
       }
