@@ -105,6 +105,19 @@
     }
   }
 
+  /* Domain badge (shared) */
+  .lc-domain-badge {
+    @apply inline-flex max-w-full items-center gap-1 truncate rounded-full px-2 py-0.5 text-[0.65rem] font-semibold;
+    background: color-mix(in srgb, var(--domain-color, #71717a) 18%, transparent);
+    color: var(--domain-color, #71717a);
+  }
+
+  .lc-domain-badge::before {
+    @apply h-1.5 w-1.5 shrink-0 rounded-full;
+    background: var(--domain-color, #71717a);
+    content: "";
+  }
+
   /* TaskCard */
   .task-card {
     @apply relative grid gap-2.5 rounded-xl border px-3.5 py-3 transition-[opacity,box-shadow];
@@ -533,8 +546,16 @@
     @apply flex items-center gap-3;
   }
 
+  .domains-section__text {
+    @apply flex min-w-0 flex-col gap-0.5;
+  }
+
   .domains-section__name {
     @apply font-semibold;
+  }
+
+  .domains-section__stats {
+    @apply text-xs text-lc-muted;
   }
 
   .domains-section__actions {
@@ -927,6 +948,18 @@
     border-color: var(--tertiary-background-color);
   }
 
+  .planner-week__task {
+    @apply flex flex-col items-start gap-1;
+  }
+
+  .planner-week__task-domain {
+    @apply max-w-full;
+  }
+
+  .planner-week__task-title {
+    @apply truncate text-left;
+  }
+
   .planner-week__payment--income {
     color: var(--success-color);
   }
@@ -965,7 +998,14 @@
   }
 
   .planner-month__task {
-    @apply truncate text-[0.68rem];
+    @apply truncate pl-2.5 text-[0.68rem];
+    position: relative;
+  }
+
+  .planner-month__task::before {
+    @apply absolute left-0 top-1.5 h-1.5 w-1.5 rounded-full;
+    background: var(--domain-color, #71717a);
+    content: "";
   }
 
   .planner-month__more,
@@ -1017,8 +1057,30 @@
     @apply m-0 flex list-none flex-col gap-2 p-0;
   }
 
-  .dashboard-section__urgent-item {
-    @apply flex items-center gap-2 text-sm;
+  .dashboard-section__urgent-item,
+  .dashboard-section__recent-item {
+    @apply flex flex-wrap items-center gap-2 text-sm;
+  }
+
+  .dashboard-section__domain-hint {
+    @apply mb-3 mt-0;
+  }
+
+  .dashboard-section__domain-list {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+
+  .dashboard-section__domain-item {
+    @apply flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .dashboard-section__domain-meta {
+    @apply flex min-w-0 items-center gap-2;
+  }
+
+  .dashboard-section__domain-count {
+    @apply shrink-0 text-xs font-semibold text-lc-muted;
   }
 
   .dashboard-section__flag {

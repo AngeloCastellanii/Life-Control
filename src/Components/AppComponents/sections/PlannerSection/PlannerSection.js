@@ -1,4 +1,5 @@
 import { FINANCE_TYPE } from '../lifeControlConstants.js';
+import { domainForTask } from '../domainLookup.js';
 import {
    addDays,
    addMonths,
@@ -170,14 +171,8 @@ export default class PlannerSection extends HTMLElement {
       };
    }
 
-   domainColorFor(domainId) {
-      const domain = this.domainService.getAll().find((d) => d.id === domainId);
-      return domain?.color ?? '#71717a';
-   }
-
-   domainNameFor(domainId) {
-      const domain = this.domainService.getAll().find((d) => d.id === domainId);
-      return domain?.name ?? 'General';
+   domainForTask(domainId) {
+      return domainForTask(domainId, this.domainService);
    }
 
    _destroyByPrefix(prefix) {
@@ -360,10 +355,12 @@ export default class PlannerSection extends HTMLElement {
          const tasksHost = blockEl.querySelector('[data-role="tasks"]');
 
          for (const task of blockTasks) {
+            const domain = this.domainForTask(task.domainId);
             const card = await slice.build('TaskCard', {
                sliceId: `task-card-block-${block.id}-${task.id}`,
                task,
-               domainColor: this.domainColorFor(task.domainId),
+               domainColor: domain.color,
+               domainName: domain.name,
                ...this.taskCardActions(task),
                onRemoveFromBlock: () => this.timeBlockService.unassignTask(block.id, task.id)
             });
@@ -409,10 +406,12 @@ export default class PlannerSection extends HTMLElement {
          this.$empty.hidden = true;
 
          for (const task of tasks) {
+            const domain = this.domainForTask(task.domainId);
             const card = await slice.build('TaskCard', {
                sliceId: `${this._taskCardPrefix()}${task.id}`,
                task,
-               domainColor: this.domainColorFor(task.domainId),
+               domainColor: domain.color,
+               domainName: domain.name,
                assignBlocks: blockOptions,
                ...this.taskCardActions(task),
                onAssignToBlock: async (taskId, blockId) => {
@@ -486,10 +485,22 @@ export default class PlannerSection extends HTMLElement {
    }
 
    weekTaskChip(task) {
+      const domain = this.domainForTask(task.domainId);
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'planner-week__task';
-      chip.textContent = task.title;
+      chip.title = `${domain.name} · ${task.title}`;
+
+      const badge = document.createElement('span');
+      badge.className = 'lc-domain-badge planner-week__task-domain';
+      badge.style.setProperty('--domain-color', domain.color);
+      badge.textContent = domain.name;
+
+      const title = document.createElement('span');
+      title.className = 'planner-week__task-title';
+      title.textContent = task.title;
+
+      chip.append(badge, title);
       chip.addEventListener('click', () => this.openTaskEdit(task.id));
       return chip;
    }
@@ -586,8 +597,11 @@ export default class PlannerSection extends HTMLElement {
    }
 
    monthTaskLine(task) {
+      const domain = this.domainForTask(task.domainId);
       const line = document.createElement('span');
       line.className = 'planner-month__task';
+      line.title = `${domain.name} · ${task.title}`;
+      line.style.setProperty('--domain-color', domain.color);
       line.textContent = task.title;
       return line;
    }

@@ -15,6 +15,7 @@ export default class DomainsSection extends HTMLElement {
 
    async init() {
       this.domainService = slice.getComponent('domain-service');
+      this.taskService = slice.getComponent('task-service');
       if (!this.domainService) {
          slice.logger.logError('DomainsSection', 'DomainService no disponible');
          return;
@@ -23,11 +24,14 @@ export default class DomainsSection extends HTMLElement {
       slice.context.watch(
          'lifeControl',
          this,
-         (domains) => this.renderList(domains),
-         (state) => state?.domains ?? []
+         () => this.renderList(),
+         (state) => ({
+            domains: state?.domains ?? [],
+            tasks: state?.tasks ?? []
+         })
       );
 
-      this.renderList(this.domainService.getAll());
+      this.renderList();
    }
 
    openEdit(domainId) {
@@ -38,14 +42,20 @@ export default class DomainsSection extends HTMLElement {
       });
    }
 
-   async renderList(domains) {
-      const list = Array.isArray(domains) ? domains : this.domainService.getAll();
+   pendingCountFor(domainId, tasks) {
+      return tasks.filter((task) => task.domainId === domainId && !task.completed).length;
+   }
+
+   async renderList() {
+      const list = this.domainService.getAll();
+      const tasks = this.taskService?.getAll?.() ?? [];
       this.$list.innerHTML = '';
 
       const hasItems = list.length > 0;
       this.$empty.hidden = hasItems;
 
       for (const domain of list) {
+         const pending = this.pendingCountFor(domain.id, tasks);
          const item = document.createElement('li');
          item.className = 'domains-section__item';
 
@@ -56,12 +66,19 @@ export default class DomainsSection extends HTMLElement {
          swatch.className = 'domains-section__swatch';
          swatch.style.backgroundColor = domain.color;
 
+         const textWrap = document.createElement('div');
+         textWrap.className = 'domains-section__text';
+
          const name = document.createElement('span');
          name.className = 'domains-section__name';
          name.textContent = domain.name;
 
-         meta.appendChild(swatch);
-         meta.appendChild(name);
+         const stats = document.createElement('span');
+         stats.className = 'domains-section__stats';
+         stats.textContent = `${pending} tarea${pending === 1 ? '' : 's'} pendiente${pending === 1 ? '' : 's'}`;
+
+         textWrap.append(name, stats);
+         meta.append(swatch, textWrap);
          item.appendChild(meta);
 
          const actions = document.createElement('div');
@@ -78,7 +95,12 @@ export default class DomainsSection extends HTMLElement {
          deleteBtn.type = 'button';
          deleteBtn.className = 'domains-section__delete';
          deleteBtn.textContent = 'Eliminar';
-         deleteBtn.addEventListener('click', () => this.domainService.remove(domain.id));
+         deleteBtn.addEventListener('click', async () => {
+            const ok = await this.domainService.remove(domain.id);
+            if (!ok) {
+               window.alert('Debe existir al menos un dominio. Las tareas se reasignan al eliminar uno.');
+            }
+         });
          actions.appendChild(deleteBtn);
 
          item.appendChild(actions);

@@ -1,3 +1,5 @@
+import { domainForTask } from '../sections/domainLookup.js';
+
 export default class HomeSection extends HTMLElement {
    constructor(props) {
       super();
@@ -23,11 +25,6 @@ export default class HomeSection extends HTMLElement {
       );
 
       this.renderTasks();
-   }
-
-   domainColorFor(domainId) {
-      const domain = this.domainService.getAll().find((d) => d.id === domainId);
-      return domain?.color ?? '#71717a';
    }
 
    _destroyTaskCards() {
@@ -68,10 +65,12 @@ export default class HomeSection extends HTMLElement {
       }
 
       for (const task of tasks) {
+         const domain = domainForTask(task.domainId, this.domainService);
          const card = await slice.build('TaskCard', {
             sliceId: `task-card-${task.id}`,
             task,
-            domainColor: this.domainColorFor(task.domainId),
+            domainColor: domain.color,
+            domainName: domain.name,
             onToggleComplete: (completed) => this.taskService.toggleComplete(task.id, completed)
          });
          if (card) {

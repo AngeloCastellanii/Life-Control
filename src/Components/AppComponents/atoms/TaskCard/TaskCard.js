@@ -3,6 +3,7 @@ export default class TaskCard extends HTMLElement {
       sliceId: { type: 'string', default: 'task-card' },
       task: { type: 'object', default: null },
       domainColor: { type: 'string', default: '#71717a' },
+      domainName: { type: 'string', default: '' },
       assignBlocks: { type: 'array', default: null },
       onToggleComplete: { type: 'function', default: null },
       onAssignToBlock: { type: 'function', default: null },
@@ -16,6 +17,7 @@ export default class TaskCard extends HTMLElement {
       slice.attachTemplate(this);
       this.$check = this.querySelector('[data-role="check"]');
       this.$title = this.querySelector('[data-role="title"]');
+      this.$domain = this.querySelector('[data-role="domain"]');
       this.$urgency = this.querySelector('[data-role="urgency"]');
       this.$minutes = this.querySelector('[data-role="minutes"]');
       this.$accent = this.querySelector('[data-role="accent"]');
@@ -98,6 +100,16 @@ export default class TaskCard extends HTMLElement {
 
       this.$title.textContent = task.title;
       this.$minutes.textContent = `${task.minutes} min`;
+      if (this.$domain) {
+         const name = this.domainName?.trim();
+         if (name) {
+            this.$domain.textContent = name;
+            this.$domain.style.setProperty('--domain-color', this.domainColor);
+            this.$domain.hidden = false;
+         } else {
+            this.$domain.hidden = true;
+         }
+      }
       this.$urgency.textContent = URGENCY_LABELS[urgency] ?? urgency;
       this.$urgency.className = `task-card__urgency task-card__urgency--${urgency}`;
       this.$accent.style.backgroundColor = this.domainColor;

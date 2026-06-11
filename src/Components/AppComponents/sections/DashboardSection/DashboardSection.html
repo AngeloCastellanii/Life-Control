@@ -51,7 +51,7 @@
     </div>
   </div>
 
-  <div class="grid gap-4 md:grid-cols-2">
+  <div class="grid gap-4 md:grid-cols-3">
     <div class="lc-card">
       <h2 class="lc-card-title">Prioridad</h2>
       <ul class="dashboard-section__urgent-list" data-role="priority-list"></ul>
@@ -61,6 +61,12 @@
       <h2 class="lc-card-title">En bloques</h2>
       <ul class="flex list-none flex-col gap-2 p-0 m-0" data-role="recent-list"></ul>
       <p class="lc-empty" data-role="recent-empty" hidden>Sin tareas en bloques.</p>
+    </div>
+    <div class="lc-card">
+      <h2 class="lc-card-title">Por dominio</h2>
+      <p class="lc-section-subtitle dashboard-section__domain-hint">Tareas pendientes agrupadas por área de vida.</p>
+      <ul class="dashboard-section__domain-list" data-role="domain-summary-list"></ul>
+      <p class="lc-empty" data-role="domain-summary-empty" hidden>Sin dominios configurados.</p>
     </div>
   </div>
 </section>

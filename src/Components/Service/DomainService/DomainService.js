@@ -1,5 +1,11 @@
 const STORE = 'domains';
 
+const DEFAULT_DOMAINS = [
+   { name: 'General', color: '#6366f1' },
+   { name: 'Personal', color: '#10b981' },
+   { name: 'Trabajo', color: '#f59e0b' }
+];
+
 export default class DomainService {
    async init() {
       this.storage = slice.getComponent('storage-service');
@@ -9,7 +15,20 @@ export default class DomainService {
       if (!this.storage.db) {
          await this.storage.init();
       }
+      await this.seedDefaultDomains();
       await this.syncToContext();
+   }
+
+   async seedDefaultDomains() {
+      const existing = await this.storage.getAll(STORE);
+      const names = new Set(existing.map((domain) => domain.name));
+
+      for (const def of DEFAULT_DOMAINS) {
+         if (names.has(def.name)) {
+            continue;
+         }
+         await this.create({ name: def.name, color: def.color });
+      }
    }
 
    async syncToContext() {
@@ -24,6 +43,18 @@ export default class DomainService {
 
    getAll() {
       return slice.context.getState('lifeControl')?.domains ?? [];
+   }
+
+   getById(id) {
+      if (!id) {
+         return null;
+      }
+      return this.getAll().find((domain) => domain.id === id) ?? null;
+   }
+
+   getDefaultId() {
+      const general = this.getAll().find((domain) => domain.name === 'General');
+      return general?.id ?? this.getAll()[0]?.id ?? null;
    }
 
    async create({ name, color }) {
@@ -70,6 +101,21 @@ export default class DomainService {
    }
 
    async remove(id) {
+      const domains = await this.storage.getAll(STORE);
+      if (domains.length <= 1) {
+         return false;
+      }
+
+      const fallback = domains.find((domain) => domain.id !== id);
+      const taskService = slice.getComponent('task-service');
+      const tasks = taskService?.getAll?.() ?? [];
+
+      for (const task of tasks.filter((item) => item.domainId === id)) {
+         if (fallback?.id) {
+            await taskService.update(task.id, { domainId: fallback.id });
+         }
+      }
+
       await this.storage.delete(STORE, id);
       await this.syncToContext();
       slice.events.emit('domain:changed', { action: 'delete', id });
