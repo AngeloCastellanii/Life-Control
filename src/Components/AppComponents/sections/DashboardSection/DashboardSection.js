@@ -80,6 +80,23 @@ export default class DashboardSection extends HTMLElement {
       });
    }
 
+   async update() {
+      this.taskService = slice.getComponent('task-service');
+      this.timeBlockService = slice.getComponent('time-block-service');
+      this.exchangeRateService = slice.getComponent('exchange-rate-service');
+      this.financeService = slice.getComponent('finance-service');
+      this.shoppingService = slice.getComponent('shopping-service');
+
+      const state = slice.context.getState('lifeControl') ?? {};
+      this.refresh({
+         tasks: state.tasks ?? this.taskService?.getAll?.() ?? [],
+         timeBlocks: state.timeBlocks ?? this.timeBlockService?.getAll?.() ?? [],
+         exchangeRate: state.exchangeRate ?? {},
+         finances: state.finances ?? this.financeService?.getAll?.() ?? [],
+         shopping: state.shopping ?? this.shoppingService?.getAll?.() ?? []
+      });
+   }
+
    formatMoney(value) {
       return `$${(Number(value) || 0).toFixed(2)}`;
    }
@@ -166,7 +183,10 @@ export default class DashboardSection extends HTMLElement {
    }
 
    renderShoppingDue() {
-      const items = this.shoppingService?.getDueItems({ withinDays: 14 }) ?? [];
+      const items =
+         typeof this.shoppingService?.getDueItems === 'function'
+            ? this.shoppingService.getDueItems({ withinDays: 14 })
+            : [];
       this.$shoppingDueList.innerHTML = '';
       this.$shoppingDueEmpty.hidden = items.length > 0;
 

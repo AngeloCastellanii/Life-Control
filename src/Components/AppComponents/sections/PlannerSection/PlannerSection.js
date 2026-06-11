@@ -94,6 +94,15 @@ export default class PlannerSection extends HTMLElement {
       this.renderAll();
    }
 
+   async update() {
+      this.taskService = slice.getComponent('task-service');
+      this.domainService = slice.getComponent('domain-service');
+      this.timeBlockService = slice.getComponent('time-block-service');
+      this.financeService = slice.getComponent('finance-service');
+      this.shoppingService = slice.getComponent('shopping-service');
+      await this.renderAll();
+   }
+
    setViewMode(mode) {
       if (!['day', 'week', 'month'].includes(mode)) {
          return;
@@ -244,7 +253,11 @@ export default class PlannerSection extends HTMLElement {
          });
       }
 
-      for (const shopping of this.shoppingService?.getDueOnDate(this._cursorDate) ?? []) {
+      const shoppingDue =
+         typeof this.shoppingService?.getDueOnDate === 'function'
+            ? this.shoppingService.getDueOnDate(this._cursorDate)
+            : [];
+      for (const shopping of shoppingDue) {
          items.push({
             name: shopping.name,
             amount: null,
@@ -454,8 +467,14 @@ export default class PlannerSection extends HTMLElement {
    }
 
    fillWeekPayments(section, iso) {
-      const finances = this.financeService?.getDueOnDate(iso) ?? [];
-      const shopping = this.shoppingService?.getDueOnDate(iso) ?? [];
+      const finances =
+         typeof this.financeService?.getDueOnDate === 'function'
+            ? this.financeService.getDueOnDate(iso)
+            : [];
+      const shopping =
+         typeof this.shoppingService?.getDueOnDate === 'function'
+            ? this.shoppingService.getDueOnDate(iso)
+            : [];
       const payments = [
          ...finances.map((item) => ({
             name: item.description,
@@ -515,9 +534,15 @@ export default class PlannerSection extends HTMLElement {
                list.appendChild(more);
             }
 
-            const paymentCount =
-               (this.financeService?.getDueOnDate(cell.iso)?.length ?? 0) +
-               (this.shoppingService?.getDueOnDate(cell.iso)?.length ?? 0);
+            const financeDue =
+               typeof this.financeService?.getDueOnDate === 'function'
+                  ? this.financeService.getDueOnDate(cell.iso).length
+                  : 0;
+            const shoppingDue =
+               typeof this.shoppingService?.getDueOnDate === 'function'
+                  ? this.shoppingService.getDueOnDate(cell.iso).length
+                  : 0;
+            const paymentCount = financeDue + shoppingDue;
             if (paymentCount > 0) {
                const badge = document.createElement('span');
                badge.className = 'planner-month__payment-dot';

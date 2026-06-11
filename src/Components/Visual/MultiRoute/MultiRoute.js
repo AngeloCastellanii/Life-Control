@@ -76,15 +76,6 @@ export default class MultiRoute extends HTMLElement {
       };
    }
 
-   _clearSectionInstances() {
-      for (const id of [...slice.controller.activeComponents.keys()]) {
-         if (id.startsWith('section-')) {
-            slice.controller.destroyComponent(id);
-         }
-      }
-      this.renderedComponents.clear();
-   }
-
    async render() {
       if (this._rendering) {
          this._renderPending = true;
@@ -107,10 +98,8 @@ export default class MultiRoute extends HTMLElement {
       const normalizedPath = currentPath.length > 1 ? currentPath.replace(/\/+$/, '') : currentPath;
       const { route: routeMatch, params } = this.matchRoute(normalizedPath);
 
-      this._clearSectionInstances();
-      this.innerHTML = '';
-
       if (!routeMatch) {
+         this.innerHTML = '';
          return;
       }
 
@@ -118,23 +107,45 @@ export default class MultiRoute extends HTMLElement {
 
       if (!slice.controller.componentCategories.has(component) && !slice.controller.classes.has(component)) {
          slice.logger.logError(`${this.sliceId}`, `Component ${component} not found`);
-         return;
-      }
-
-      const sectionSliceId = `section-${component}`;
-      const section = await slice.build(component, {
-         sliceId: sectionSliceId,
-         params,
-         metadata: metadata || {}
-      });
-
-      if (!section) {
          this.innerHTML = '<p class="lc-empty">No se pudo cargar la vista.</p>';
          return;
       }
 
-      this.renderedComponents.set(normalizedPath, section);
-      this.appendChild(section);
+      for (const [path, el] of this.renderedComponents) {
+         el.hidden = path !== normalizedPath;
+      }
+
+      let section = this.renderedComponents.get(normalizedPath);
+
+      if (!section) {
+         const sectionSliceId = `section-${component}`;
+
+         if (slice.controller.activeComponents.has(sectionSliceId)) {
+            slice.controller.destroyComponent(sectionSliceId);
+         }
+
+         section = await slice.build(component, {
+            sliceId: sectionSliceId,
+            params,
+            metadata: metadata || {}
+         });
+
+         if (!section) {
+            this.innerHTML = '<p class="lc-empty">No se pudo cargar la vista.</p>';
+            return;
+         }
+
+         this.renderedComponents.set(normalizedPath, section);
+         this.appendChild(section);
+      } else {
+         section.hidden = false;
+         if (!section.isConnected) {
+            this.appendChild(section);
+         }
+         if (typeof section.update === 'function') {
+            await section.update();
+         }
+      }
 
       this.dispatchEvent(new CustomEvent('route-rendered', {
          bubbles: true,

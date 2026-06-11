@@ -23,7 +23,7 @@ export default class FinancesSection extends HTMLElement {
 
    async init() {
       this.financeService = slice.getComponent('finance-service');
-      if (!this.financeService) {
+      if (typeof this.financeService?.getAll !== 'function') {
          slice.logger.logError('FinancesSection', 'FinanceService no disponible');
          return;
       }
@@ -42,22 +42,19 @@ export default class FinancesSection extends HTMLElement {
          })
       );
 
-      this.render({
-         finances: this.financeService.getAll(),
-         walletBalance: this.financeService.getWalletBalance()
-      });
+      this.renderFromState();
    }
 
    async update() {
-      if (!this.financeService) {
-         this.financeService = slice.getComponent('finance-service');
-      }
-      if (!this.financeService) {
-         return;
-      }
+      this.financeService = slice.getComponent('finance-service');
+      this.renderFromState();
+   }
+
+   renderFromState() {
+      const state = slice.context.getState('lifeControl') ?? {};
       this.render({
-         finances: this.financeService.getAll(),
-         walletBalance: this.financeService.getWalletBalance()
+         finances: state.finances ?? [],
+         walletBalance: state.walletBalance ?? 0
       });
    }
 
@@ -66,7 +63,10 @@ export default class FinancesSection extends HTMLElement {
    }
 
    async adjustWallet() {
-      const current = this.financeService.getWalletBalance();
+      if (typeof this.financeService?.setWalletBalance !== 'function') {
+         return;
+      }
+      const current = slice.context.getState('lifeControl')?.walletBalance ?? 0;
       const input = window.prompt('Saldo actual en USD (billetera):', current.toFixed(2));
       if (input === null) {
          return;
@@ -99,7 +99,7 @@ export default class FinancesSection extends HTMLElement {
          check.type = 'checkbox';
          check.checked = !!item.settled;
          check.addEventListener('change', () => {
-            this.financeService.toggleSettled(item.id, check.checked);
+            this.financeService?.toggleSettled?.(item.id, check.checked);
          });
 
          checkWrap.appendChild(check);
@@ -130,26 +130,32 @@ export default class FinancesSection extends HTMLElement {
          deleteBtn.className = 'finances-section__delete';
          deleteBtn.textContent = '×';
          deleteBtn.setAttribute('aria-label', 'Eliminar');
-         deleteBtn.addEventListener('click', () => this.financeService.remove(item.id));
+         deleteBtn.addEventListener('click', () => this.financeService?.remove?.(item.id));
          row.appendChild(deleteBtn);
 
          listEl.appendChild(row);
       }
    }
 
+   pendingTotal(list, type) {
+      return list
+         .filter((item) => item.type === type && !item.settled)
+         .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+   }
+
    render({ finances, walletBalance }) {
-      if (!this.$walletBalance || !this.financeService) {
+      if (!this.$walletBalance) {
          return;
       }
 
       this.$walletBalance.textContent = this.formatMoney(walletBalance);
 
-      const list = Array.isArray(finances) ? finances : this.financeService.getAll();
+      const list = Array.isArray(finances) ? finances : [];
       const payItems = list.filter((item) => item.type === FINANCE_TYPE.PAY);
       const receiveItems = list.filter((item) => item.type === FINANCE_TYPE.RECEIVE);
 
-      this.$payTotal.textContent = this.formatMoney(this.financeService.pendingTotal(FINANCE_TYPE.PAY));
-      this.$receiveTotal.textContent = this.formatMoney(this.financeService.pendingTotal(FINANCE_TYPE.RECEIVE));
+      this.$payTotal.textContent = this.formatMoney(this.pendingTotal(list, FINANCE_TYPE.PAY));
+      this.$receiveTotal.textContent = this.formatMoney(this.pendingTotal(list, FINANCE_TYPE.RECEIVE));
 
       this.renderColumn(this.$payList, this.$payEmpty, payItems, 'Pagado');
       this.renderColumn(this.$receiveList, this.$receiveEmpty, receiveItems, 'Cobrado');

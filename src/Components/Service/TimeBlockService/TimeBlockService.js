@@ -53,11 +53,14 @@ export default class TimeBlockService {
 
    async seedDefaultBlocks() {
       const existing = await this.storage.getAll(STORE);
-      if (existing.length > 0) {
-         return;
-      }
+      const labels = new Set(existing.map((block) => block.label));
+      let added = false;
 
       for (const def of DEFAULT_BLOCKS) {
+         if (labels.has(def.label)) {
+            continue;
+         }
+
          const block = {
             id: crypto.randomUUID(),
             label: def.label,
@@ -68,6 +71,11 @@ export default class TimeBlockService {
             taskIds: []
          };
          await this.storage.put(STORE, block);
+         added = true;
+      }
+
+      if (added) {
+         await this.storage.put('meta', { id: 'defaultBlocksSeeded', value: true });
       }
    }
 
