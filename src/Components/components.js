@@ -18,6 +18,7 @@ const components = {
   "WalletForm": "forms",
   "ShoppingForm": "forms",
   "DomainsSection": "sections",
+  "SettingsSection": "sections",
   "Button": "Visual",
   "Link": "Visual",
   "Loading": "Visual",
@@ -31,7 +32,8 @@ const components = {
   "ExchangeRateService": "Service",
   "TimeBlockService": "Service",
   "FinanceService": "Service",
-  "ShoppingService": "Service"
+  "ShoppingService": "Service",
+  "ProfileService": "Service"
 };
 
 export default components;

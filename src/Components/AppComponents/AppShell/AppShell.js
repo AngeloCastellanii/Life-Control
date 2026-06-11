@@ -15,15 +15,11 @@ export default class AppShell extends HTMLElement {
             { text: 'Planificador', path: '/planner' },
             { text: 'Finanzas', path: '/finances' },
             { text: 'Compras', path: '/shopping' },
-            { text: 'Dominios', path: '/domains' }
+            { text: 'Dominios', path: '/domains' },
+            { text: 'Perfil', path: '/settings' }
          ]
       });
       this.$sidebar.appendChild(sidebar);
-
-      const themeSelector = await slice.build('ThemeSelector', {
-         sliceId: 'theme-selector'
-      });
-      sidebar.querySelector('[data-role="footer"]').appendChild(themeSelector);
 
       this.$multiRoute = await slice.build('MultiRoute', {
          sliceId: 'app-content',
@@ -32,7 +28,8 @@ export default class AppShell extends HTMLElement {
             { path: '/planner', component: 'PlannerSection' },
             { path: '/finances', component: 'FinancesSection' },
             { path: '/shopping', component: 'ShoppingSection' },
-            { path: '/domains', component: 'DomainsSection' }
+            { path: '/domains', component: 'DomainsSection' },
+            { path: '/settings', component: 'SettingsSection' }
          ]
       });
       this.$content.appendChild(this.$multiRoute);

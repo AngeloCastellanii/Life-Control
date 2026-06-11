@@ -6,7 +6,8 @@ async function bootstrapLifeControl() {
       tasks: [],
       timeBlocks: [],
       finances: [],
-      shopping: []
+      shopping: [],
+      profile: { displayName: '' }
    });
 
    const storage = await slice.build('StorageService', { sliceId: 'storage-service', singleton: true });
@@ -56,6 +57,15 @@ async function bootstrapLifeControl() {
       throw new Error('No se pudo crear ShoppingService');
    }
    await shoppingService.init();
+
+   const profileService = await slice.build('ProfileService', {
+      sliceId: 'profile-service',
+      singleton: true
+   });
+   if (!profileService) {
+      throw new Error('No se pudo crear ProfileService');
+   }
+   await profileService.init();
 }
 
 slice.router.afterEach((to) => {

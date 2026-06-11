@@ -1,0 +1,33 @@
+<section class="settings-section">
+  <h1 class="lc-section-title">Perfil</h1>
+  <p class="lc-section-subtitle">Personaliza tu experiencia en Life Control.</p>
+
+  <div class="settings-section__grid">
+    <div class="lc-card settings-section__card">
+      <h2 class="lc-card-title">Tu nombre</h2>
+      <p class="settings-section__hint">Aparece en el saludo del inicio.</p>
+      <label class="settings-section__field" for="settings-display-name">
+        <span class="lc-label">Nombre</span>
+        <input
+          class="lc-input"
+          id="settings-display-name"
+          type="text"
+          maxlength="40"
+          placeholder="Ej. Angelo, María…"
+          autocomplete="nickname"
+        />
+      </label>
+      <p class="settings-section__preview" data-role="greeting-preview"></p>
+      <button type="button" class="lc-btn-outline settings-section__save" data-role="save-name">
+        Guardar nombre
+      </button>
+      <p class="settings-section__status" data-role="save-status" hidden></p>
+    </div>
+
+    <div class="lc-card settings-section__card">
+      <h2 class="lc-card-title">Apariencia</h2>
+      <p class="settings-section__hint">Elige el tema visual de la app.</p>
+      <div data-role="theme-mount"></div>
+    </div>
+  </div>
+</section>

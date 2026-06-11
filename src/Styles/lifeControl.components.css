@@ -510,6 +510,42 @@
     @apply pointer-events-none blur-sm;
   }
 
+  /* Settings */
+  .settings-section__grid {
+    @apply grid gap-4 md:grid-cols-2;
+  }
+
+  .settings-section__card {
+    @apply flex flex-col gap-3;
+  }
+
+  .settings-section__hint {
+    @apply m-0 text-sm text-lc-muted;
+  }
+
+  .settings-section__field {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .settings-section__preview {
+    @apply m-0 rounded-lg border px-3 py-2 text-sm;
+    border-color: var(--tertiary-background-color);
+    color: var(--font-secondary-color);
+  }
+
+  .settings-section__save {
+    @apply self-start;
+  }
+
+  .settings-section__status {
+    @apply m-0 text-sm;
+    color: var(--success-color);
+  }
+
+  .settings-section__status--error {
+    color: var(--danger-color);
+  }
+
   /* CapacityRing */
   .capacity-ring__svg {
     @apply h-20 w-20 -rotate-90;

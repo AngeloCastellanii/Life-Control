@@ -2,6 +2,7 @@ import { FINANCE_TYPE } from '../lifeControlConstants.js';
 import { getDueStatus } from '../shoppingDue.js';
 import { formatDayLong, todayISO } from '../plannerDates.js';
 import { domainForTask } from '../domainLookup.js';
+import { greetingForName } from '../profileGreeting.js';
 
 const FREQUENCY_LABELS = {
    daily: 'Diaria',
@@ -20,6 +21,7 @@ export default class DashboardSection extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
+      this.$greetingTitle = this.querySelector('[data-role="greeting-title"]');
       this.$dateSubtitle = this.querySelector('[data-role="date-subtitle"]');
       this.$capacityMount = this.querySelector('[data-role="capacity-ring"]');
       this.$capacityText = this.querySelector('[data-role="capacity-text"]');
@@ -70,17 +72,20 @@ export default class DashboardSection extends HTMLElement {
             tasks: state?.tasks ?? [],
             timeBlocks: state?.timeBlocks ?? [],
             domains: state?.domains ?? [],
+            profile: state?.profile ?? { displayName: '' },
             exchangeRate: state?.exchangeRate ?? {},
             finances: state?.finances ?? [],
             shopping: state?.shopping ?? []
          })
       );
 
+      const state = slice.context.getState('lifeControl') ?? {};
       this.refresh({
          tasks: this.taskService?.getAll() ?? [],
          timeBlocks: this.timeBlockService?.getAll() ?? [],
          domains: this.domainService?.getAll() ?? [],
-         exchangeRate: slice.context.getState('lifeControl')?.exchangeRate ?? {},
+         profile: state.profile ?? { displayName: '' },
+         exchangeRate: state.exchangeRate ?? {},
          finances: this.financeService?.getAll() ?? [],
          shopping: this.shoppingService?.getAll() ?? []
       });
@@ -99,6 +104,7 @@ export default class DashboardSection extends HTMLElement {
          tasks: state.tasks ?? this.taskService?.getAll?.() ?? [],
          timeBlocks: state.timeBlocks ?? this.timeBlockService?.getAll?.() ?? [],
          domains: state.domains ?? this.domainService?.getAll?.() ?? [],
+         profile: state.profile ?? { displayName: '' },
          exchangeRate: state.exchangeRate ?? {},
          finances: state.finances ?? this.financeService?.getAll?.() ?? [],
          shopping: state.shopping ?? this.shoppingService?.getAll?.() ?? []
@@ -109,8 +115,9 @@ export default class DashboardSection extends HTMLElement {
       return `$${(Number(value) || 0).toFixed(2)}`;
    }
 
-   refresh({ tasks, timeBlocks, domains, exchangeRate, finances }) {
+   refresh({ tasks, timeBlocks, domains, profile, exchangeRate, finances }) {
       const today = todayISO();
+      this.$greetingTitle.textContent = greetingForName(profile?.displayName ?? '');
       this.$dateSubtitle.textContent = formatDayLong(today);
 
       const pending = tasks.filter((task) => !task.completed);
