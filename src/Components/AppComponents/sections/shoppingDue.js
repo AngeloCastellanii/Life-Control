@@ -8,7 +8,7 @@ function daysBetween(fromISO, toISO) {
    return Math.round((b - a) / (1000 * 60 * 60 * 24));
 }
 
-function formatShortDate(iso) {
+export function formatShortDate(iso) {
    const [y, m, d] = iso.split('-');
    return `${d}/${m}/${y}`;
 }

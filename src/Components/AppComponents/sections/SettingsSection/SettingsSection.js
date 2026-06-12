@@ -10,6 +10,7 @@ export default class SettingsSection extends HTMLElement {
    constructor(props) {
       super();
       slice.attachTemplate(this);
+      this.$avatar = this.querySelector('[data-role="avatar"]');
       this.$nameInput = this.querySelector('#settings-display-name');
       this.$saveName = this.querySelector('[data-role="save-name"]');
       this.$greetingPreview = this.querySelector('[data-role="greeting-preview"]');
@@ -27,7 +28,10 @@ export default class SettingsSection extends HTMLElement {
       }
 
       this.$saveName.addEventListener('click', () => this.saveName());
-      this.$nameInput.addEventListener('input', () => this.updatePreview());
+      this.$nameInput.addEventListener('input', () => {
+         this.updateAvatar();
+         this.updatePreview();
+      });
       this.$nameInput.addEventListener('keydown', (event) => {
          if (event.key === 'Enter') {
             event.preventDefault();
@@ -58,14 +62,30 @@ export default class SettingsSection extends HTMLElement {
       if (document.activeElement !== this.$nameInput) {
          this.$nameInput.value = name;
       }
+      this.updateAvatar(name);
       this.updatePreview(name);
+   }
+
+   updateAvatar(name = this.$nameInput.value) {
+      const trimmed = name?.trim();
+      const initial = trimmed ? trimmed.charAt(0).toUpperCase() : 'LC';
+      this.$avatar.textContent = initial;
    }
 
    updatePreview(name = this.$nameInput.value) {
       const trimmed = name?.trim() ?? '';
       const greeting = greetingForName(trimmed || 'Angelo');
       const label = trimmed ? 'Vista previa' : 'Ejemplo';
-      this.$greetingPreview.textContent = `${label}: «${greeting}»`;
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'settings-section__preview-label';
+      labelEl.textContent = label;
+
+      const textEl = document.createElement('span');
+      textEl.className = 'settings-section__preview-text';
+      textEl.textContent = `«${greeting}»`;
+
+      this.$greetingPreview.replaceChildren(labelEl, textEl);
    }
 
    async ensureProfileService() {

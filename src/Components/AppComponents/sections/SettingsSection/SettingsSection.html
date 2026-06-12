@@ -1,11 +1,26 @@
 <section class="settings-section">
-  <h1 class="lc-section-title">Perfil</h1>
-  <p class="lc-section-subtitle">Personaliza tu experiencia en Life Control.</p>
+  <header class="settings-section__hero">
+    <div class="settings-section__avatar" data-role="avatar" aria-hidden="true">LC</div>
+    <div class="settings-section__hero-text">
+      <h1 class="lc-section-title settings-section__title">Perfil</h1>
+      <p class="settings-section__subtitle">Personaliza tu experiencia en Life Control.</p>
+    </div>
+  </header>
 
   <div class="settings-section__grid">
-    <div class="lc-card settings-section__card">
-      <h2 class="lc-card-title">Tu nombre</h2>
-      <p class="settings-section__hint">Aparece en el saludo del inicio.</p>
+    <div class="lc-card settings-section__card settings-section__card--name">
+      <div class="settings-section__card-head">
+        <span class="settings-section__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M5 20c0-4 3.5-6 7-6s7 2 7 6" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="settings-section__card-label">Tu nombre</h2>
+          <p class="settings-section__hint">Aparece en el saludo del inicio.</p>
+        </div>
+      </div>
       <label class="settings-section__field" for="settings-display-name">
         <span class="lc-label">Nombre</span>
         <input
@@ -18,16 +33,105 @@
         />
       </label>
       <p class="settings-section__preview" data-role="greeting-preview"></p>
-      <button type="button" class="lc-btn-outline settings-section__save" data-role="save-name">
+      <button type="button" class="settings-section__save" data-role="save-name">
         Guardar nombre
       </button>
       <p class="settings-section__status" data-role="save-status" hidden></p>
     </div>
 
-    <div class="lc-card settings-section__card">
-      <h2 class="lc-card-title">Apariencia</h2>
-      <p class="settings-section__hint">Elige el tema visual de la app.</p>
+    <div class="lc-card settings-section__card settings-section__card--theme">
+      <div class="settings-section__card-head">
+        <span class="settings-section__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="settings-section__card-label">Apariencia</h2>
+          <p class="settings-section__hint">Elige el tema visual de la app.</p>
+        </div>
+      </div>
       <div data-role="theme-mount"></div>
     </div>
+  </div>
+
+  <div class="lc-card settings-section__guide">
+    <div class="settings-section__guide-head">
+      <span class="settings-section__card-icon settings-section__card-icon--guide" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <path d="M4 6h16M4 12h10M4 18h14" stroke-linecap="round" />
+        </svg>
+      </span>
+      <div>
+        <h2 class="settings-section__card-label">Guía rápida</h2>
+        <p class="settings-section__hint">Qué hace cada vista y cómo usarla.</p>
+      </div>
+    </div>
+    <dl class="settings-section__guide-list">
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--dashboard" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+        </span>
+        <div>
+          <dt>Dashboard</dt>
+          <dd>Resumen del día: saludo, tareas, bloques, dominios y vencimientos.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--planner" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <rect x="4" y="5" width="16" height="15" rx="2" />
+            <path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Planificador</dt>
+          <dd>Calendario día, semana o mes con bloques, tareas y caja por fecha.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--finances" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M12 3v18M7 8h6.5a3.5 3.5 0 0 1 0 7H9" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Finanzas</dt>
+          <dd>Registra pagos y cobros. Ajusta saldo y consulta historial.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--shopping" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M6 6h15l-1.5 9H8L6 6z" stroke-linejoin="round" />
+            <circle cx="10" cy="19" r="1.25" fill="currentColor" stroke="none" />
+            <circle cx="17" cy="19" r="1.25" fill="currentColor" stroke="none" />
+            <path d="M6 6L5 3H2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Compras</dt>
+          <dd>Listas por frecuencia. Marca lo comprado y calcula la próxima vez.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--domains" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 3v2M12 19v2M3 12h2M19 12h2" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Dominios</dt>
+          <dd>Etiquetas con color para clasificar tareas (trabajo, salud…).</dd>
+        </div>
+      </div>
+    </dl>
   </div>
 </section>

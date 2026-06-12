@@ -63,8 +63,13 @@
 :root .finances-section__col,
 :root .shopping-section__col,
 :root .shopping-section__detail,
-:root .dashboard-section__due-item {
-  background: var(--slice-surface);
+:root .dashboard-section__due-item,
+:root .settings-section__guide-item {
+  background: var(--slice-surface-muted);
+}
+
+:root .settings-section__guide-item:hover {
+  background: color-mix(in srgb, var(--slice-accent) 8%, var(--slice-surface-muted));
 }
 
 :root .lc-input,

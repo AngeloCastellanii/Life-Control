@@ -1,5 +1,5 @@
 import { SHOPPING_FREQUENCY } from '../lifeControlConstants.js';
-import { getDueStatus } from '../shoppingDue.js';
+import { formatShortDate, getDueStatus } from '../shoppingDue.js';
 import { getService } from '../../forms/formHelpers.js';
 import { shoppingItemById } from '../shoppingLookup.js';
 
@@ -164,10 +164,10 @@ export default class ShoppingSection extends HTMLElement {
 
       const parts = [status.label];
       if (item.lastDoneAt) {
-         parts.push(`Última vez: ${item.lastDoneAt}`);
+         parts.push(`Última vez: ${formatShortDate(item.lastDoneAt)}`);
       }
-      if (item.nextDueAt) {
-         parts.push(`Próxima: ${item.nextDueAt}`);
+      if (item.nextDueAt && !status.label.startsWith('Próximo:')) {
+         parts.push(`Próximo: ${formatShortDate(item.nextDueAt)}`);
       }
       this.$detailMeta.textContent = parts.join(' · ');
 

@@ -511,16 +511,66 @@
   }
 
   /* Settings */
+  .settings-section__hero {
+    @apply mb-6 flex items-center gap-4;
+  }
+
+  .settings-section__avatar {
+    @apply flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-bold;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary-color) 88%, #000),
+      var(--primary-color)
+    );
+    color: var(--primary-color-contrast);
+    box-shadow: var(--box-shadow-secondary, 0 4px 12px rgb(0 0 0 / 10%));
+  }
+
+  .settings-section__hero-text {
+    @apply min-w-0;
+  }
+
+  .settings-section__title {
+    @apply mb-1;
+  }
+
+  .settings-section__subtitle {
+    @apply m-0 text-sm leading-relaxed;
+    color: var(--font-secondary-color);
+  }
+
   .settings-section__grid {
     @apply grid gap-4 md:grid-cols-2;
   }
 
   .settings-section__card {
-    @apply flex flex-col gap-3;
+    @apply flex flex-col gap-4;
+  }
+
+  .settings-section__card-head,
+  .settings-section__guide-head {
+    @apply flex items-start gap-3;
+  }
+
+  .settings-section__card-icon {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-xl;
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    color: var(--primary-color);
+  }
+
+  .settings-section__card-icon svg,
+  .settings-section__guide-icon svg {
+    @apply h-5 w-5;
+  }
+
+  .settings-section__card-label {
+    @apply m-0 mb-0.5 text-[0.95rem] font-semibold tracking-tight;
+    color: var(--font-primary-color);
   }
 
   .settings-section__hint {
-    @apply m-0 text-sm text-lc-muted;
+    @apply m-0 text-[0.82rem] leading-snug;
+    color: var(--font-secondary-color);
   }
 
   .settings-section__field {
@@ -528,22 +578,108 @@
   }
 
   .settings-section__preview {
-    @apply m-0 rounded-lg border px-3 py-2 text-sm;
-    border-color: var(--tertiary-background-color);
-    color: var(--font-secondary-color);
+    @apply m-0 flex flex-col gap-1 rounded-xl border-l-[3px] px-3.5 py-3;
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 7%, var(--surface-elevated, var(--secondary-background-color)));
+  }
+
+  .settings-section__preview-label {
+    @apply text-[0.65rem] font-semibold uppercase tracking-wider;
+    color: var(--primary-color);
+  }
+
+  .settings-section__preview-text {
+    @apply text-[0.95rem] font-medium leading-snug;
+    color: var(--font-primary-color);
   }
 
   .settings-section__save {
-    @apply self-start;
+    @apply w-full cursor-pointer rounded-xl border-0 px-4 py-2.5 text-sm font-semibold transition-[transform,box-shadow,background];
+    background: var(--primary-color);
+    color: var(--primary-color-contrast);
+    box-shadow: var(--box-shadow-secondary, 0 4px 12px rgb(0 0 0 / 8%));
+  }
+
+  .settings-section__save:hover {
+    background: var(--primary-color-shade, var(--primary-color));
+    box-shadow: var(--box-shadow-primary, 0 8px 20px rgb(0 0 0 / 12%));
+  }
+
+  .settings-section__save:active {
+    @apply scale-[0.98];
   }
 
   .settings-section__status {
-    @apply m-0 text-sm;
+    @apply m-0 rounded-lg px-3 py-2 text-center text-sm;
+    background: color-mix(in srgb, var(--success-color) 12%, transparent);
     color: var(--success-color);
   }
 
   .settings-section__status--error {
+    background: color-mix(in srgb, var(--danger-color) 12%, transparent);
     color: var(--danger-color);
+  }
+
+  .settings-section__guide {
+    @apply mt-4 flex flex-col gap-4;
+  }
+
+  .settings-section__guide-list {
+    @apply m-0 flex flex-col gap-2;
+  }
+
+  .settings-section__guide-item {
+    @apply flex items-start gap-3 rounded-xl px-3 py-3 transition-colors;
+    background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-elevated, transparent));
+  }
+
+  .settings-section__guide-item:hover {
+    background: color-mix(in srgb, var(--primary-color) 9%, var(--surface-elevated, transparent));
+  }
+
+  .settings-section__guide-icon {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-lg;
+  }
+
+  .settings-section__guide-icon--dashboard {
+    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+    color: var(--primary-color);
+  }
+
+  .settings-section__guide-icon--planner {
+    background: color-mix(in srgb, #3b82f6 16%, transparent);
+    color: #2563eb;
+  }
+
+  .settings-section__guide-icon--finances {
+    background: color-mix(in srgb, #eab308 18%, transparent);
+    color: #a16207;
+  }
+
+  .settings-section__guide-icon--shopping {
+    background: color-mix(in srgb, #f97316 16%, transparent);
+    color: #c2410c;
+  }
+
+  .settings-section__guide-icon--domains {
+    background: color-mix(in srgb, #a855f7 16%, transparent);
+    color: #7e22ce;
+  }
+
+  .settings-section__guide-list dt {
+    @apply mb-0.5 text-[0.88rem] font-semibold;
+    color: var(--font-primary-color);
+  }
+
+  .settings-section__guide-list dd {
+    @apply m-0 text-[0.8rem] leading-snug;
+    color: var(--font-secondary-color);
+  }
+
+  @media (min-width: 768px) {
+    .settings-section__save {
+      @apply w-auto self-start;
+    }
   }
 
   /* CapacityRing */
