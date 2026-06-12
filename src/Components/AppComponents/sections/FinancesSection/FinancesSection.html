@@ -1,31 +1,53 @@
 <section class="finances-section">
-  <h1 class="lc-section-title">Finanzas</h1>
-  <p class="lc-section-subtitle">Billetera, pagos y cobros. Pulsa + para agregar.</p>
+  <header class="lc-view-hero">
+    <span class="lc-view-hero__icon lc-view-hero__icon--finances lc-icon-dollar" aria-hidden="true">$</span>
+    <div class="lc-view-hero__text">
+      <h1 class="lc-section-title lc-view-hero__title">Finanzas</h1>
+      <p class="lc-view-hero__subtitle">Billetera, pagos y cobros. Pulsa + para agregar.</p>
+    </div>
+  </header>
 
   <div class="finances-section__wallet lc-card">
-    <div class="finances-section__wallet-info">
-      <span class="finances-section__wallet-label">Dinero actual</span>
-      <p class="finances-section__wallet-hint">Al marcar pagado se descuenta; al cobrar se suma.</p>
+    <div class="lc-view-card-head finances-section__wallet-head">
+      <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
+      <div>
+        <h2 class="lc-view-card-label">Dinero actual</h2>
+        <p class="lc-view-hint">Al marcar pagado se descuenta; al cobrar se suma.</p>
+      </div>
     </div>
     <div class="finances-section__wallet-actions">
       <span class="finances-section__wallet-balance" data-role="wallet-balance">$0.00</span>
-      <button type="button" class="lc-btn-outline finances-section__wallet-adjust" data-role="wallet-adjust">Ajustar saldo</button>
+      <button type="button" class="finances-section__wallet-adjust" data-role="wallet-adjust">Ajustar saldo</button>
     </div>
   </div>
 
   <div class="finances-section__balance">
     <div class="finances-section__col finances-section__col--pay lc-card">
-      <div class="finances-section__col-head">
-        <h2 class="finances-section__col-title">Por pagar</h2>
-        <p class="finances-section__total" data-role="pay-total">$0.00</p>
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="lc-view-card-label">Por pagar</h2>
+          <p class="finances-section__total" data-role="pay-total">$0.00</p>
+        </div>
       </div>
       <ul class="finances-section__list" data-role="pay-list"></ul>
       <p class="finances-section__empty lc-empty" data-role="pay-empty" hidden>Sin pendientes por pagar.</p>
     </div>
     <div class="finances-section__col finances-section__col--receive lc-card">
-      <div class="finances-section__col-head">
-        <h2 class="finances-section__col-title">Por cobrar</h2>
-        <p class="finances-section__total" data-role="receive-total">$0.00</p>
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--receive" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M12 5v14M5 12l7 7 7-7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="lc-view-card-label">Por cobrar</h2>
+          <p class="finances-section__total" data-role="receive-total">$0.00</p>
+        </div>
       </div>
       <ul class="finances-section__list" data-role="receive-list"></ul>
       <p class="finances-section__empty lc-empty" data-role="receive-empty" hidden>Sin pendientes por cobrar.</p>

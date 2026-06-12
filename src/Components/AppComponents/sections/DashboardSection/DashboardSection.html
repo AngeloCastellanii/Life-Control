@@ -1,32 +1,50 @@
-<section>
-  <h1 class="lc-section-title" data-role="greeting-title">Bienvenido</h1>
-  <p class="lc-section-subtitle" data-role="date-subtitle">Resumen del día.</p>
+<section class="dashboard-section">
+  <header class="lc-view-hero">
+    <span class="lc-view-hero__icon lc-view-hero__icon--dashboard" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    </span>
+    <div class="lc-view-hero__text">
+      <h1 class="lc-section-title lc-view-hero__title" data-role="greeting-title">Bienvenido</h1>
+      <p class="lc-view-hero__subtitle" data-role="date-subtitle">Resumen del día.</p>
+    </div>
+  </header>
 
-  <div class="mb-5 grid gap-4 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
-    <div class="lc-card dashboard-section__capacity flex flex-col items-center gap-1.5">
-      <span class="dashboard-section__card-label">Capacidad hoy</span>
+  <div class="lc-view-stat-grid">
+    <div class="lc-card dashboard-section__capacity lc-view-stat">
+      <span class="lc-view-stat__label">Capacidad hoy</span>
       <div data-role="capacity-ring"></div>
-      <p class="dashboard-section__capacity-text" data-role="capacity-text">0 / 0 tareas completadas</p>
-      <span class="dashboard-section__pending-count" data-role="pending-count">0 pendientes</span>
+      <p class="lc-view-stat__meta" data-role="capacity-text">0 / 0 tareas completadas</p>
+      <span class="lc-view-stat__meta" data-role="pending-count">0 pendientes</span>
     </div>
-    <div class="lc-card flex flex-col gap-1.5">
-      <span class="dashboard-section__card-label">Tareas pendientes</span>
-      <span class="text-3xl font-bold" data-role="tasks-count">0</span>
+    <div class="lc-card lc-view-stat">
+      <span class="lc-view-stat__label">Tareas pendientes</span>
+      <span class="lc-view-stat__value" data-role="tasks-count">0</span>
     </div>
-    <div class="lc-card flex flex-col gap-1.5">
-      <span class="dashboard-section__card-label">Bloques hoy</span>
-      <span class="text-3xl font-bold" data-role="blocks-count">0</span>
+    <div class="lc-card lc-view-stat">
+      <span class="lc-view-stat__label">Bloques hoy</span>
+      <span class="lc-view-stat__value" data-role="blocks-count">0</span>
     </div>
-    <div class="lc-card flex flex-col gap-1.5">
-      <span class="dashboard-section__card-label">Tipo de cambio</span>
-      <span class="text-lg font-bold leading-snug" data-role="rate">—</span>
+    <div class="lc-card lc-view-stat">
+      <span class="lc-view-stat__label">Tipo de cambio</span>
+      <span class="lc-view-stat__value text-xl" data-role="rate">—</span>
       <button type="button" class="lc-btn-ghost text-left text-sm" data-role="rate-retry" hidden>Reintentar</button>
     </div>
   </div>
 
-  <div class="mb-5 grid gap-4 md:grid-cols-3">
+  <div class="lc-view-grid-3">
     <div class="lc-card">
-      <h2 class="lc-card-title">Finanzas</h2>
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
+        <div>
+          <h2 class="lc-view-card-label">Finanzas</h2>
+          <p class="lc-view-hint">Pagos y cobros pendientes.</p>
+        </div>
+      </div>
       <div class="dashboard-section__finance-row">
         <div>
           <span class="dashboard-section__finance-label">Por pagar</span>
@@ -39,32 +57,81 @@
       </div>
     </div>
     <div class="lc-card">
-      <h2 class="lc-card-title">Compras próximas</h2>
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--orange" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="20" r="1" />
+            <circle cx="18" cy="20" r="1" />
+            <path d="M2 3h2l2.4 12.4a2 2 0 0 0 2 1.6h9.2a2 2 0 0 0 2-1.6L22 7H6" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="lc-view-card-label">Compras próximas</h2>
+          <p class="lc-view-hint">Lo que vence en las próximas semanas.</p>
+        </div>
+      </div>
       <ul class="dashboard-section__due-list" data-role="shopping-due-list"></ul>
       <p class="lc-empty" data-role="shopping-due-empty" hidden>Sin vencimientos próximos.</p>
     </div>
     <div class="lc-card">
-      <span class="dashboard-section__card-label">Liquidez neta pendiente</span>
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--receive lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
+        <div>
+          <h2 class="lc-view-card-label">Liquidez pendiente</h2>
+          <p class="lc-view-hint">Solo ingresos por cobrar.</p>
+        </div>
+      </div>
       <span class="dashboard-section__net-value dashboard-section__finance-value--receive" data-role="net-liquidity">$0.00 USD</span>
       <span class="dashboard-section__net-bs" data-role="net-bs" hidden></span>
-      <p class="dashboard-section__net-hint">Solo ingresos por cobrar</p>
     </div>
   </div>
 
-  <div class="grid gap-4 md:grid-cols-3">
+  <div class="lc-view-grid-3">
     <div class="lc-card">
-      <h2 class="lc-card-title">Prioridad</h2>
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M12 9v4M12 17h.01" stroke-linecap="round" />
+            <path d="M10.3 4.3 3.6 17a2 2 0 0 0 1.7 3h13.4a2 2 0 0 0 1.7-3l-6.7-12.7a2 2 0 0 0-3.4 0z" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="lc-view-card-label">Prioridad</h2>
+          <p class="lc-view-hint">Tareas urgentes.</p>
+        </div>
+      </div>
       <ul class="dashboard-section__urgent-list" data-role="priority-list"></ul>
       <p class="lc-empty" data-role="priority-empty" hidden>Sin tareas urgentes.</p>
     </div>
     <div class="lc-card">
-      <h2 class="lc-card-title">En bloques</h2>
-      <ul class="flex list-none flex-col gap-2 p-0 m-0" data-role="recent-list"></ul>
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--blue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <rect x="4" y="5" width="16" height="15" rx="2" />
+            <path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="lc-view-card-label">En bloques</h2>
+          <p class="lc-view-hint">Tareas asignadas a bloques.</p>
+        </div>
+      </div>
+      <ul class="dashboard-section__recent-list" data-role="recent-list"></ul>
       <p class="lc-empty" data-role="recent-empty" hidden>Sin tareas en bloques.</p>
     </div>
     <div class="lc-card">
-      <h2 class="lc-card-title">Por dominio</h2>
-      <p class="lc-section-subtitle dashboard-section__domain-hint">Tareas pendientes agrupadas por área de vida.</p>
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--purple" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 3v2M12 19v2M3 12h2M19 12h2" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="lc-view-card-label">Por dominio</h2>
+          <p class="lc-view-hint">Pendientes por área de vida.</p>
+        </div>
+      </div>
       <ul class="dashboard-section__domain-list" data-role="domain-summary-list"></ul>
       <p class="lc-empty" data-role="domain-summary-empty" hidden>Sin dominios configurados.</p>
     </div>

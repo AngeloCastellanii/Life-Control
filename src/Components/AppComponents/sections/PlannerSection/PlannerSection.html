@@ -1,17 +1,26 @@
 <section class="planner-section">
-  <div class="planner-section__header">
-    <h1 class="lc-section-title">Planificador</h1>
-  </div>
+  <header class="lc-view-hero">
+    <span class="lc-view-hero__icon lc-view-hero__icon--planner" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <rect x="4" y="5" width="16" height="15" rx="2" />
+        <path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round" />
+      </svg>
+    </span>
+    <div class="lc-view-hero__text">
+      <h1 class="lc-section-title lc-view-hero__title">Planificador</h1>
+      <p class="lc-view-hero__subtitle">Organiza bloques, tareas y finanzas por día, semana o mes.</p>
+    </div>
+  </header>
 
-  <div class="planner-section__toolbar">
+  <div class="lc-card planner-section__toolbar">
     <div class="planner-section__nav">
       <button type="button" class="planner-section__nav-btn" data-role="prev" aria-label="Anterior">‹</button>
       <span class="planner-section__period" data-role="period-label"></span>
       <button type="button" class="planner-section__nav-btn" data-role="next" aria-label="Siguiente">›</button>
-      <button type="button" class="planner-section__today lc-btn-ghost" data-role="today">Hoy</button>
+      <button type="button" class="planner-section__today" data-role="today">Hoy</button>
     </div>
     <div class="planner-section__controls">
-      <button type="button" class="lc-btn-outline" data-role="add-block">Configurar Bloques</button>
+      <button type="button" class="planner-section__add-block" data-role="add-block">Configurar bloques</button>
       <div class="planner-section__view-toggle" data-role="view-toggle">
         <button type="button" class="planner-section__view-btn" data-view="day">Día</button>
         <button type="button" class="planner-section__view-btn" data-view="week">Semana</button>
@@ -24,17 +33,48 @@
     <div class="grid min-h-[360px] gap-4 lg:grid-cols-[7fr_3fr]">
       <div class="flex flex-col gap-4">
         <div class="lc-card">
-          <h2 class="lc-card-title">Flujo de finanzas del día</h2>
+          <div class="lc-view-card-head">
+            <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
+            <div>
+              <h2 class="lc-view-card-label">Flujo del día</h2>
+              <p class="lc-view-hint">Movimientos de caja para esta fecha.</p>
+            </div>
+          </div>
           <div class="planner-section__cash-flow" data-role="cash-flow"></div>
           <p class="lc-empty" data-role="cash-flow-empty" hidden>Sin movimientos para este día.</p>
         </div>
         <div class="lc-card">
+          <div class="lc-view-card-head">
+            <span class="lc-view-card-icon lc-view-card-icon--blue" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M3 10h18M8 2v4M16 2v4" stroke-linecap="round" />
+              </svg>
+            </span>
+            <div>
+              <h2 class="lc-view-card-label">Bloques de tiempo</h2>
+              <p class="lc-view-hint">Asigna tareas a cada franja del día.</p>
+            </div>
+          </div>
           <div class="flex flex-col gap-3" data-role="blocks"></div>
           <p class="lc-empty" data-role="blocks-empty" hidden>Sin bloques. Configura uno arriba.</p>
         </div>
       </div>
       <aside class="lc-card">
-        <h2 class="lc-card-title">Bandeja de Entrada <span class="planner-section__inbox-count" data-role="inbox-count"></span></h2>
+        <div class="lc-view-card-head">
+          <span class="lc-view-card-icon lc-view-card-icon--primary" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <path d="M22 12H2M22 6H2M22 18H2" stroke-linecap="round" />
+            </svg>
+          </span>
+          <div>
+            <h2 class="lc-view-card-label">
+              Bandeja de entrada
+              <span class="planner-section__inbox-count" data-role="inbox-count"></span>
+            </h2>
+            <p class="lc-view-hint">Tareas sin bloque asignado.</p>
+          </div>
+        </div>
         <div class="flex flex-col gap-2.5" data-role="tasks"></div>
         <p class="lc-empty" data-role="empty" hidden>Sin tareas. Pulsa +.</p>
       </aside>
