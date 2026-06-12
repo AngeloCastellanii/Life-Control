@@ -1,3 +1,5 @@
+import { preloadModalForms } from '../forms/preloadForms.js';
+
 export default class AppShell extends HTMLElement {
    constructor(props) {
       super();
@@ -8,6 +10,8 @@ export default class AppShell extends HTMLElement {
    }
 
    async init() {
+      await preloadModalForms();
+
       const sidebar = await slice.build('Sidebar', {
          sliceId: 'app-sidebar',
          items: [

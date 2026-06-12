@@ -13,7 +13,6 @@ import {
 
 export default class ShoppingForm extends HTMLElement {
    static props = {
-      sliceId: { type: 'string', default: 'shopping-form' },
       shoppingId: { type: 'string', default: null }
    };
 

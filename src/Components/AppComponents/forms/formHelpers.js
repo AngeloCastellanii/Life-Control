@@ -37,33 +37,48 @@ export function hideFormError(el) {
    el.hidden = true;
 }
 
-export async function buildModalButtons(form, { submitLabel = 'Guardar', onSubmit } = {}) {
-   form.$actions.innerHTML = '';
+function formActionsEl(form) {
+   return form.querySelector('[data-role="actions"]');
+}
+
+function formEl(form) {
+   return form.querySelector('[data-role="form"]');
+}
+
+export async function buildModalButtons(form, options = {}) {
+   const { submitLabel = 'Guardar', onSubmit } = options;
+   const actions = formActionsEl(form);
+   if (!actions) {
+      return false;
+   }
+
+   actions.innerHTML = '';
+   const formKey = form.sliceId || form.constructor?.name || 'form';
 
    const cancelBtn = await slice.build('Button', {
-      sliceId: `${form.sliceId}-cancel`,
+      ['sliceId']: `${formKey}-cancel`,
       value: 'Cancelar',
       variant: 'outlined',
-      onClick: () => closeModal()
+      ['onClick']: () => closeModal()
    });
    const submitBtn = await slice.build('Button', {
-      sliceId: `${form.sliceId}-submit`,
+      ['sliceId']: `${formKey}-submit`,
       value: submitLabel,
       variant: 'filled',
-      onClick: () => {
+      ['onClick']: () => {
          if (typeof onSubmit === 'function') {
             onSubmit();
             return;
          }
-         form.$form?.requestSubmit();
+         formEl(form)?.requestSubmit();
       }
    });
 
    if (cancelBtn) {
-      form.$actions.appendChild(cancelBtn);
+      actions.appendChild(cancelBtn);
    }
    if (submitBtn) {
-      form.$actions.appendChild(submitBtn);
+      actions.appendChild(submitBtn);
    }
 
    return Boolean(cancelBtn && submitBtn);

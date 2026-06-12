@@ -7,9 +7,7 @@ import {
 } from '../formHelpers.js';
 
 export default class FinanceForm extends HTMLElement {
-   static props = {
-      sliceId: { type: 'string', default: 'finance-form' }
-   };
+   static props = {};
 
    constructor(props) {
       super();

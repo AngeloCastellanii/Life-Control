@@ -1,5 +1,7 @@
 import { SHOPPING_FREQUENCY } from '../lifeControlConstants.js';
 import { getDueStatus } from '../shoppingDue.js';
+import { getService } from '../../forms/formHelpers.js';
+import { shoppingItemById } from '../shoppingLookup.js';
 
 const COLUMNS = [
    { frequency: SHOPPING_FREQUENCY.DAILY, list: 'daily-list', empty: 'daily-empty' },
@@ -48,11 +50,14 @@ export default class ShoppingSection extends HTMLElement {
       slice.controller.setComponentProps(this, props);
    }
 
+   getShoppingService() {
+      return getService('shopping-service', ['getAll', 'getById', 'toggleChecked', 'remove']);
+   }
+
    async init() {
-      this.shoppingService = slice.getComponent('shopping-service');
+      this.shoppingService = this.getShoppingService();
       if (!this.shoppingService) {
          slice.logger.logError('ShoppingSection', 'ShoppingService no disponible');
-         return;
       }
 
       for (const col of this.$columns) {
@@ -67,7 +72,14 @@ export default class ShoppingSection extends HTMLElement {
          (state) => state?.shopping ?? []
       );
 
-      this.render(this.shoppingService.getAll());
+      const items = this.shoppingService?.getAll?.() ?? slice.context.getState('lifeControl')?.shopping ?? [];
+      this.render(items);
+   }
+
+   async update() {
+      this.shoppingService = this.getShoppingService();
+      const items = slice.context.getState('lifeControl')?.shopping ?? this.shoppingService?.getAll?.() ?? [];
+      this.render(items);
    }
 
    getSelectedId(frequency) {
@@ -85,7 +97,7 @@ export default class ShoppingSection extends HTMLElement {
       if (!id) {
          return null;
       }
-      return this.shoppingService.getById(id);
+      return shoppingItemById(id, this.shoppingService);
    }
 
    syncSelectionStyles() {
@@ -126,14 +138,15 @@ export default class ShoppingSection extends HTMLElement {
    }
 
    async deleteSelected(frequency) {
+      const service = this.getShoppingService();
       const item = this.getSelectedItem(frequency);
-      if (!item) {
+      if (!item || !service) {
          return;
       }
       if (!window.confirm(`¿Eliminar "${item.name}"?`)) {
          return;
       }
-      await this.shoppingService.remove(item.id);
+      await service.remove(item.id);
       if (this._detailItemId === item.id) {
          this.hideDetail();
       }
@@ -178,6 +191,8 @@ export default class ShoppingSection extends HTMLElement {
          }
       }
 
+      const service = this.getShoppingService();
+
       for (const item of items) {
          const row = document.createElement('li');
          row.className = 'shopping-section__item';
@@ -194,7 +209,8 @@ export default class ShoppingSection extends HTMLElement {
          check.className = 'shopping-section__check';
          check.checked = !!item.checked;
          check.addEventListener('change', () => {
-            this.shoppingService.toggleChecked(item.id, check.checked);
+            const active = this.getShoppingService();
+            active?.toggleChecked?.(item.id, check.checked);
          });
 
          const body = document.createElement('div');
@@ -222,7 +238,10 @@ export default class ShoppingSection extends HTMLElement {
    }
 
    render(shopping) {
-      const list = Array.isArray(shopping) ? shopping : this.shoppingService.getAll();
+      const service = this.getShoppingService();
+      const list = Array.isArray(shopping)
+         ? shopping
+         : (service?.getAll?.() ?? slice.context.getState('lifeControl')?.shopping ?? []);
 
       for (const col of this.$columns) {
          const items = list.filter((item) => item.frequency === col.frequency);
@@ -232,7 +251,7 @@ export default class ShoppingSection extends HTMLElement {
       this.syncColumnButtons();
 
       if (this._detailItemId) {
-         const detailItem = this.shoppingService.getById(this._detailItemId);
+         const detailItem = shoppingItemById(this._detailItemId, service);
          if (detailItem) {
             this.showDetail(detailItem);
          } else {

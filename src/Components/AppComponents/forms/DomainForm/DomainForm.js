@@ -8,7 +8,6 @@ import {
 
 export default class DomainForm extends HTMLElement {
    static props = {
-      sliceId: { type: 'string', default: 'domain-form' },
       domainId: { type: 'string', default: null }
    };
 

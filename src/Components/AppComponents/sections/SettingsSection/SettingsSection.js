@@ -1,4 +1,3 @@
-import { getService } from '../../forms/formHelpers.js';
 import { greetingForName } from '../profileGreeting.js';
 
 export default class SettingsSection extends HTMLElement {
@@ -63,7 +62,31 @@ export default class SettingsSection extends HTMLElement {
    }
 
    updatePreview(name = this.$nameInput.value) {
-      this.$greetingPreview.textContent = `Vista previa: «${greetingForName(name)}»`;
+      const trimmed = name?.trim() ?? '';
+      const greeting = greetingForName(trimmed || 'Angelo');
+      const label = trimmed ? 'Vista previa' : 'Ejemplo';
+      this.$greetingPreview.textContent = `${label}: «${greeting}»`;
+   }
+
+   async ensureProfileService() {
+      const existing = slice.getComponent('profile-service');
+      if (existing && typeof existing.setDisplayName === 'function') {
+         return existing;
+      }
+
+      const service = await slice.build('ProfileService', {
+         sliceId: 'profile-service',
+         singleton: true
+      });
+      if (!service) {
+         return null;
+      }
+
+      if (typeof service.init === 'function' && !service.storage) {
+         await service.init();
+      }
+
+      return typeof service.setDisplayName === 'function' ? service : null;
    }
 
    showStatus(message, isError = false) {
@@ -73,7 +96,7 @@ export default class SettingsSection extends HTMLElement {
    }
 
    async saveName() {
-      const profileService = getService('profile-service', ['setDisplayName']);
+      const profileService = await this.ensureProfileService();
       if (!profileService) {
          this.showStatus('Servicio no disponible. Recarga la página.', true);
          return;

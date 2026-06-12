@@ -7,9 +7,7 @@ import {
 } from '../formHelpers.js';
 
 export default class WalletForm extends HTMLElement {
-   static props = {
-      sliceId: { type: 'string', default: 'wallet-form' }
-   };
+   static props = {};
 
    constructor(props) {
       super();

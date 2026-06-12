@@ -13,7 +13,6 @@ function minutesBetween(start, end) {
 
 export default class BlockForm extends HTMLElement {
    static props = {
-      sliceId: { type: 'string', default: 'block-form' },
       blockId: { type: 'string', default: null }
    };
 

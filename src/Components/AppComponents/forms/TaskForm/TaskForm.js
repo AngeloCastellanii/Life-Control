@@ -8,7 +8,6 @@ import {
 
 export default class TaskForm extends HTMLElement {
    static props = {
-      sliceId: { type: 'string', default: 'task-form' },
       taskId: { type: 'string', default: null }
    };
 
