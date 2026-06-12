@@ -49,12 +49,8 @@ export default class PlannerSection extends HTMLElement {
    }
 
    async init() {
-      this.taskService = slice.getComponent('task-service');
-      this.domainService = slice.getComponent('domain-service');
-      this.timeBlockService = slice.getComponent('time-block-service');
-      this.financeService = slice.getComponent('finance-service');
-      this.shoppingService = slice.getComponent('shopping-service');
-      if (!this.taskService || !this.domainService || !this.timeBlockService) {
+      this._bindServices();
+      if (!this._servicesReady()) {
          return;
       }
 
@@ -116,12 +112,23 @@ export default class PlannerSection extends HTMLElement {
       this.renderAll();
    }
 
-   async update() {
+   _bindServices() {
       this.taskService = slice.getComponent('task-service');
       this.domainService = slice.getComponent('domain-service');
       this.timeBlockService = slice.getComponent('time-block-service');
       this.financeService = slice.getComponent('finance-service');
       this.shoppingService = slice.getComponent('shopping-service');
+   }
+
+   _servicesReady() {
+      return Boolean(this.taskService && this.domainService && this.timeBlockService);
+   }
+
+   async update() {
+      this._bindServices();
+      if (!this._servicesReady()) {
+         return;
+      }
       await this.renderAll();
    }
 
@@ -184,12 +191,11 @@ export default class PlannerSection extends HTMLElement {
    }
 
    tasksForDay(iso) {
-      return this.taskService.getAll().filter((task) => taskBelongsToDay(task, iso));
+      return (this.taskService?.getAll?.() ?? []).filter((task) => taskBelongsToDay(task, iso));
    }
 
    inboxTasks() {
-      return this.taskService
-         .getAll()
+      return (this.taskService?.getAll?.() ?? [])
          .filter((task) => {
             if (task.blockId) {
                return false;
@@ -220,6 +226,10 @@ export default class PlannerSection extends HTMLElement {
    }
 
    async renderAll() {
+      if (!this._servicesReady()) {
+         return;
+      }
+
       if (this._renderingAll) {
          this._renderPending = true;
          return;
@@ -437,7 +447,7 @@ export default class PlannerSection extends HTMLElement {
    renderWeekView() {
       this.$weekGrid.innerHTML = '';
       const days = getWeekDays(this._cursorDate);
-      const tasks = this.taskService.getAll();
+      const tasks = this.taskService?.getAll?.() ?? [];
 
       for (const iso of days) {
          const column = document.createElement('article');
@@ -543,7 +553,7 @@ export default class PlannerSection extends HTMLElement {
 
    renderMonthView() {
       this.$monthGrid.innerHTML = '';
-      const tasks = this.taskService.getAll();
+      const tasks = this.taskService?.getAll?.() ?? [];
       const weeks = getMonthMatrix(this._cursorDate);
 
       for (const week of weeks) {

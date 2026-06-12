@@ -4,13 +4,19 @@ const PROFILE_ID = 'profile';
 export default class ProfileService {
    async init() {
       this.storage = slice.getComponent('storage-service');
-      if (!this.storage?.db) {
-         await this.storage?.init();
+      if (!this.storage) {
+         return;
+      }
+      if (!this.storage.db) {
+         await this.storage.init();
       }
       await this.syncToContext();
    }
 
    async syncToContext() {
+      if (!this.storage) {
+         return;
+      }
       const items = await this.storage.getAll(META_STORE);
       const stored = items.find((item) => item.id === PROFILE_ID);
       const displayName = stored?.displayName?.trim() ?? '';

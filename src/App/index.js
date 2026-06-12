@@ -72,13 +72,17 @@ slice.router.afterEach((to) => {
    document.title = `${to.metadata?.title ?? 'Life Control'} · Life Control`;
 });
 
+let bootstrapOk = false;
+
 try {
    await bootstrapLifeControl();
-   if (!slice.router._started) {
-      await slice.router.start();
-   }
+   bootstrapOk = true;
 } catch (error) {
    console.error('Error al iniciar Life Control:', error);
 } finally {
    slice.loading?.stop();
+}
+
+if (bootstrapOk && !slice.router._started) {
+   await slice.router.start();
 }
