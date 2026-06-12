@@ -51,11 +51,6 @@ export default class PlannerSection extends HTMLElement {
    }
 
    async init() {
-      this._bindServices();
-      if (!this._servicesReady()) {
-         return;
-      }
-
       this.$addBlock.addEventListener('click', () => {
          slice.events.emit('ui:modal:open', {
             title: 'Configurar Contenedor de Tiempo',
@@ -77,6 +72,11 @@ export default class PlannerSection extends HTMLElement {
          }
          this.setViewMode(button.dataset.view);
       });
+
+      this._bindServices();
+      if (!this._servicesReady()) {
+         return;
+      }
 
       this._plannerWatchPrev = null;
       slice.context.watch(
