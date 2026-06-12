@@ -774,6 +774,10 @@
     @apply scale-[0.98];
   }
 
+  .settings-section__cache-btn {
+    @apply w-full py-2.5 text-sm font-semibold;
+  }
+
   .settings-section__status {
     @apply m-0 rounded-lg px-3 py-2 text-center text-sm;
     background: color-mix(in srgb, var(--success-color) 12%, transparent);

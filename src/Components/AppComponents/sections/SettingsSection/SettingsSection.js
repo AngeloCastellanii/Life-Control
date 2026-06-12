@@ -1,3 +1,5 @@
+import { clearAppCacheAndReload } from '../clearAppCache.js';
+
 export default class SettingsSection extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'settings-section' },
@@ -12,6 +14,8 @@ export default class SettingsSection extends HTMLElement {
       this.$nameInput = this.querySelector('#settings-display-name');
       this.$saveName = this.querySelector('[data-role="save-name"]');
       this.$saveStatus = this.querySelector('[data-role="save-status"]');
+      this.$clearCache = this.querySelector('[data-role="clear-cache"]');
+      this.$cacheStatus = this.querySelector('[data-role="cache-status"]');
       this.$themeMount = this.querySelector('[data-role="theme-mount"]');
       slice.controller.setComponentProps(this, props);
    }
@@ -25,6 +29,7 @@ export default class SettingsSection extends HTMLElement {
       }
 
       this.$saveName.addEventListener('click', () => this.saveName());
+      this.$clearCache.addEventListener('click', () => this.clearCache());
       this.$nameInput.addEventListener('input', () => this.updateAvatar());
       this.$nameInput.addEventListener('keydown', (event) => {
          if (event.key === 'Enter') {
@@ -90,6 +95,31 @@ export default class SettingsSection extends HTMLElement {
       this.$saveStatus.textContent = message;
       this.$saveStatus.hidden = false;
       this.$saveStatus.classList.toggle('settings-section__status--error', isError);
+   }
+
+   showCacheStatus(message, isError = false) {
+      this.$cacheStatus.textContent = message;
+      this.$cacheStatus.hidden = false;
+      this.$cacheStatus.classList.toggle('settings-section__status--error', isError);
+   }
+
+   async clearCache() {
+      if (this._clearingCache) {
+         return;
+      }
+
+      this._clearingCache = true;
+      this.$clearCache.disabled = true;
+      this.showCacheStatus('Limpiando caché…');
+
+      try {
+         await clearAppCacheAndReload();
+      } catch (error) {
+         console.error('SettingsSection clearCache:', error);
+         this.showCacheStatus('No se pudo limpiar. Recarga manualmente.', true);
+         this.$clearCache.disabled = false;
+         this._clearingCache = false;
+      }
    }
 
    async saveName() {
