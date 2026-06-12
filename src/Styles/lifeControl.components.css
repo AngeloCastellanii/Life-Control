@@ -1289,11 +1289,11 @@
   }
 
   .planner-week {
-    @apply grid gap-3 md:grid-cols-7;
+    @apply grid min-w-0 gap-3 md:grid-cols-7;
   }
 
   .planner-week__day {
-    @apply flex min-h-[220px] flex-col gap-2 rounded-xl border p-2;
+    @apply flex min-h-[220px] min-w-0 flex-col gap-2 overflow-hidden rounded-xl border p-2;
     border-color: var(--tertiary-background-color);
   }
 
@@ -1307,7 +1307,7 @@
   }
 
   .planner-week__section {
-    @apply flex flex-col gap-1;
+    @apply flex min-w-0 flex-col gap-1;
   }
 
   .planner-week__section-title {
@@ -1320,20 +1320,24 @@
 
   .planner-week__task,
   .planner-week__payment {
-    @apply rounded-md border px-2 py-1 text-left text-xs;
+    @apply max-w-full min-w-0 overflow-hidden rounded-md border px-2 py-1 text-left text-xs;
     border-color: var(--tertiary-background-color);
   }
 
   .planner-week__task {
-    @apply flex flex-col items-start gap-1;
+    @apply flex w-full min-w-0 flex-col items-start gap-1;
   }
 
   .planner-week__task-domain {
-    @apply max-w-full;
+    @apply max-w-full truncate;
   }
 
   .planner-week__task-title {
-    @apply truncate text-left;
+    @apply w-full min-w-0 truncate text-left;
+  }
+
+  .planner-week__payment {
+    @apply block truncate;
   }
 
   .planner-week__payment--income {
