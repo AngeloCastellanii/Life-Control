@@ -1,6 +1,6 @@
 import { FINANCE_TYPE } from '../lifeControlConstants.js';
 import { getDueStatus } from '../shoppingDue.js';
-import { formatDayLong, todayISO } from '../plannerDates.js';
+import { formatDayLong, taskActiveOnDay, todayISO } from '../plannerDates.js';
 import { domainForTask } from '../domainLookup.js';
 import { greetingForName } from '../profileGreeting.js';
 
@@ -121,7 +121,7 @@ export default class DashboardSection extends HTMLElement {
       this.$dateSubtitle.textContent = formatDayLong(today);
 
       const pending = tasks.filter((task) => !task.completed);
-      const todayTasks = tasks.filter((task) => task.scheduledDate === today || (!task.scheduledDate && task.blockId));
+      const todayTasks = tasks.filter((task) => taskActiveOnDay(task, today));
       const completedToday = todayTasks.filter((task) => task.completed).length;
       const totalToday = todayTasks.length || pending.length;
       const completedForRing = todayTasks.length ? completedToday : tasks.filter((task) => task.completed).length;

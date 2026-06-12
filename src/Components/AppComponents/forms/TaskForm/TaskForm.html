@@ -20,9 +20,17 @@
     <label class="lc-label" for="task-form-minutes">Duración (min)</label>
     <input class="lc-input" id="task-form-minutes" type="number" min="1" step="1" value="30" required />
   </div>
-  <div>
-    <label class="lc-label" for="task-form-date">Fecha planificada</label>
-    <input class="lc-input" id="task-form-date" type="date" />
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <label class="lc-label" for="task-form-start">Desde (inbox)</label>
+      <p class="lc-hint">Aparece en el inbox a partir de este día.</p>
+      <input class="lc-input" id="task-form-start" type="date" />
+    </div>
+    <div>
+      <label class="lc-label" for="task-form-due">Fecha tope</label>
+      <p class="lc-hint">Último día en inbox si no está en un bloque.</p>
+      <input class="lc-input" id="task-form-due" type="date" />
+    </div>
   </div>
   <p class="lc-empty" data-role="hint" hidden>Crea un dominio antes de añadir tareas.</p>
   <p class="block-form__error" data-role="error" hidden></p>

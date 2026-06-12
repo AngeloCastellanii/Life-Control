@@ -5,6 +5,7 @@ import {
    hideFormError,
    showFormError
 } from '../formHelpers.js';
+import { taskDateRange, todayISO } from '../../sections/plannerDates.js';
 
 export default class TaskForm extends HTMLElement {
    static props = {
@@ -21,7 +22,8 @@ export default class TaskForm extends HTMLElement {
       this.$titleInput = this.querySelector('#task-form-title');
       this.$urgencySelect = this.querySelector('#task-form-urgency');
       this.$minutesInput = this.querySelector('#task-form-minutes');
-      this.$dateInput = this.querySelector('#task-form-date');
+      this.$startInput = this.querySelector('#task-form-start');
+      this.$dueInput = this.querySelector('#task-form-due');
       this.$error = this.querySelector('[data-role="error"]');
       this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
@@ -64,6 +66,9 @@ export default class TaskForm extends HTMLElement {
       this.fillDomains();
       if (this.taskId) {
          this.loadTask(this.taskId);
+      } else {
+         this.$startInput.value = todayISO();
+         this.$dueInput.value = '';
       }
    }
 
@@ -100,7 +105,9 @@ export default class TaskForm extends HTMLElement {
       this.$urgencySelect.value = task.urgency ?? 'medium';
       this.$minutesInput.value = String(task.minutes ?? 30);
       this.$domainSelect.value = task.domainId;
-      this.$dateInput.value = task.scheduledDate ?? '';
+      const { start, end } = taskDateRange(task);
+      this.$startInput.value = start ?? '';
+      this.$dueInput.value = end ?? '';
    }
 
    async handleSubmit() {
@@ -125,12 +132,20 @@ export default class TaskForm extends HTMLElement {
          return;
       }
 
+      const startDate = this.$startInput.value || null;
+      const dueDate = this.$dueInput.value || null;
+      if (startDate && dueDate && startDate > dueDate) {
+         showFormError(this.$error, 'La fecha tope no puede ser anterior al inicio.');
+         return;
+      }
+
       const payload = {
          title,
          domainId,
          urgency: this.$urgencySelect.value,
          minutes: this.$minutesInput.value,
-         scheduledDate: this.$dateInput.value || null
+         startDate: startDate || (dueDate ? dueDate : todayISO()),
+         dueDate
       };
 
       this._submitting = true;

@@ -104,9 +104,68 @@ export function daysUntil(iso, fromIso = todayISO()) {
    return Math.round((target - from) / 86400000);
 }
 
-/** Tarea visible solo en su fecha planificada (historial al revisar días pasados). */
+/** Rango de fechas (compatible con scheduledDate legacy). */
+export function taskDateRange(task) {
+   const due = task?.dueDate ?? task?.scheduledDate ?? null;
+   const start = task?.startDate ?? due ?? null;
+   const end = due ?? start ?? null;
+   return { start, end };
+}
+
+/** El día cae dentro del rango activo de la tarea. */
+export function taskActiveOnDay(task, iso) {
+   const { start, end } = taskDateRange(task);
+   if (start && iso < start) {
+      return false;
+   }
+   if (end && iso > end) {
+      return false;
+   }
+   return true;
+}
+
+/** Inbox: visible entre inicio y tope; completadas solo como historial en días pasados. */
+export function taskInInboxOnDay(task, iso, today = todayISO()) {
+   if (task?.blockId) {
+      return false;
+   }
+   if (!taskActiveOnDay(task, iso)) {
+      return false;
+   }
+   if (task.completed) {
+      return iso < today;
+   }
+   return true;
+}
+
+/** Bloque: visible en el rango; completadas quedan como historial hasta hoy. */
+export function taskInBlockOnDay(task, iso, today = todayISO()) {
+   if (!task?.blockId) {
+      return false;
+   }
+   if (!taskActiveOnDay(task, iso)) {
+      return false;
+   }
+   if (task.completed) {
+      return iso <= today;
+   }
+   return true;
+}
+
+/** Semana / mes: tareas activas o historial en días pasados. */
+export function taskShowsOnCalendarDay(task, iso, today = todayISO()) {
+   if (!taskActiveOnDay(task, iso)) {
+      return false;
+   }
+   if (task.completed) {
+      return iso < today;
+   }
+   return true;
+}
+
+/** @deprecated Usar taskActiveOnDay / taskInBlockOnDay */
 export function taskBelongsToDay(task, iso) {
-   return Boolean(task?.scheduledDate) && task.scheduledDate === iso;
+   return taskInBlockOnDay(task, iso);
 }
 
 export function dueBadgeLabel(iso, fromIso = todayISO()) {

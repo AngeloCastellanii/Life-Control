@@ -45,11 +45,14 @@ export default class TaskService {
       return this.getAll().find((t) => t.id === id) ?? null;
    }
 
-   async create({ title, urgency, minutes, domainId, blockId = null, scheduledDate = null }) {
+   async create({ title, urgency, minutes, domainId, blockId = null, startDate = null, dueDate = null, scheduledDate = null }) {
       const trimmed = title?.trim();
       if (!trimmed || !domainId) {
          return null;
       }
+
+      const resolvedDue = dueDate || scheduledDate || null;
+      const resolvedStart = startDate || resolvedDue || todayISO();
 
       const task = {
          id: crypto.randomUUID(),
@@ -58,7 +61,9 @@ export default class TaskService {
          minutes: Math.max(1, Number(minutes) || 30),
          domainId,
          blockId,
-         scheduledDate: scheduledDate || null,
+         startDate: resolvedStart,
+         dueDate: resolvedDue,
+         scheduledDate: resolvedDue,
          completed: false
       };
 
@@ -80,7 +85,15 @@ export default class TaskService {
          ...patch,
          id,
          title: patch.title?.trim() ?? existing.title,
-         minutes: patch.minutes !== undefined ? Math.max(1, Number(patch.minutes) || 30) : existing.minutes
+         minutes: patch.minutes !== undefined ? Math.max(1, Number(patch.minutes) || 30) : existing.minutes,
+         startDate: patch.startDate !== undefined ? patch.startDate || null : existing.startDate ?? null,
+         dueDate: patch.dueDate !== undefined ? patch.dueDate || null : existing.dueDate ?? existing.scheduledDate ?? null,
+         scheduledDate:
+            patch.dueDate !== undefined
+               ? patch.dueDate || null
+               : patch.scheduledDate !== undefined
+                 ? patch.scheduledDate || null
+                 : existing.dueDate ?? existing.scheduledDate ?? null
       };
 
       await this.storage.put(STORE, updated);

@@ -11,7 +11,9 @@ import {
    getMonthMatrix,
    getWeekDays,
    isSameDay,
-   taskBelongsToDay,
+   taskInBlockOnDay,
+   taskInInboxOnDay,
+   taskShowsOnCalendarDay,
    todayISO
 } from '../plannerDates.js';
 
@@ -191,20 +193,13 @@ export default class PlannerSection extends HTMLElement {
    }
 
    tasksForDay(iso) {
-      return (this.taskService?.getAll?.() ?? []).filter((task) => taskBelongsToDay(task, iso));
+      return (this.taskService?.getAll?.() ?? []).filter((task) => taskShowsOnCalendarDay(task, iso));
    }
 
    inboxTasks() {
-      return (this.taskService?.getAll?.() ?? [])
-         .filter((task) => {
-            if (task.blockId) {
-               return false;
-            }
-            if (!task.scheduledDate) {
-               return true;
-            }
-            return taskBelongsToDay(task, this._cursorDate);
-         });
+      return (this.taskService?.getAll?.() ?? []).filter((task) =>
+         taskInInboxOnDay(task, this._cursorDate)
+      );
    }
 
    updateToolbar() {
@@ -345,7 +340,7 @@ export default class PlannerSection extends HTMLElement {
          const usedMinutes = this.timeBlockService.usedMinutes(block.id);
          const blockTasks = this.taskService
             .getAll()
-            .filter((t) => t.blockId === block.id && taskBelongsToDay(t, this._cursorDate));
+            .filter((t) => t.blockId === block.id && taskInBlockOnDay(t, this._cursorDate));
          const blockEl = await slice.build('TimeBlock', {
             sliceId: `planner-block-${block.id}`,
             block,
@@ -429,8 +424,8 @@ export default class PlannerSection extends HTMLElement {
                ...this.taskCardActions(task),
                onAssignToBlock: async (taskId, blockId) => {
                   const current = this.taskService.getById(taskId);
-                  if (current && !current.scheduledDate) {
-                     await this.taskService.update(taskId, { scheduledDate: this._cursorDate });
+                  if (current && !current.startDate && !current.dueDate && !current.scheduledDate) {
+                     await this.taskService.update(taskId, { startDate: this._cursorDate });
                   }
                   await this.timeBlockService.assignTask(blockId, taskId);
                }
@@ -472,7 +467,7 @@ export default class PlannerSection extends HTMLElement {
          tasksTitle.textContent = 'Tareas';
          tasksSection.appendChild(tasksTitle);
 
-         const dayTasks = tasks.filter((task) => taskBelongsToDay(task, iso));
+         const dayTasks = tasks.filter((task) => taskShowsOnCalendarDay(task, iso));
          if (dayTasks.length === 0) {
             const empty = document.createElement('p');
             empty.className = 'planner-week__empty';
@@ -575,7 +570,7 @@ export default class PlannerSection extends HTMLElement {
             const list = document.createElement('div');
             list.className = 'planner-month__list';
 
-            const dayTasks = tasks.filter((task) => taskBelongsToDay(task, cell.iso));
+            const dayTasks = tasks.filter((task) => taskShowsOnCalendarDay(task, cell.iso));
             for (const task of dayTasks.slice(0, 3)) {
                list.appendChild(this.monthTaskLine(task));
             }
