@@ -1,120 +1,140 @@
 # Progress — Life Control
 
-Apuntes del proyecto con **Slice.js** y **pnpm**. Todo armado por composición: servicios, contexto y componentes.
+Registro de avance del proyecto web **Life Control**, desarrollado con **Slice.js**, **pnpm**, **Tailwind CSS v4** e **IndexedDB**. Organizador personal de tareas, planificación, finanzas y compras.
+
+**Demo en producción:** https://lifecontrol-a5i4.onrender.com  
+**Repositorio:** GitHub — `AngeloCastellanii/Life-Control`
 
 ---
 
-## Qué he hecho
+## Resumen
 
-| # | Qué | Listo |
-|---|-----|-------|
-| 1 | Proyecto base Slice | ✅ |
-| 2 | Temas Light / Dark / Slice / Obsidian | ✅ |
-| 3 | Contexto + IndexedDB | ✅ |
-| 4 | Dominios (crear, editar, borrar) | ✅ |
-| 5 | Tareas + TaskCard | ✅ |
-| — | Sidebar (escritorio / tabs abajo en móvil) | ✅ |
-| — | FAB + modal shell con blur | ✅ |
-| — | Formularios en modal por ruta | ✅ |
-| — | 5 rutas + secciones completas | ✅ |
-| — | Dashboard + API tipo de cambio | ✅ |
-| — | Planificador: bloques de tiempo + inbox | ✅ |
-| — | Finanzas: pagar / cobrar | ✅ |
-| — | Compras: listas por frecuencia | ✅ |
-| — | UI con Tailwind + clases `.lc-*` | ✅ |
-| — | Tipografía Plus Jakarta Sans | ✅ |
+Life Control centraliza la gestión diaria en una SPA componentizada: dashboard resumen, planificador con bloques de tiempo, finanzas, listas de compras, dominios (etiquetas) y perfil de usuario. Los datos persisten en el navegador (IndexedDB). El tipo de cambio USD se obtiene de una API externa.
 
 ---
 
-## Lo que ya hay
+## Cumplimiento de requerimientos técnicos (R01–R10)
 
-- `pnpm dev`, scripts del CLI local (`pnpm slice:*`).
-- **Temas**: Light, Dark, **Slice** (Amethyst Geode) y **Obsidian** (Obsidian Chrome). Selector en sidebar. Tras editar un tema custom, borrar `sliceTheme-*` en Local Storage si no se reflejan los cambios.
-- **IndexedDB** (`life-control`) y contexto `lifeControl`.
-- **Dominios**: crear, **editar** (nombre y color), listar, borrar.
-- **Tareas**: `TaskCard` con urgencia, minutos, checkbox, editar y borrar.
-- **Dashboard**: capacidad (completadas/pendientes), bloques, tipo de cambio, finanzas, compras próximas, prioridad, en bloques, **liquidez neta pendiente** (solo ingresos por cobrar).
-- **Finanzas**: billetera **Dinero actual** (ajustable); al marcar pagado descuenta, al cobrar suma.
-- **Planificador**: vistas **Día / Semana / Mes**, navegación de fechas, flujo de caja del día, bandeja de entrada, bloques de tiempo. Tareas con `scheduledDate` opcional.
-- **Finanzas**: columnas por pagar / por cobrar, totales pendientes, marcar pagado/cobrado, crear y borrar (`FinanceForm`).
-- **Compras**: 4 columnas por frecuencia con **fechas** (`nextDueAt`, `lastDoneAt`). Formulario permite fijar **última vez** y **próxima fecha** (útil si ya pagaste antes de usar la app). Al marcar hecho calcula la próxima. Botones ✎ y × arriba de cada columna; clic en el nombre → detalle.
-- **Sidebar**: Dashboard, Planificador, Finanzas, Compras, Dominios. Tema abajo del menú.
-- **FAB** (+) abre modal según la ruta (`DomainForm`, `TaskForm`, `BlockForm`, `FinanceForm`, `ShoppingForm`).
-- Modal: cierra con ×, fondo, Esc o `ui:modal:close` al guardar.
-- Servicios en `Service/Nombre/Nombre.js` (ruta que pide Slice).
-- **Slice** CLI v3.6.3 · framework v3.3.4.
+| ID | Requerimiento | Implementación en Life Control | Estado |
+|----|---------------|--------------------------------|--------|
+| R01 | Framework basado en componentes | Slice.js 3.3.x — Web Components, `slice.build`, registry en `components.js` | ✅ |
+| R02 | Contexto / state global | Contexto `lifeControl` (`tasks`, `domains`, `timeBlocks`, `finances`, `shopping`, `profile`, `exchangeRate`) | ✅ |
+| R03 | Gestor de eventos | `slice.events` — p. ej. `ui:modal:open`, `ui:modal:close`, `router:change`, `task:changed` | ✅ |
+| R04 | Tema claro y oscuro | `ThemeManager` — temas **Light** y **Dark**; preferencia en `localStorage` | ✅ |
+| R05 | Tema visual propio | Temas custom **Slice** y **Obsidian** + sistema `.lc-*` documentado en README | ✅ |
+| R06 | ≥3 entidades persistidas | Dominios, tareas, bloques de tiempo, finanzas, compras (IndexedDB `life-control`) | ✅ |
+| R07 | Modal interactivo | `ModalShell` + formularios (`TaskForm`, `DomainForm`, `FinanceForm`, etc.) vía eventos | ✅ |
+| R08 | ≥3 vistas con router | 6 rutas: `/`, `/planner`, `/finances`, `/shopping`, `/domains`, `/settings` | ✅ |
+| R09 | API externa | `ExchangeRateService` → Open Exchange Rates (`open.er-api.com`); estados loading/success/error | ✅ |
+| R10 | Arquitectura componentizada | Carpetas `sections`, `forms`, `atoms`, `shell`, `Service`, utilidades (`plannerDates.js`, etc.) | ✅ |
 
 ---
 
-## Problemas y arreglos
+## Funcionalidades implementadas
 
-**Puertos 3001/3002 ocupados** — viejos `pnpm dev` colgados. Cerrar terminales o `taskkill`.
+### Núcleo
+- Bootstrap en `App/index.js`: servicios singleton, arranque del router tras inicialización correcta.
+- Persistencia con `StorageService` (IndexedDB, stores: `domains`, `tasks`, `timeBlocks`, `finances`, `shopping`, `meta`).
+- Sincronización servicios → contexto `lifeControl` → vistas reactivas (`slice.context.watch`).
 
-**Pizza cargando forever** — loading no se apagaba. `finally` + `loading.stop()` en `App/index.js`.
+### Vistas
+- **Dashboard:** saludo personalizado, capacidad del día, tipo de cambio, finanzas pendientes, compras próximas, liquidez neta, resumen por dominio.
+- **Planificador:** vistas Día / Semana / Mes; bloques de tiempo (Mañana, Tarde, Noche); inbox; flujo de caja del día; tareas con **fecha desde** y **fecha tope**; historial al revisar días pasados.
+- **Finanzas:** pagos y cobros, billetera ajustable, marcar liquidado.
+- **Compras:** columnas por frecuencia (diaria, semanal, mensual, anual) con fechas `lastDoneAt` / `nextDueAt`.
+- **Dominios:** CRUD con nombre y color.
+- **Perfil:** nombre de usuario, selector de tema, guía de uso, botón **Limpiar caché y recargar** (PWA/navegador).
 
-**Actualizar Slice** — `pnpm slice:update` o `pnpm add` de `slicejs-cli` y `slicejs-web-framework`.
+### UI / UX
+- Sidebar responsive (escritorio / tabs inferiores en móvil).
+- FAB contextual por ruta (+ abre el formulario correspondiente).
+- Estilos compartidos `.lc-view-*`, `.lc-card`, `.lc-input` en `lifeControl.components.css`.
+- Tipografía **Plus Jakarta Sans**.
+- PWA: `manifest.json`, iconos SVG/PNG, meta theme-color, apple-touch-icon.
 
-**/domains vacío** — `MultiRoute` no renderizaba. `render()` al iniciar + evento `router:change`.
+### Deploy
+- **Render:** build `pnpm run build`, start `node api/index.js`, `NODE_ENV=production`.
 
-**Dominios no guardaban** — servicios en carpeta plana; Slice pide subcarpeta `Service/X/X.js`.
-
-**Al crear, dominios duplicados** — botón y form hacían doble submit. `requestSubmit()` + `_submitting`.
-
-**Al borrar, se vacía toda la lista** — barrido de `activeComponents` rompía cosas. En dominios: solo `innerHTML = ''`. En tareas: destruir solo `task-card-*`.
-
-**Datos raros en IndexedDB** — pruebas viejas con duplicados. Borrar DB en DevTools → Application → `life-control` y volver a crear.
-
-**sliceId duplicado (task-card, sections)** — re-build sin destruir instancias. MultiRoute usa `section-Nombre` fijo; Planner destruye cards antes de re-render.
-
-**Bloques no se guardaban** — `renderBlocks` destruía `time-block-service` porque su id empezaba con `time-block-`. Los bloques visuales usan `planner-block-{id}`.
-
-**Tema Slice no actualiza** — caché en `localStorage` (`sliceTheme-Slice`). Borrar y recargar.
-
-**Deploy en Vercel** — Igual que el repo del profe: `vercel.json` con rewrite a `/api/`, script **`build`** en `package.json`, carpeta `api/index.js`. **Output Directory vacío** en el panel. `includeFiles: dist/**` en functions. Alternativa: **Render** con `pnpm start`.
 
 ---
 
-## Probar
+## Stack y versiones
+
+| Herramienta | Versión |
+|-------------|---------|
+| Node.js | ≥ 20 |
+| pnpm | 11.2.x |
+| slicejs-web-framework | 3.3.6 |
+| slicejs-cli | 3.6.3 |
+| Tailwind CSS | 4.3.x |
+
+---
+
+## Arquitectura (partes más trabajadss)
+
+```
+src/
+├── App/                 # index.html, index.js, bootstrap
+├── routes.js            # Rutas de la SPA
+├── Components/
+│   ├── AppComponents/   # sections, forms, atoms, shell
+│   └── Service/         # Lógica de datos y API
+├── Themes/              # Light, Dark, Slice, Obsidian
+├── Styles/              # Tailwind + lifeControl.components.css
+└── images/              # Iconos PWA
+api/
+└── index.js             # Express: sirve src (dev) o dist (prod)
+```
+
+**Relaciones entre entidades:** tarea → `domainId` (dominio); tarea → `blockId` (bloque de tiempo); finanzas y compras independientes pero visibles en planificador/dashboard por fecha.
+
+---
+
+## Incidencias resueltas durante el desarrollo
+
+| Problema | Solución |
+|----------|----------|
+| Loading infinito al iniciar | `slice.loading.stop()` en `finally` de `App/index.js` |
+| MultiRoute no renderizaba al entrar | `render()` explícito al montar `AppShell` |
+| Servicios no persistían | Estructura `Service/Nombre/Nombre.js` exigida por Slice |
+| IDs duplicados al re-renderizar | Prefijos `planner-block-`, `task-card-*`; destrucción selectiva |
+| Build en producción rompía modales | `pnpm run build --no-obfuscate --no-minify` |
+| Tareas ancladas a bloques en fechas incorrectas | Rango `startDate`–`dueDate` + helpers en `plannerDates.js` |
+| Pantalla en blanco tras deploy | Guards en `PlannerSection` y arranque del router solo si bootstrap OK |
+| Caché PWA en móvil | Botón limpiar caché en Perfil (`clearAppCache.js`) |
+| Tema Slice: calendario semanal poco visible | Contraste en `Themes/Slice.css` para `.planner-week__day` |
+
+---
+
+## Pendiente (alguna futuar implementacion)
+
+- **Vision Board:** vista con canvas para imágenes/metas (propuesta documentada, no implementada).
+- Limpieza de `HomeSection` / `AboutSection` (no usados en rutas activas).
+
+---
+
+## Comandos de desarrollo
 
 ```powershell
-cd "Life Control"
+git clone https://github.com/AngeloCastellanii/Life-Control.git
+cd Life-Control
+pnpm install
 pnpm dev
 ```
 
-Dominios primero, luego tareas. Si algo falla: `Ctrl+Shift+R`.
+Slice.js se obtiene vía dependencias (`slicejs-cli`, `slicejs-web-framework`); no requiere instalación global.
+
+Build de producción local:
+
+```powershell
+pnpm run build
+pnpm start
+```
+
+Generar iconos PWA desde SVG:
+
+```powershell
+pnpm run icons:generate
+```
 
 ---
-
-## Deploy (Render)
-
-| Campo | Valor |
-|--------|--------|
-| Root Directory | vacío |
-| Build Command | `pnpm install && pnpm css:build && pnpm exec slice build` |
-| Start Command | `NODE_ENV=production pnpm start` |
-
----
-
-## Planeado (sin desarrollar aún)
-
-> Cuando pidas implementarlo, lo hacemos. Por ahora solo queda documentado.
-
-### Vision Board
-- Nueva ruta / vista con **canvas** para agregar **fotos**.
-- Tablero visual personal para motivarse y ver metas a largo plazo.
-- Persistencia en IndexedDB (imágenes o referencias).
-
-### Compras — mejoras futuras
-- Notificaciones push / recordatorios fuera de la app.
-
-### Dashboard — mejoras futuras
-- Acceso o preview al **Vision Board**.
-
----
-
-## Siguiente
-
-- Desplegar en Render y verificar en producción.
-- Probar finanzas y compras de punta a punta.
-- Limpiar `HomeSection` (no se usa; la app usa `DashboardSection`).
-- Luego: Vision Board (ver sección Planeado).

@@ -139,7 +139,8 @@ if (runMode === 'production') {
   });
 
   app.use('/Slice', (req, res) => res.status(404).send('Not found'));
-  app.use('/Components', (req, res) => res.status(404).send('Not found'));
+  // Servicios, forms y registry viven fuera de los route bundles
+  app.use('/Components', express.static(path.join(deployRoot, 'Components')));
 }
 
 // Middleware personalizado para archivos de bundles con MIME types correctos
@@ -268,7 +269,7 @@ app.get('*', (req, res) => {
     if (err) {
       res.status(404).send(`
         <h1>404 - Page Not Found</h1>
-        <p>The requested file could not be found at ${deployRoot}</p>
+        <p>The requested file could not be found in /${folderDeployed}</p>
         <p>Make sure you've run the appropriate build command:</p>
         <ul>
           <li>For development: Files should be in /src</li>
@@ -289,11 +290,6 @@ function startServer() {
     console.log(`🔒 Security middleware: active (zero-config, automatic)`);
     console.log(`🚀 Slice.js server running on http://${host}:${PORT}`);
     console.log(`📁 Serving from: ${deployRoot}`);
-    console.log(`⚙️  Mode: ${runMode}`);
-  });
-  server.on('error', (error) => {
-    console.error('❌ Server failed to start:', error.message);
-    process.exit(1);
   });
 }
 
