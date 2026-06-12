@@ -104,6 +104,11 @@ export function daysUntil(iso, fromIso = todayISO()) {
    return Math.round((target - from) / 86400000);
 }
 
+/** Tarea visible solo en su fecha planificada (historial al revisar días pasados). */
+export function taskBelongsToDay(task, iso) {
+   return Boolean(task?.scheduledDate) && task.scheduledDate === iso;
+}
+
 export function dueBadgeLabel(iso, fromIso = todayISO()) {
    const diff = daysUntil(iso, fromIso);
    if (diff < 0) {

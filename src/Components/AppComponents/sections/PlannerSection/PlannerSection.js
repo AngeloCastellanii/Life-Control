@@ -11,6 +11,7 @@ import {
    getMonthMatrix,
    getWeekDays,
    isSameDay,
+   taskBelongsToDay,
    todayISO
 } from '../plannerDates.js';
 
@@ -183,7 +184,7 @@ export default class PlannerSection extends HTMLElement {
    }
 
    tasksForDay(iso) {
-      return this.taskService.getAll().filter((task) => task.scheduledDate === iso);
+      return this.taskService.getAll().filter((task) => taskBelongsToDay(task, iso));
    }
 
    inboxTasks() {
@@ -196,7 +197,7 @@ export default class PlannerSection extends HTMLElement {
             if (!task.scheduledDate) {
                return true;
             }
-            return task.scheduledDate === this._cursorDate;
+            return taskBelongsToDay(task, this._cursorDate);
          });
    }
 
@@ -332,7 +333,9 @@ export default class PlannerSection extends HTMLElement {
 
       for (const block of blocks) {
          const usedMinutes = this.timeBlockService.usedMinutes(block.id);
-         const blockTasks = this.taskService.getAll().filter((t) => t.blockId === block.id);
+         const blockTasks = this.taskService
+            .getAll()
+            .filter((t) => t.blockId === block.id && taskBelongsToDay(t, this._cursorDate));
          const blockEl = await slice.build('TimeBlock', {
             sliceId: `planner-block-${block.id}`,
             block,
@@ -459,7 +462,7 @@ export default class PlannerSection extends HTMLElement {
          tasksTitle.textContent = 'Tareas';
          tasksSection.appendChild(tasksTitle);
 
-         const dayTasks = tasks.filter((task) => task.scheduledDate === iso && !task.completed);
+         const dayTasks = tasks.filter((task) => taskBelongsToDay(task, iso));
          if (dayTasks.length === 0) {
             const empty = document.createElement('p');
             empty.className = 'planner-week__empty';
@@ -562,7 +565,7 @@ export default class PlannerSection extends HTMLElement {
             const list = document.createElement('div');
             list.className = 'planner-month__list';
 
-            const dayTasks = tasks.filter((task) => task.scheduledDate === cell.iso && !task.completed);
+            const dayTasks = tasks.filter((task) => taskBelongsToDay(task, cell.iso));
             for (const task of dayTasks.slice(0, 3)) {
                list.appendChild(this.monthTaskLine(task));
             }

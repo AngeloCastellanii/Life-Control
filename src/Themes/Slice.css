@@ -111,3 +111,26 @@
   background: var(--slice-accent);
   color: #ffffff;
 }
+
+:root .planner-week__day,
+:root .planner-month__cell {
+  background: var(--slice-surface);
+  border-color: color-mix(in srgb, var(--slice-accent) 28%, var(--slice-border));
+  box-shadow: 0 1px 6px rgb(63 115 89 / 10%);
+}
+
+:root .planner-week__day--today,
+:root .planner-month__cell--today {
+  border-color: var(--slice-accent);
+  background: color-mix(in srgb, var(--slice-accent) 12%, var(--slice-surface));
+}
+
+:root .planner-week__day-head {
+  color: var(--slice-accent);
+}
+
+:root .planner-week__task,
+:root .planner-week__payment {
+  background: var(--slice-surface-muted);
+  border-color: color-mix(in srgb, var(--slice-accent) 20%, var(--slice-border));
+}
