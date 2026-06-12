@@ -5,6 +5,7 @@
     "css:build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify",
     "css:watch": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --watch",
     "build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js build --no-obfuscate --no-minify",
+    "icons:generate": "node scripts/generate-icons.mjs",
     "start": "node api/index.js",
     "component:create": "node ./node_modules/slicejs-cli/client.js component create",
     "component:list": "node ./node_modules/slicejs-cli/client.js component list",
@@ -37,5 +38,8 @@
     "slicejs-cli": "^3.6.3",
     "slicejs-web-framework": "^3.3.6",
     "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2"
   }
 }

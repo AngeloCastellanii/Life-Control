@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Life Control">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2f5642" />
+      <stop offset="100%" stop-color="#3f7359" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <text
+    x="256"
+    y="292"
+    text-anchor="middle"
+    font-family="Plus Jakarta Sans, system-ui, sans-serif"
+    font-size="168"
+    font-weight="700"
+    fill="#ffffff"
+    letter-spacing="-8"
+  >LC</text>
+</svg>
