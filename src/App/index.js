@@ -1,3 +1,7 @@
+import { installFetchCacheBust } from './fetchCacheBust.js';
+
+installFetchCacheBust();
+
 import Slice from '/Slice/Slice.js';
 
 async function bootstrapLifeControl() {

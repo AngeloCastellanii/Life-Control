@@ -15,6 +15,9 @@ export async function clearAppCacheAndReload() {
       RouteClass.componentCache = {};
    }
 
+   localStorage.setItem('lc_style_v', String(Date.now()));
+   document.getElementById('slice-component-styles')?.remove();
+
    const url = new URL(window.location.href);
    url.searchParams.delete('_lc');
    url.searchParams.delete('_refresh');

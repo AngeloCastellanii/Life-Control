@@ -14,7 +14,13 @@
     <link rel="icon" type="image/svg+xml" href="/images/icon.svg" />
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png" />
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
-    <link rel="stylesheet" type="text/css" href="/App/style.css" />
+    <script type="module">
+      import { getStyleCacheKey } from '/App/fetchCacheBust.js';
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `/App/style.css?v=${getStyleCacheKey()}`;
+      document.head.appendChild(link);
+    </script>
   </head>
 
   <body>
