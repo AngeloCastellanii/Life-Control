@@ -1,0 +1,22 @@
+<div class="pending-tasks-panel">
+  <div class="pending-tasks-panel__filters">
+    <label class="pending-tasks-panel__field">
+      <span class="lc-label">Urgencia</span>
+      <select class="lc-input" id="pending-tasks-urgency" data-role="urgency">
+        <option value="all">Todas</option>
+        <option value="high">Alta</option>
+        <option value="medium">Media</option>
+        <option value="low">Baja</option>
+      </select>
+    </label>
+    <label class="pending-tasks-panel__field">
+      <span class="lc-label">Dominio</span>
+      <select class="lc-input" id="pending-tasks-domain" data-role="domain">
+        <option value="all">Todos</option>
+      </select>
+    </label>
+  </div>
+  <p class="pending-tasks-panel__count" data-role="count"></p>
+  <ul class="pending-tasks-panel__list" data-role="list"></ul>
+  <p class="lc-empty" data-role="empty" hidden>Sin tareas con estos filtros.</p>
+</div>

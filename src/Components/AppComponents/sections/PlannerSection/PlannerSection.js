@@ -45,12 +45,15 @@ export default class PlannerSection extends HTMLElement {
       this.$weekGrid = this.querySelector('[data-role="week-grid"]');
       this.$monthGrid = this.querySelector('[data-role="month-grid"]');
       this.$addBlock = this.querySelector('[data-role="add-block"]');
+      this.$pendingTasks = this.querySelector('[data-role="pending-tasks"]');
       this._viewMode = 'day';
       this._cursorDate = todayISO();
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
+      this.$pendingTasks.addEventListener('click', () => this.openPendingTasks());
+
       this.$addBlock.addEventListener('click', () => {
          slice.events.emit('ui:modal:open', {
             title: 'Configurar Contenedor de Tiempo',
@@ -164,6 +167,13 @@ export default class PlannerSection extends HTMLElement {
          title: 'Editar tarea',
          form: 'TaskForm',
          taskId
+      });
+   }
+
+   openPendingTasks() {
+      slice.events.emit('ui:modal:open', {
+         title: 'Tareas pendientes',
+         form: 'PendingTasksPanel'
       });
    }
 
