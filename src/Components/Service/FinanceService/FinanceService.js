@@ -118,6 +118,43 @@ export default class FinanceService {
       return item;
    }
 
+   async update(id, patch) {
+      const items = await this.storage.getAll(STORE);
+      const existing = items.find((item) => item.id === id);
+      if (!existing) {
+         return null;
+      }
+
+      const oldAmount = Number(existing.amount) || 0;
+      const description = patch.description?.trim() ?? existing.description;
+      const amount = patch.amount !== undefined ? Number(patch.amount) : oldAmount;
+      const type = patch.type === FINANCE_TYPE.RECEIVE ? FINANCE_TYPE.RECEIVE : patch.type === FINANCE_TYPE.PAY ? FINANCE_TYPE.PAY : existing.type;
+      const dueDate = patch.dueDate !== undefined ? patch.dueDate || null : existing.dueDate ?? null;
+
+      if (!description || !Number.isFinite(amount) || amount <= 0) {
+         return null;
+      }
+
+      if (existing.settled && amount !== oldAmount) {
+         const oldEffect = type === FINANCE_TYPE.RECEIVE ? oldAmount : -oldAmount;
+         const newEffect = type === FINANCE_TYPE.RECEIVE ? amount : -amount;
+         await this.adjustWallet(newEffect - oldEffect);
+      }
+
+      const updated = {
+         ...existing,
+         description,
+         amount,
+         type,
+         dueDate
+      };
+
+      await this.storage.put(STORE, updated);
+      await this.syncToContext();
+      slice.events.emit('finance:changed', { action: 'update', item: updated });
+      return updated;
+   }
+
    async toggleSettled(id, settled) {
       const items = await this.storage.getAll(STORE);
       const existing = items.find((item) => item.id === id);

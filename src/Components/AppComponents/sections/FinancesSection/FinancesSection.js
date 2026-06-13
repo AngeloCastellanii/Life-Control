@@ -69,6 +69,14 @@ export default class FinancesSection extends HTMLElement {
       });
    }
 
+   openEdit(financeId) {
+      slice.events.emit('ui:modal:open', {
+         title: 'Editar transacción',
+         form: 'FinanceForm',
+         financeId
+      });
+   }
+
    renderColumn(listEl, emptyEl, items, settledLabel) {
       listEl.innerHTML = '';
       emptyEl.hidden = items.length > 0;
@@ -112,6 +120,14 @@ export default class FinancesSection extends HTMLElement {
          amount.className = 'finances-section__item-amount';
          amount.textContent = this.formatMoney(item.amount);
          row.appendChild(amount);
+
+         const editBtn = document.createElement('button');
+         editBtn.type = 'button';
+         editBtn.className = 'finances-section__edit';
+         editBtn.textContent = '✎';
+         editBtn.setAttribute('aria-label', 'Editar');
+         editBtn.addEventListener('click', () => this.openEdit(item.id));
+         row.appendChild(editBtn);
 
          const deleteBtn = document.createElement('button');
          deleteBtn.type = 'button';

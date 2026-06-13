@@ -7,7 +7,9 @@ import {
 } from '../formHelpers.js';
 
 export default class FinanceForm extends HTMLElement {
-   static props = {};
+   static props = {
+      financeId: { type: 'string', default: null }
+   };
 
    constructor(props) {
       super();
@@ -26,19 +28,42 @@ export default class FinanceForm extends HTMLElement {
    async init() {
       await this.ensureButtons();
       this.bindForm();
-      hideFormError(this.$error);
+      this.populate();
    }
 
    async update() {
       await this.ensureButtons();
+      this.populate();
+   }
+
+   populate() {
       hideFormError(this.$error);
+      if (this.financeId) {
+         this.loadFinance(this.financeId);
+      }
+   }
+
+   loadFinance(financeId) {
+      const financeService = getService('finance-service', ['getAll']);
+      const item = financeService?.getAll().find((entry) => entry.id === financeId);
+      if (!item) {
+         showFormError(this.$error, 'No se encontró la transacción.');
+         return;
+      }
+
+      this.$typeSelect.value = item.type;
+      this.$descriptionInput.value = item.description;
+      this.$amountInput.value = String(item.amount);
+      this.$dueInput.value = item.dueDate ?? '';
    }
 
    async ensureButtons() {
       if (this._buttonsReady && this.$actions.childElementCount >= 2) {
          return;
       }
-      await buildModalButtons(this, { submitLabel: 'Guardar' });
+      await buildModalButtons(this, {
+         submitLabel: this.financeId ? 'Guardar cambios' : 'Guardar'
+      });
       this._buttonsReady = true;
    }
 
@@ -58,7 +83,7 @@ export default class FinanceForm extends HTMLElement {
          return;
       }
 
-      const financeService = getService('finance-service', ['create']);
+      const financeService = getService('finance-service', ['create', 'update']);
       if (!financeService) {
          showFormError(this.$error, 'Servicio de finanzas no disponible. Recarga la página.');
          return;
@@ -78,14 +103,18 @@ export default class FinanceForm extends HTMLElement {
       this._submitting = true;
       hideFormError(this.$error);
       try {
-         const created = await financeService.create({
+         const payload = {
             type: this.$typeSelect.value,
             description,
             amount,
             dueDate: this.$dueInput.value || null
-         });
+         };
 
-         if (created) {
+         const saved = this.financeId
+            ? await financeService.update(this.financeId, payload)
+            : await financeService.create(payload);
+
+         if (saved) {
             closeModal();
             return;
          }

@@ -1035,6 +1035,15 @@
     color: var(--font-secondary-color);
   }
 
+  .finances-section__edit {
+    @apply cursor-pointer border-0 bg-transparent p-1 text-sm leading-none;
+    color: var(--font-secondary-color);
+  }
+
+  .finances-section__edit:hover {
+    color: var(--primary-color);
+  }
+
   .finances-section__delete:hover {
     color: var(--danger-color);
   }
