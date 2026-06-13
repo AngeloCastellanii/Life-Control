@@ -16,6 +16,8 @@ export async function clearAppCacheAndReload() {
    }
 
    const url = new URL(window.location.href);
-   url.searchParams.set('_refresh', String(Date.now()));
-   window.location.replace(url.pathname + url.search + url.hash);
+   url.searchParams.delete('_lc');
+   url.searchParams.delete('_refresh');
+   url.searchParams.set('_lc', String(Date.now()));
+   window.location.href = `${url.pathname}?${url.searchParams.toString()}${url.hash}`;
 }

@@ -49,6 +49,22 @@ const publicEnvProvider = createPublicEnvProvider({
   envFilePath: path.join(__dirname, '..', '.env')
 });
 
+function applyNoCacheHeaders(res) {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+}
+
+function noCacheStaticOptions() {
+  return {
+    setHeaders(res, filePath) {
+      if (/\.(css|js|html|json)$/i.test(filePath)) {
+        applyNoCacheHeaders(res);
+      }
+    }
+  };
+}
+
 // Obtener puerto desde process.env.PORT con fallback a sliceConfig.json
 const PORT = process.env.PORT || sliceConfig.server?.port || 3001;
 
@@ -133,6 +149,7 @@ if (runMode === 'production') {
     const slicePath = path.join(__dirname, '..', 'node_modules', 'slicejs-web-framework', 'Slice', 'Slice.js');
     if (fs.existsSync(slicePath)) {
       res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      applyNoCacheHeaders(res);
       return res.send(fs.readFileSync(slicePath, 'utf8'));
     }
     return res.status(404).send('Slice.js not found');
@@ -140,7 +157,7 @@ if (runMode === 'production') {
 
   app.use('/Slice', (req, res) => res.status(404).send('Not found'));
   // Servicios, forms y registry viven fuera de los route bundles
-  app.use('/Components', express.static(path.join(deployRoot, 'Components')));
+  app.use('/Components', express.static(path.join(deployRoot, 'Components'), noCacheStaticOptions()));
 }
 
 // Middleware personalizado para archivos de bundles con MIME types correctos
@@ -196,7 +213,7 @@ const normalizedPublicFolders = publicFolders
 if (runMode === 'development') {
   app.use(express.static(deployRoot));
 } else {
-  app.use('/App', express.static(path.join(deployRoot, 'App')));
+  app.use('/App', express.static(path.join(deployRoot, 'App'), noCacheStaticOptions()));
   app.get('/manifest.json', (req, res) => {
     const manifestPath = path.join(deployRoot, 'manifest.json');
     if (fs.existsSync(manifestPath)) {
@@ -230,7 +247,7 @@ if (runMode === 'development') {
     return res.status(404).send('sliceConfig.json not found');
   });
   for (const folder of normalizedPublicFolders) {
-    app.use(folder, express.static(path.join(deployRoot, folder.replace(/^\//, ''))));
+    app.use(folder, express.static(path.join(deployRoot, folder.replace(/^\//, '')), noCacheStaticOptions()));
   }
   app.use('/bundles/', express.static(path.join(deployRoot, 'bundles')));
   app.use('/dist/', express.static(deployRoot));
@@ -265,6 +282,7 @@ app.get('/api/status', (req, res) => {
 // SPA fallback - servir index.html para rutas no encontradas
 app.get('*', (req, res) => {
   const indexPath = path.join(deployRoot, 'App', 'index.html');
+  applyNoCacheHeaders(res);
   res.sendFile(indexPath, (err) => {
     if (err) {
       res.status(404).send(`
