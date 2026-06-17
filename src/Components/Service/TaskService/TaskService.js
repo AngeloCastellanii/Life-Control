@@ -1,3 +1,5 @@
+import { todayISO } from '../../AppComponents/sections/plannerDates.js';
+
 const STORE = 'tasks';
 
 export const TASK_URGENCY = {
@@ -103,7 +105,9 @@ export default class TaskService {
    }
 
    async toggleComplete(id, completed) {
-      return this.update(id, { completed: !!completed });
+      const willComplete = !!completed;
+      const patch = { completed: willComplete, completedAt: willComplete ? todayISO() : null };
+      return this.update(id, patch);
    }
 
    async remove(id) {

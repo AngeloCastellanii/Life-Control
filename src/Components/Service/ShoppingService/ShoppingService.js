@@ -45,6 +45,21 @@ function daysBetween(fromISO, toISO) {
    return Math.round((b - a) / (1000 * 60 * 60 * 24));
 }
 
+export function getReminderWindowDays(frequency) {
+   switch (frequency) {
+      case SHOPPING_FREQUENCY.DAILY:
+         return 0;
+      case SHOPPING_FREQUENCY.WEEKLY:
+         return 3;
+      case SHOPPING_FREQUENCY.MONTHLY:
+         return 7;
+      case SHOPPING_FREQUENCY.YEARLY:
+         return 14;
+      default:
+         return 7;
+   }
+}
+
 export function getDueStatus(item) {
    const today = todayISO();
    const next = item.nextDueAt ?? today;
@@ -52,6 +67,17 @@ export function getDueStatus(item) {
    if (item.checked) {
       if (next <= today) {
          return { state: 'renew', label: 'Toca de nuevo', priority: 0 };
+      }
+      const diff = daysBetween(today, next);
+      const window = getReminderWindowDays(item.frequency);
+      if (diff <= window) {
+         if (diff === 0) {
+            return { state: 'today', label: 'Toca hoy', priority: -5 };
+         }
+         if (diff === 1) {
+            return { state: 'soon', label: 'Mañana', priority: 1 };
+         }
+         return { state: 'approaching', label: `En ${diff} días`, priority: diff };
       }
       return { state: 'done', label: `Próximo: ${formatShortDate(next)}`, priority: 5 };
    }
@@ -187,21 +213,32 @@ export default class ShoppingService {
    }
 
    getDueOnDate(isoDate) {
-      return this.getAll().filter((item) => item.nextDueAt === isoDate);
+      const today = todayISO();
+      return this.getAll().filter((item) => {
+         const next = item.nextDueAt ?? today;
+         if (next === isoDate) {
+            return true;
+         }
+         if (!item.checked && next < isoDate && isoDate >= today) {
+            return true;
+         }
+         return false;
+      });
    }
 
-   getDueItems({ withinDays = 7 } = {}) {
+   getDueItems({ withinDays } = {}) {
       const today = todayISO();
       return this.getAll()
          .filter((item) => {
-            const status = getDueStatus(item);
-            if (status.state === 'overdue' || status.state === 'today' || status.state === 'renew') {
+            const next = item.nextDueAt ?? today;
+            const daysLeft = daysBetween(today, next);
+            const window =
+               typeof withinDays === 'number' ? withinDays : getReminderWindowDays(item.frequency);
+
+            if (daysLeft <= 0) {
                return true;
             }
-            if (status.state === 'done') {
-               return false;
-            }
-            return daysBetween(today, item.nextDueAt ?? today) <= withinDays;
+            return daysLeft <= window;
          })
          .sort((a, b) => getDueStatus(a).priority - getDueStatus(b).priority);
    }

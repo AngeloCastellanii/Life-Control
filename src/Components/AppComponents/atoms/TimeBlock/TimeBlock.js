@@ -5,6 +5,8 @@ const RULE_LABELS = {
    [BLOCK_RULE.LOCKED]: 'FIJO'
 };
 
+const collapsedByBlock = new Map();
+
 export default class TimeBlock extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'time-block' },
@@ -28,6 +30,8 @@ export default class TimeBlock extends HTMLElement {
       this.$rule = this.querySelector('[data-role="rule"]');
       this.$delete = this.querySelector('[data-role="delete"]');
       this.$edit = this.querySelector('[data-role="edit"]');
+      this.$toggleTasks = this.querySelector('[data-role="toggle-tasks"]');
+      this._collapsed = collapsedByBlock.get(this.block?.id) ?? false;
       slice.controller.setComponentProps(this, props);
    }
 
@@ -44,13 +48,34 @@ export default class TimeBlock extends HTMLElement {
          }
       });
 
+      this.$toggleTasks.addEventListener('click', () => {
+         this._collapsed = !this._collapsed;
+         if (this.block?.id) {
+            collapsedByBlock.set(this.block.id, this._collapsed);
+         }
+         this.applyTasksCollapsed();
+      });
+
       this.paint();
+   }
+
+   applyTasksCollapsed() {
+      const collapsed = !!this._collapsed;
+      this.$tasks.hidden = collapsed;
+      this.$empty.hidden = collapsed || (Number(this.taskCount) || 0) > 0;
+      this.$toggleTasks.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      this.$toggleTasks.textContent = collapsed ? '▸ Tareas' : '▾ Tareas';
+      this.classList.toggle('time-block--tasks-collapsed', collapsed);
    }
 
    paint() {
       const block = this.block;
       if (!block) {
          return;
+      }
+
+      if (this.block?.id) {
+         this._collapsed = collapsedByBlock.get(this.block.id) ?? false;
       }
 
       const used = Number(this.usedMinutes) || 0;
@@ -78,6 +103,7 @@ export default class TimeBlock extends HTMLElement {
       this.$empty.textContent = locked
          ? 'Bloque bloqueado — no admite tareas.'
          : 'Sin tareas en este bloque.';
+      this.applyTasksCollapsed();
    }
 
    async update() {

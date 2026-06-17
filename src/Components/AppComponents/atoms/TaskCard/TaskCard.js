@@ -9,7 +9,8 @@ export default class TaskCard extends HTMLElement {
       onAssignToBlock: { type: 'function', default: null },
       onRemoveFromBlock: { type: 'function', default: null },
       onEdit: { type: 'function', default: null },
-      onDelete: { type: 'function', default: null }
+      onDelete: { type: 'function', default: null },
+      onOpenDetail: { type: 'function', default: null }
    };
 
    constructor(props) {
@@ -27,6 +28,7 @@ export default class TaskCard extends HTMLElement {
       this.$remove = this.querySelector('[data-role="remove"]');
       this.$edit = this.querySelector('[data-role="edit"]');
       this.$delete = this.querySelector('[data-role="delete"]');
+      this.$body = this.querySelector('[data-role="body"]');
       slice.controller.setComponentProps(this, props);
    }
 
@@ -60,6 +62,16 @@ export default class TaskCard extends HTMLElement {
          if (typeof this.onDelete === 'function') {
             this.onDelete(this.task?.id);
          }
+      });
+
+      this.$body.addEventListener('click', (event) => {
+         if (typeof this.onOpenDetail !== 'function') {
+            return;
+         }
+         if (event.target.closest('input, button, select, label')) {
+            return;
+         }
+         this.onOpenDetail(this.task?.id);
       });
 
       this.paint();
@@ -126,6 +138,7 @@ export default class TaskCard extends HTMLElement {
       this.$remove.hidden = typeof this.onRemoveFromBlock !== 'function';
       this.$edit.hidden = typeof this.onEdit !== 'function';
       this.$delete.hidden = typeof this.onDelete !== 'function';
+      this.classList.toggle('task-card--clickable', typeof this.onOpenDetail === 'function');
    }
 
    async update() {

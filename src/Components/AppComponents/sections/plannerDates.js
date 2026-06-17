@@ -124,43 +124,61 @@ export function taskActiveOnDay(task, iso) {
    return true;
 }
 
-/** Inbox: visible entre inicio y tope; completadas solo como historial en días pasados. */
+/** Día de referencia para historial de tareas completadas. */
+export function taskCompletionDay(task) {
+   const { end } = taskDateRange(task);
+   return task?.completedAt ?? end ?? task?.dueDate ?? task?.scheduledDate ?? task?.startDate ?? null;
+}
+
+/** Inbox: sin bloque; pendientes hasta fin de rango; completadas solo en días pasados. */
 export function taskInInboxOnDay(task, iso, today = todayISO()) {
    if (task?.blockId) {
       return false;
    }
-   if (!taskActiveOnDay(task, iso)) {
-      return false;
-   }
    if (task.completed) {
-      return iso < today;
+      if (iso >= today) {
+         return false;
+      }
+      return taskActiveOnDay(task, iso);
    }
-   return true;
+   return taskActiveOnDay(task, iso);
 }
 
-/** Bloque: visible en el rango; completadas quedan como historial hasta hoy. */
+/** Bloque: pendientes persisten tras vencimiento; completadas solo como historial en días pasados. */
 export function taskInBlockOnDay(task, iso, today = todayISO()) {
    if (!task?.blockId) {
       return false;
    }
-   if (!taskActiveOnDay(task, iso)) {
+
+   if (!task.completed) {
+      const { start } = taskDateRange(task);
+      if (start && iso < start) {
+         return false;
+      }
+      if (iso >= today) {
+         return true;
+      }
+      return taskActiveOnDay(task, iso);
+   }
+
+   if (iso >= today) {
       return false;
    }
-   if (task.completed) {
-      return iso <= today;
+
+   const historyDay = taskCompletionDay(task);
+   if (!historyDay) {
+      return taskActiveOnDay(task, iso);
    }
-   return true;
+
+   return iso <= historyDay;
 }
 
-/** Semana / mes: tareas activas o historial en días pasados. */
+/** Semana / mes: delega en reglas de bloque o inbox según ubicación de la tarea. */
 export function taskShowsOnCalendarDay(task, iso, today = todayISO()) {
-   if (!taskActiveOnDay(task, iso)) {
-      return false;
+   if (task?.blockId) {
+      return taskInBlockOnDay(task, iso, today);
    }
-   if (task.completed) {
-      return iso < today;
-   }
-   return true;
+   return taskInInboxOnDay(task, iso, today);
 }
 
 /** @deprecated Usar taskActiveOnDay / taskInBlockOnDay */

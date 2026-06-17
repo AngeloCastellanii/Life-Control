@@ -170,6 +170,14 @@ export default class PlannerSection extends HTMLElement {
       });
    }
 
+   openTaskDetail(taskId) {
+      slice.events.emit('ui:modal:open', {
+         title: 'Detalle de tarea',
+         form: 'TaskDetailPanel',
+         taskId
+      });
+   }
+
    openPendingTasks() {
       slice.events.emit('ui:modal:open', {
          title: 'Tareas pendientes',
@@ -187,7 +195,8 @@ export default class PlannerSection extends HTMLElement {
       return {
          onToggleComplete: (completed) => this.taskService.toggleComplete(task.id, completed),
          onEdit: () => this.openTaskEdit(task.id),
-         onDelete: () => this.deleteTask(task.id)
+         onDelete: () => this.deleteTask(task.id),
+         onOpenDetail: () => this.openTaskDetail(task.id)
       };
    }
 
@@ -268,15 +277,12 @@ export default class PlannerSection extends HTMLElement {
    renderCashFlow() {
       this.$cashFlow.innerHTML = '';
       const items = [];
-      const finances = this.financeService?.getAll() ?? [];
+      const finances =
+         typeof this.financeService?.getDueOnDate === 'function'
+            ? this.financeService.getDueOnDate(this._cursorDate)
+            : [];
 
       for (const finance of finances) {
-         if (finance.settled) {
-            continue;
-         }
-         if (finance.dueDate && finance.dueDate !== this._cursorDate) {
-            continue;
-         }
          items.push({
             name: finance.description,
             amount: finance.amount,
@@ -519,7 +525,7 @@ export default class PlannerSection extends HTMLElement {
       title.textContent = task.title;
 
       chip.append(badge, title);
-      chip.addEventListener('click', () => this.openTaskEdit(task.id));
+      chip.addEventListener('click', () => this.openTaskDetail(task.id));
       return chip;
    }
 

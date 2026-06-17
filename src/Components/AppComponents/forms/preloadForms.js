@@ -5,7 +5,8 @@ const MODAL_FORMS = [
    'ShoppingForm',
    'DomainForm',
    'WalletForm',
-   'PendingTasksPanel'
+   'PendingTasksPanel',
+   'TaskDetailPanel'
 ];
 
 export async function preloadModalForms() {

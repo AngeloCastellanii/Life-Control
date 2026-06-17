@@ -73,7 +73,16 @@ export default class FinanceService {
    }
 
    getDueOnDate(isoDate) {
-      return this.getAll().filter((item) => !item.settled && item.dueDate === isoDate);
+      const today = new Date().toISOString().slice(0, 10);
+      return this.getAll().filter((item) => {
+         if (item.settled || !item.dueDate) {
+            return false;
+         }
+         if (item.dueDate === isoDate) {
+            return true;
+         }
+         return item.dueDate < isoDate && isoDate >= today;
+      });
    }
 
    getUpcoming({ withinDays = 7, fromDate = null } = {}) {

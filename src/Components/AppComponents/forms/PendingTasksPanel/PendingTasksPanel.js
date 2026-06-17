@@ -99,8 +99,8 @@ export default class PendingTasksPanel extends HTMLElement {
 
    openEdit(taskId) {
       slice.events.emit('ui:modal:open', {
-         title: 'Editar tarea',
-         form: 'TaskForm',
+         title: 'Detalle de tarea',
+         form: 'TaskDetailPanel',
          taskId
       });
    }

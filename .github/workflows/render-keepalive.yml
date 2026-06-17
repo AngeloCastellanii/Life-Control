@@ -6,11 +6,24 @@ on:
     - cron: '*/14 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: render-keepalive
+  cancel-in-progress: false
+
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Ping Life Control on Render
         run: |
+          set -euo pipefail
+          url="https://lifecontrol-a5i4.onrender.com/api/status"
+          echo "Pinging ${url} at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           curl -fsS --retry 3 --retry-delay 10 --max-time 30 \
-            "https://lifecontrol-a5i4.onrender.com/api/status"
+            -H "User-Agent: LifeControl-KeepAlive/1.0" \
+            "${url}"
+          echo "Ping OK"

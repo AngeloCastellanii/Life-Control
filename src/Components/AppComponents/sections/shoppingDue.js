@@ -13,6 +13,21 @@ export function formatShortDate(iso) {
    return `${d}/${m}/${y}`;
 }
 
+export function getReminderWindowDays(frequency) {
+   switch (frequency) {
+      case 'daily':
+         return 0;
+      case 'weekly':
+         return 3;
+      case 'monthly':
+         return 7;
+      case 'yearly':
+         return 14;
+      default:
+         return 7;
+   }
+}
+
 export function getDueStatus(item) {
    const today = todayISO();
    const next = item.nextDueAt ?? today;
@@ -20,6 +35,17 @@ export function getDueStatus(item) {
    if (item.checked) {
       if (next <= today) {
          return { state: 'renew', label: 'Toca de nuevo', priority: 0 };
+      }
+      const diff = daysBetween(today, next);
+      const window = getReminderWindowDays(item.frequency);
+      if (diff <= window) {
+         if (diff === 0) {
+            return { state: 'today', label: 'Toca hoy', priority: -5 };
+         }
+         if (diff === 1) {
+            return { state: 'soon', label: 'Mañana', priority: 1 };
+         }
+         return { state: 'approaching', label: `En ${diff} días`, priority: diff };
       }
       return { state: 'done', label: `Próximo: ${formatShortDate(next)}`, priority: 5 };
    }

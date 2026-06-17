@@ -1,6 +1,6 @@
 import { FINANCE_TYPE } from '../lifeControlConstants.js';
 import { getDueStatus } from '../shoppingDue.js';
-import { formatDayLong, taskActiveOnDay, todayISO } from '../plannerDates.js';
+import { formatDayLong, taskActiveOnDay, daysUntil, todayISO } from '../plannerDates.js';
 import { domainForTask } from '../domainLookup.js';
 import { greetingForName } from '../profileGreeting.js';
 
@@ -113,6 +113,28 @@ export default class DashboardSection extends HTMLElement {
 
    formatMoney(value) {
       return `$${(Number(value) || 0).toFixed(2)}`;
+   }
+
+   shoppingCountdownLabel(item, status) {
+      if (status.state === 'renew') {
+         return status.label;
+      }
+      if (status.state === 'done') {
+         const days = daysUntil(item.nextDueAt);
+         if (days <= 0) {
+            return 'faltan 0 días';
+         }
+         return days === 1 ? 'falta 1 día' : `faltan ${days} días`;
+      }
+      const days = daysUntil(item.nextDueAt);
+      if (days < 0) {
+         const overdue = Math.abs(days);
+         return overdue === 1 ? 'vencido hace 1 día' : `vencido hace ${overdue} días`;
+      }
+      if (days === 0) {
+         return 'faltan 0 días';
+      }
+      return days === 1 ? 'falta 1 día' : `faltan ${days} días`;
    }
 
    refresh({ tasks, timeBlocks, domains, profile, exchangeRate, finances }) {
@@ -242,7 +264,7 @@ export default class DashboardSection extends HTMLElement {
    renderShoppingDue() {
       const items =
          typeof this.shoppingService?.getDueItems === 'function'
-            ? this.shoppingService.getDueItems({ withinDays: 14 })
+            ? this.shoppingService.getDueItems()
             : [];
       this.$shoppingDueList.innerHTML = '';
       this.$shoppingDueEmpty.hidden = items.length > 0;
@@ -258,7 +280,8 @@ export default class DashboardSection extends HTMLElement {
 
          const meta = document.createElement('span');
          meta.className = 'dashboard-section__due-meta';
-         meta.textContent = `${FREQUENCY_LABELS[item.frequency] ?? ''} · ${status.label}`;
+         const countdown = this.shoppingCountdownLabel(item, status);
+         meta.textContent = `${FREQUENCY_LABELS[item.frequency] ?? ''} · ${countdown}`;
 
          li.appendChild(name);
          li.appendChild(meta);
