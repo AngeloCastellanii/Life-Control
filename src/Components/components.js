@@ -18,6 +18,7 @@ const components = {
   "WalletForm": "forms",
   "PendingTasksPanel": "forms",
   "TaskDetailPanel": "forms",
+  "FinanceDetailPanel": "forms",
   "ShoppingForm": "forms",
   "DomainsSection": "sections",
   "SettingsSection": "sections",

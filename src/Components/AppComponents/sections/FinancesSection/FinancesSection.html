@@ -36,6 +36,14 @@
       </div>
       <ul class="finances-section__list" data-role="pay-list"></ul>
       <p class="finances-section__empty lc-empty" data-role="pay-empty" hidden>Sin pendientes por pagar.</p>
+      <details class="finances-section__history" data-role="pay-settled-wrap" hidden>
+        <summary class="finances-section__history-toggle">
+          <span>Cuentas pagadas</span>
+          <span class="finances-section__history-count" data-role="pay-settled-count">0</span>
+        </summary>
+        <ul class="finances-section__list finances-section__list--settled" data-role="pay-settled-list"></ul>
+        <p class="finances-section__empty lc-empty" data-role="pay-settled-empty" hidden>Sin cuentas pagadas.</p>
+      </details>
     </div>
     <div class="finances-section__col finances-section__col--receive lc-card">
       <div class="lc-view-card-head">
@@ -51,6 +59,14 @@
       </div>
       <ul class="finances-section__list" data-role="receive-list"></ul>
       <p class="finances-section__empty lc-empty" data-role="receive-empty" hidden>Sin pendientes por cobrar.</p>
+      <details class="finances-section__history" data-role="receive-settled-wrap" hidden>
+        <summary class="finances-section__history-toggle">
+          <span>Cuentas cobradas</span>
+          <span class="finances-section__history-count" data-role="receive-settled-count">0</span>
+        </summary>
+        <ul class="finances-section__list finances-section__list--settled" data-role="receive-settled-list"></ul>
+        <p class="finances-section__empty lc-empty" data-role="receive-settled-empty" hidden>Sin cuentas cobradas.</p>
+      </details>
     </div>
   </div>
 </section>

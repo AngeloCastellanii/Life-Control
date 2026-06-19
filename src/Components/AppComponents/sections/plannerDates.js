@@ -144,25 +144,22 @@ export function taskInInboxOnDay(task, iso, today = todayISO()) {
    return taskActiveOnDay(task, iso);
 }
 
-/** Bloque: pendientes persisten tras vencimiento; completadas solo como historial en días pasados. */
+/** Bloque: pendientes persisten tras vencimiento; completadas visibles hasta el día en que se tacharon. */
 export function taskInBlockOnDay(task, iso, today = todayISO()) {
    if (!task?.blockId) {
       return false;
    }
 
+   const { start } = taskDateRange(task);
+   if (start && iso < start) {
+      return false;
+   }
+
    if (!task.completed) {
-      const { start } = taskDateRange(task);
-      if (start && iso < start) {
-         return false;
-      }
       if (iso >= today) {
          return true;
       }
       return taskActiveOnDay(task, iso);
-   }
-
-   if (iso >= today) {
-      return false;
    }
 
    const historyDay = taskCompletionDay(task);

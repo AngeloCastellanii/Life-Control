@@ -1,0 +1,36 @@
+<div class="finance-detail-panel">
+  <header class="finance-detail-panel__head">
+    <h2 class="finance-detail-panel__title" data-role="title"></h2>
+    <span class="finance-detail-panel__status" data-role="status"></span>
+  </header>
+  <dl class="finance-detail-panel__grid">
+    <div class="finance-detail-panel__row">
+      <dt>Tipo</dt>
+      <dd data-role="type"></dd>
+    </div>
+    <div class="finance-detail-panel__row">
+      <dt>Monto</dt>
+      <dd class="finance-detail-panel__amount" data-role="amount"></dd>
+    </div>
+    <div class="finance-detail-panel__row">
+      <dt>Vencimiento</dt>
+      <dd data-role="due"></dd>
+    </div>
+    <div class="finance-detail-panel__row">
+      <dt>Estado</dt>
+      <dd data-role="settled"></dd>
+    </div>
+    <div class="finance-detail-panel__row" data-role="settled-at-row" hidden>
+      <dt>Fecha de cierre</dt>
+      <dd data-role="settled-at"></dd>
+    </div>
+    <div class="finance-detail-panel__row">
+      <dt>Creada</dt>
+      <dd data-role="created"></dd>
+    </div>
+  </dl>
+  <footer class="finance-detail-panel__actions">
+    <button type="button" class="lc-btn-outline finance-detail-panel__toggle" data-role="toggle-settled"></button>
+    <button type="button" class="lc-btn-outline finance-detail-panel__edit" data-role="edit">Editar</button>
+  </footer>
+</div>

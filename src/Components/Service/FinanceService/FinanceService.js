@@ -36,6 +36,10 @@ export default class FinanceService {
       return slice.context.getState('lifeControl')?.finances ?? [];
    }
 
+   getById(id) {
+      return this.getAll().find((item) => item.id === id) ?? null;
+   }
+
    getWalletBalance() {
       return slice.context.getState('lifeControl')?.walletBalance ?? 0;
    }
@@ -177,7 +181,11 @@ export default class FinanceService {
          return existing;
       }
 
-      const updated = { ...existing, settled: willBeSettled };
+      const updated = {
+         ...existing,
+         settled: willBeSettled,
+         settledAt: willBeSettled ? new Date().toISOString().slice(0, 10) : null
+      };
       await this.storage.put(STORE, updated);
       await this.adjustWallet(this.walletDeltaFor(existing, willBeSettled));
       await this.syncToContext();
