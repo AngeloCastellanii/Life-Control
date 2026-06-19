@@ -130,7 +130,18 @@ export function taskCompletionDay(task) {
    return task?.completedAt ?? end ?? task?.dueDate ?? task?.scheduledDate ?? task?.startDate ?? null;
 }
 
-/** Inbox: sin bloque; pendientes hasta fin de rango; completadas solo en días pasados. */
+/** Fechas de inbox ancladas al día actual (al sacar de un bloque). */
+export function inboxDatesAnchoredToToday(task, today = todayISO()) {
+   const { end } = taskDateRange(task);
+   const due = end && end >= today ? end : today;
+   return {
+      startDate: today,
+      dueDate: due,
+      scheduledDate: due
+   };
+}
+
+/** Inbox: sin bloque; pendientes vencidas visibles desde hoy; completadas solo en días pasados. */
 export function taskInInboxOnDay(task, iso, today = todayISO()) {
    if (task?.blockId) {
       return false;
@@ -141,6 +152,12 @@ export function taskInInboxOnDay(task, iso, today = todayISO()) {
       }
       return taskActiveOnDay(task, iso);
    }
+
+   const { end } = taskDateRange(task);
+   if (end && end < today) {
+      return iso >= today;
+   }
+
    return taskActiveOnDay(task, iso);
 }
 

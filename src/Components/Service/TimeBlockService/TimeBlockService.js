@@ -1,3 +1,5 @@
+import { inboxDatesAnchoredToToday } from '../../AppComponents/sections/plannerDates.js';
+
 const STORE = 'timeBlocks';
 
 const DEFAULT_BLOCKS = [
@@ -196,9 +198,12 @@ export default class TimeBlockService {
          return null;
       }
 
+      const task = this.taskService.getById(taskId);
       const taskIds = block.taskIds.filter((id) => id !== taskId);
       await this.storage.put(STORE, { ...block, taskIds });
-      await this.taskService.update(taskId, { blockId: null });
+
+      const datePatch = task ? inboxDatesAnchoredToToday(task) : {};
+      await this.taskService.update(taskId, { blockId: null, ...datePatch });
       await this.syncToContext();
       slice.events.emit('time-block:changed', { action: 'unassign', blockId, taskId });
       return true;
@@ -211,7 +216,9 @@ export default class TimeBlockService {
       }
 
       for (const taskId of block.taskIds) {
-         await this.taskService.update(taskId, { blockId: null });
+         const task = this.taskService.getById(taskId);
+         const datePatch = task ? inboxDatesAnchoredToToday(task) : {};
+         await this.taskService.update(taskId, { blockId: null, ...datePatch });
       }
 
       await this.storage.delete(STORE, id);
