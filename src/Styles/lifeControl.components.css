@@ -1654,6 +1654,52 @@
     @apply flex flex-col items-center gap-2;
   }
 
+  .dashboard-section__rate-card--clickable {
+    @apply cursor-pointer transition-colors;
+  }
+
+  .dashboard-section__rate-card--clickable:hover {
+    background: color-mix(in srgb, var(--primary-color) 6%, var(--surface-elevated, transparent));
+  }
+
+  .dashboard-section__rate-card--clickable:focus-visible {
+    @apply outline-2 outline-offset-2;
+    outline-color: var(--primary-color);
+  }
+
+  .exchange-calculator {
+    @apply flex flex-col gap-4;
+  }
+
+  .exchange-calculator__rate {
+    @apply m-0 text-sm font-semibold;
+    color: var(--font-secondary-color);
+  }
+
+  .exchange-calculator__field {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .exchange-calculator__result {
+    @apply flex items-baseline gap-2 rounded-xl px-4 py-3 text-2xl font-bold;
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--surface-elevated, transparent));
+    color: var(--font-primary-color);
+  }
+
+  .exchange-calculator__equals {
+    @apply text-lg font-normal;
+    color: var(--font-secondary-color);
+  }
+
+  .exchange-calculator__currency {
+    @apply text-base font-semibold;
+    color: var(--font-secondary-color);
+  }
+
+  .exchange-calculator__hint {
+    @apply m-0;
+  }
+
   .dashboard-section__capacity-text {
     @apply m-0 text-sm text-lc-muted;
   }

@@ -1,6 +1,6 @@
 import { FINANCE_TYPE } from '../lifeControlConstants.js';
 import { getDueStatus } from '../shoppingDue.js';
-import { formatDayLong, taskActiveOnDay, daysUntil, todayISO } from '../plannerDates.js';
+import { formatDayLong, taskShowsOnCalendarDay, daysUntil, todayISO } from '../plannerDates.js';
 import { domainForTask } from '../domainLookup.js';
 import { greetingForName } from '../profileGreeting.js';
 
@@ -29,6 +29,7 @@ export default class DashboardSection extends HTMLElement {
       this.$tasksCount = this.querySelector('[data-role="tasks-count"]');
       this.$blocksCount = this.querySelector('[data-role="blocks-count"]');
       this.$rate = this.querySelector('[data-role="rate"]');
+      this.$rateCard = this.querySelector('[data-role="rate-card"]');
       this.$rateRetry = this.querySelector('[data-role="rate-retry"]');
       this.$financePay = this.querySelector('[data-role="finance-pay"]');
       this.$financeReceive = this.querySelector('[data-role="finance-receive"]');
@@ -60,8 +61,17 @@ export default class DashboardSection extends HTMLElement {
       });
       this.$capacityMount.appendChild(this._capacityRing);
 
-      this.$rateRetry.addEventListener('click', () => {
+      this.$rateRetry.addEventListener('click', (event) => {
+         event.stopPropagation();
          this.exchangeRateService?.fetchRate();
+      });
+
+      this.$rateCard?.addEventListener('click', () => this.openExchangeCalculator());
+      this.$rateCard?.addEventListener('keydown', (event) => {
+         if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            this.openExchangeCalculator();
+         }
       });
 
       slice.context.watch(
@@ -137,23 +147,32 @@ export default class DashboardSection extends HTMLElement {
       return days === 1 ? 'falta 1 día' : `faltan ${days} días`;
    }
 
+   openExchangeCalculator() {
+      const exchangeRate = slice.context.getState('lifeControl')?.exchangeRate ?? {};
+      if (exchangeRate.status !== 'success' || !exchangeRate.rate) {
+         return;
+      }
+      slice.events.emit('ui:modal:open', {
+         title: 'Calculadora de cambio',
+         form: 'ExchangeCalculatorPanel'
+      });
+   }
+
    refresh({ tasks, timeBlocks, domains, profile, exchangeRate, finances }) {
       const today = todayISO();
       this.$greetingTitle.textContent = greetingForName(profile?.displayName ?? '');
       this.$dateSubtitle.textContent = formatDayLong(today);
 
       const pending = tasks.filter((task) => !task.completed);
-      const todayTasks = tasks.filter((task) => taskActiveOnDay(task, today));
+      const todayTasks = tasks.filter((task) => taskShowsOnCalendarDay(task, today));
       const completedToday = todayTasks.filter((task) => task.completed).length;
-      const totalToday = todayTasks.length || pending.length;
-      const completedForRing = todayTasks.length ? completedToday : tasks.filter((task) => task.completed).length;
-      const totalForRing = todayTasks.length || tasks.length;
-      const percent = totalForRing ? Math.round((completedForRing / totalForRing) * 100) : 0;
+      const totalToday = todayTasks.length;
+      const percent = totalToday ? Math.round((completedToday / totalToday) * 100) : 0;
 
       if (this._capacityRing) {
          this._capacityRing.percent = percent;
       }
-      this.$capacityText.textContent = `${completedForRing} / ${totalForRing} tareas completadas`;
+      this.$capacityText.textContent = `${completedToday} / ${totalToday} tareas completadas`;
       this.$pendingCount.textContent = `${pending.length} pendientes`;
       this.$tasksCount.textContent = String(pending.length);
       this.$blocksCount.textContent = String(timeBlocks.length);
@@ -209,6 +228,12 @@ export default class DashboardSection extends HTMLElement {
 
    renderRate(exchangeRate) {
       const status = exchangeRate?.status ?? 'idle';
+      const canCalculate = status === 'success' && exchangeRate.rate;
+
+      if (this.$rateCard) {
+         this.$rateCard.classList.toggle('dashboard-section__rate-card--clickable', !!canCalculate);
+         this.$rateCard.setAttribute('aria-disabled', canCalculate ? 'false' : 'true');
+      }
 
       if (status === 'loading') {
          this.$rate.textContent = 'Cargando…';

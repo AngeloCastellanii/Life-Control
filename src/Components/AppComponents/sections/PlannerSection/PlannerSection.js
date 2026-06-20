@@ -353,7 +353,7 @@ export default class PlannerSection extends HTMLElement {
       this.$blocksEmpty.hidden = blocks.length > 0;
 
       for (const block of blocks) {
-         const usedMinutes = this.timeBlockService.usedMinutes(block.id);
+         const usedMinutes = this.timeBlockService.usedMinutes(block.id, this._cursorDate);
          const blockTasks = this.taskService
             .getAll()
             .filter((t) => t.blockId === block.id && taskInBlockOnDay(t, this._cursorDate));

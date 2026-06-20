@@ -1,4 +1,4 @@
-import { inboxDatesAnchoredToToday } from '../../AppComponents/sections/plannerDates.js';
+import { inboxDatesAnchoredToToday, taskCompletionDay } from '../../AppComponents/sections/plannerDates.js';
 
 const STORE = 'timeBlocks';
 
@@ -103,10 +103,15 @@ export default class TimeBlockService {
       return (block?.rule ?? BLOCK_RULE.FLEXIBLE) === BLOCK_RULE.FLEXIBLE;
    }
 
-   usedMinutes(blockId) {
+   usedMinutes(blockId, isoDate) {
       const tasks = slice.context.getState('lifeControl')?.tasks ?? [];
       return tasks
-         .filter((t) => t.blockId === blockId && t.completed)
+         .filter(
+            (t) =>
+               t.blockId === blockId &&
+               t.completed &&
+               taskCompletionDay(t) === isoDate
+         )
          .reduce((sum, t) => sum + (t.minutes ?? 0), 0);
    }
 

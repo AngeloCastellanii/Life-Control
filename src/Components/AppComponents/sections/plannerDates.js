@@ -141,7 +141,16 @@ export function inboxDatesAnchoredToToday(task, today = todayISO()) {
    };
 }
 
-/** Inbox: sin bloque; pendientes vencidas visibles desde hoy; completadas solo en días pasados. */
+/** Día en que se completó la tarea (solo ese día en historial). */
+export function taskCompletedOnDay(task, iso) {
+   if (!task?.completed) {
+      return false;
+   }
+   const historyDay = taskCompletionDay(task);
+   return historyDay ? iso === historyDay : false;
+}
+
+/** Inbox: sin bloque; pendientes vencidas visibles desde hoy; completadas solo el día en que se tacharon. */
 export function taskInInboxOnDay(task, iso, today = todayISO()) {
    if (task?.blockId) {
       return false;
@@ -150,7 +159,7 @@ export function taskInInboxOnDay(task, iso, today = todayISO()) {
       if (iso >= today) {
          return false;
       }
-      return taskActiveOnDay(task, iso);
+      return taskCompletedOnDay(task, iso);
    }
 
    const { end } = taskDateRange(task);
@@ -161,7 +170,7 @@ export function taskInInboxOnDay(task, iso, today = todayISO()) {
    return taskActiveOnDay(task, iso);
 }
 
-/** Bloque: pendientes persisten tras vencimiento; completadas visibles hasta el día en que se tacharon. */
+/** Bloque: pendientes persisten tras vencimiento; completadas solo el día en que se tacharon. */
 export function taskInBlockOnDay(task, iso, today = todayISO()) {
    if (!task?.blockId) {
       return false;
@@ -179,12 +188,7 @@ export function taskInBlockOnDay(task, iso, today = todayISO()) {
       return taskActiveOnDay(task, iso);
    }
 
-   const historyDay = taskCompletionDay(task);
-   if (!historyDay) {
-      return taskActiveOnDay(task, iso);
-   }
-
-   return iso <= historyDay;
+   return taskCompletedOnDay(task, iso);
 }
 
 /** Semana / mes: delega en reglas de bloque o inbox según ubicación de la tarea. */

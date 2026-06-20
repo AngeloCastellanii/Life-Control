@@ -1,0 +1,17 @@
+<div class="exchange-calculator">
+  <p class="exchange-calculator__rate" data-role="rate-label"></p>
+  <label class="exchange-calculator__field">
+    <span class="lc-label">Monto en USD</span>
+    <input type="number" class="lc-input" data-role="usd-input" min="0" step="0.01" placeholder="Ej. 10" />
+  </label>
+  <div class="exchange-calculator__result" aria-live="polite">
+    <span class="exchange-calculator__equals">=</span>
+    <span class="exchange-calculator__output" data-role="output">0.00</span>
+    <span class="exchange-calculator__currency" data-role="currency"></span>
+  </div>
+  <label class="exchange-calculator__field">
+    <span class="lc-label">Monto en moneda local</span>
+    <input type="number" class="lc-input" data-role="local-input" min="0" step="0.01" placeholder="Ej. 365" />
+  </label>
+  <p class="exchange-calculator__hint lc-hint">Escribe en USD o en la moneda local; el otro campo se actualiza solo.</p>
+</div>
