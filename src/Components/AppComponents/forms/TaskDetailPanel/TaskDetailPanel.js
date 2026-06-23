@@ -1,5 +1,6 @@
 import { domainForTask } from '../../sections/domainLookup.js';
 import { taskDateRange } from '../../sections/plannerDates.js';
+import { formatTaskSlotLabel } from '../../../Utils/taskSlotTimes.js';
 
 const URGENCY_LABELS = { high: 'Alta', medium: 'Media', low: 'Baja' };
 
@@ -20,6 +21,8 @@ export default class TaskDetailPanel extends HTMLElement {
       this.$start = this.querySelector('[data-role="start"]');
       this.$due = this.querySelector('[data-role="due"]');
       this.$place = this.querySelector('[data-role="place"]');
+      this.$slotRow = this.querySelector('[data-role="slot-row"]');
+      this.$slot = this.querySelector('[data-role="slot"]');
       this.$edit = this.querySelector('[data-role="edit"]');
       slice.controller.setComponentProps(this, props);
    }
@@ -102,6 +105,11 @@ export default class TaskDetailPanel extends HTMLElement {
       this.$start.textContent = this.formatDate(start);
       this.$due.textContent = this.formatDate(end);
       this.$place.textContent = this.blockLabel(task.blockId);
+      const slotLabel = formatTaskSlotLabel(task.slotStart, task.slotEnd);
+      if (this.$slotRow && this.$slot) {
+         this.$slotRow.hidden = !slotLabel;
+         this.$slot.textContent = slotLabel || '—';
+      }
       this.$edit.hidden = false;
    }
 }

@@ -16,6 +16,7 @@ import {
    taskShowsOnCalendarDay,
    todayISO
 } from '../plannerDates.js';
+import { compareTasksBySlot } from '../../../Utils/taskSlotTimes.js';
 
 export default class PlannerSection extends HTMLElement {
    static props = {
@@ -37,6 +38,15 @@ export default class PlannerSection extends HTMLElement {
       this.$viewMonth = this.querySelector('[data-role="view-month"]');
       this.$cashFlow = this.querySelector('[data-role="cash-flow"]');
       this.$cashFlowEmpty = this.querySelector('[data-role="cash-flow-empty"]');
+      this.$cashPayWrap = this.querySelector('[data-role="cash-pay-wrap"]');
+      this.$cashReceiveWrap = this.querySelector('[data-role="cash-receive-wrap"]');
+      this.$cashShoppingWrap = this.querySelector('[data-role="cash-shopping-wrap"]');
+      this.$cashPay = this.querySelector('[data-role="cash-pay"]');
+      this.$cashReceive = this.querySelector('[data-role="cash-receive"]');
+      this.$cashShopping = this.querySelector('[data-role="cash-shopping"]');
+      this.$cashPayCount = this.querySelector('[data-role="cash-pay-count"]');
+      this.$cashReceiveCount = this.querySelector('[data-role="cash-receive-count"]');
+      this.$cashShoppingCount = this.querySelector('[data-role="cash-shopping-count"]');
       this.$blocks = this.querySelector('[data-role="blocks"]');
       this.$blocksEmpty = this.querySelector('[data-role="blocks-empty"]');
       this.$tasks = this.querySelector('[data-role="tasks"]');
@@ -275,19 +285,26 @@ export default class PlannerSection extends HTMLElement {
    }
 
    renderCashFlow() {
-      this.$cashFlow.innerHTML = '';
-      const items = [];
+      const payables = [];
+      const receivables = [];
+      const shoppingItems = [];
+
       const finances =
          typeof this.financeService?.getDueOnDate === 'function'
             ? this.financeService.getDueOnDate(this._cursorDate)
             : [];
 
       for (const finance of finances) {
-         items.push({
+         const entry = {
             name: finance.description,
             amount: finance.amount,
-            kind: finance.type === FINANCE_TYPE.RECEIVE ? 'income' : 'debt'
-         });
+            kind: finance.type === FINANCE_TYPE.RECEIVE ? 'receive' : 'pay'
+         };
+         if (entry.kind === 'receive') {
+            receivables.push(entry);
+         } else {
+            payables.push(entry);
+         }
       }
 
       const shoppingDue =
@@ -295,33 +312,58 @@ export default class PlannerSection extends HTMLElement {
             ? this.shoppingService.getDueOnDate(this._cursorDate)
             : [];
       for (const shopping of shoppingDue) {
-         items.push({
+         shoppingItems.push({
             name: shopping.name,
             amount: null,
-            kind: 'debt'
+            kind: 'shopping'
          });
       }
 
-      this.$cashFlowEmpty.hidden = items.length > 0;
+      this.$cashPay.innerHTML = '';
+      this.$cashReceive.innerHTML = '';
+      this.$cashShopping.innerHTML = '';
+      this.$cashPayCount.textContent = String(payables.length);
+      this.$cashReceiveCount.textContent = String(receivables.length);
+      this.$cashShoppingCount.textContent = String(shoppingItems.length);
+      this.$cashPayWrap.hidden = payables.length === 0;
+      this.$cashReceiveWrap.hidden = receivables.length === 0;
+      this.$cashShoppingWrap.hidden = shoppingItems.length === 0;
+      this.$cashFlowEmpty.hidden = payables.length + receivables.length + shoppingItems.length > 0;
 
-      for (const item of items) {
-         const card = document.createElement('article');
-         card.className = `planner-section__cash-item planner-section__cash-item--${item.kind}`;
-
-         const label = document.createElement('span');
-         label.className = 'planner-section__cash-label';
-         label.textContent = item.kind === 'income' ? 'INGRESO' : 'DEUDA';
-
-         const name = document.createElement('strong');
-         name.textContent = item.name;
-
-         const amount = document.createElement('span');
-         amount.className = 'planner-section__cash-amount';
-         amount.textContent = item.amount != null ? `$${Number(item.amount).toFixed(2)}` : '—';
-
-         card.append(label, name, amount);
-         this.$cashFlow.appendChild(card);
+      for (const item of payables) {
+         this.$cashPay.appendChild(this.createCashItem(item));
       }
+      for (const item of receivables) {
+         this.$cashReceive.appendChild(this.createCashItem(item));
+      }
+      for (const item of shoppingItems) {
+         this.$cashShopping.appendChild(this.createCashItem(item));
+      }
+   }
+
+   createCashItem(item) {
+      const card = document.createElement('article');
+      card.className = `planner-section__cash-item planner-section__cash-item--${item.kind}`;
+
+      const label = document.createElement('span');
+      label.className = 'planner-section__cash-label';
+      if (item.kind === 'receive') {
+         label.textContent = 'COBRAR';
+      } else if (item.kind === 'shopping') {
+         label.textContent = 'COMPRA';
+      } else {
+         label.textContent = 'PAGAR';
+      }
+
+      const name = document.createElement('strong');
+      name.textContent = item.name;
+
+      const amount = document.createElement('span');
+      amount.className = 'planner-section__cash-amount';
+      amount.textContent = item.amount != null ? `$${Number(item.amount).toFixed(2)}` : '—';
+
+      card.append(label, name, amount);
+      return card;
    }
 
    async renderBlocks() {
@@ -356,7 +398,8 @@ export default class PlannerSection extends HTMLElement {
          const usedMinutes = this.timeBlockService.usedMinutes(block.id, this._cursorDate);
          const blockTasks = this.taskService
             .getAll()
-            .filter((t) => t.blockId === block.id && taskInBlockOnDay(t, this._cursorDate));
+            .filter((t) => t.blockId === block.id && taskInBlockOnDay(t, this._cursorDate))
+            .sort(compareTasksBySlot);
          const blockEl = await slice.build('TimeBlock', {
             sliceId: `planner-block-${block.id}`,
             block,

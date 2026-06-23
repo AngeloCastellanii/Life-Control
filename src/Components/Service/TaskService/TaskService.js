@@ -47,7 +47,7 @@ export default class TaskService {
       return this.getAll().find((t) => t.id === id) ?? null;
    }
 
-   async create({ title, urgency, minutes, domainId, blockId = null, startDate = null, dueDate = null, scheduledDate = null }) {
+   async create({ title, urgency, minutes, domainId, blockId = null, startDate = null, dueDate = null, scheduledDate = null, slotStart = null, slotEnd = null }) {
       const trimmed = title?.trim();
       if (!trimmed || !domainId) {
          return null;
@@ -55,6 +55,7 @@ export default class TaskService {
 
       const resolvedDue = dueDate || scheduledDate || null;
       const resolvedStart = startDate || resolvedDue || todayISO();
+      const hasBlock = Boolean(blockId);
 
       const task = {
          id: crypto.randomUUID(),
@@ -62,7 +63,9 @@ export default class TaskService {
          urgency: urgency || TASK_URGENCY.MEDIUM,
          minutes: Math.max(1, Number(minutes) || 30),
          domainId,
-         blockId,
+         blockId: hasBlock ? blockId : null,
+         slotStart: hasBlock ? slotStart || null : null,
+         slotEnd: hasBlock ? slotEnd || null : null,
          startDate: resolvedStart,
          dueDate: resolvedDue,
          scheduledDate: resolvedDue,
@@ -82,12 +85,28 @@ export default class TaskService {
          return null;
       }
 
+      const nextBlockId = patch.blockId !== undefined ? patch.blockId || null : existing.blockId ?? null;
+      const hasBlock = Boolean(nextBlockId);
+
       const updated = {
          ...existing,
          ...patch,
          id,
          title: patch.title?.trim() ?? existing.title,
          minutes: patch.minutes !== undefined ? Math.max(1, Number(patch.minutes) || 30) : existing.minutes,
+         blockId: nextBlockId,
+         slotStart:
+            patch.slotStart !== undefined
+               ? patch.slotStart || null
+               : hasBlock
+                 ? existing.slotStart ?? null
+                 : null,
+         slotEnd:
+            patch.slotEnd !== undefined
+               ? patch.slotEnd || null
+               : hasBlock
+                 ? existing.slotEnd ?? null
+                 : null,
          startDate: patch.startDate !== undefined ? patch.startDate || null : existing.startDate ?? null,
          dueDate: patch.dueDate !== undefined ? patch.dueDate || null : existing.dueDate ?? existing.scheduledDate ?? null,
          scheduledDate:
@@ -97,6 +116,11 @@ export default class TaskService {
                  ? patch.scheduledDate || null
                  : existing.dueDate ?? existing.scheduledDate ?? null
       };
+
+      if (!updated.blockId) {
+         updated.slotStart = null;
+         updated.slotEnd = null;
+      }
 
       await this.storage.put(STORE, updated);
       await this.syncToContext();

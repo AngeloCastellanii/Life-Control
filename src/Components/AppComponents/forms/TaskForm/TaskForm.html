@@ -32,6 +32,25 @@
       <input class="lc-input" id="task-form-due" type="date" />
     </div>
   </div>
+  <div>
+    <label class="lc-label" for="task-form-block">Bloque de tiempo</label>
+    <p class="lc-hint">Opcional. Si eliges uno, la tarea se asigna al bloque en lugar del inbox.</p>
+    <select class="lc-input" id="task-form-block">
+      <option value="">Inbox (sin bloque)</option>
+    </select>
+  </div>
+  <div class="grid gap-4 sm:grid-cols-2" data-role="slot-section" hidden>
+    <div>
+      <label class="lc-label" for="task-form-slot-start">Hora inicio en bloque</label>
+      <p class="lc-hint" data-role="slot-hint">Dentro del rango del bloque seleccionado.</p>
+      <input class="lc-input" id="task-form-slot-start" type="time" step="60" />
+    </div>
+    <div>
+      <label class="lc-label" for="task-form-slot-end">Hora fin en bloque</label>
+      <p class="lc-hint">Debe ser posterior al inicio.</p>
+      <input class="lc-input" id="task-form-slot-end" type="time" step="60" />
+    </div>
+  </div>
   <p class="lc-empty" data-role="hint" hidden>Crea un dominio antes de añadir tareas.</p>
   <p class="block-form__error" data-role="error" hidden></p>
   <div class="flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>

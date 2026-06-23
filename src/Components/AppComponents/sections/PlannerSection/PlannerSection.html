@@ -41,7 +41,29 @@
               <p class="lc-view-hint">Movimientos de caja para esta fecha.</p>
             </div>
           </div>
-          <div class="planner-section__cash-flow" data-role="cash-flow"></div>
+          <div class="planner-section__cash-flow" data-role="cash-flow">
+            <details class="planner-section__cash-group" data-role="cash-pay-wrap" hidden>
+              <summary class="planner-section__cash-summary">
+                <span>Cuentas por pagar</span>
+                <span class="planner-section__cash-count" data-role="cash-pay-count">0</span>
+              </summary>
+              <div class="planner-section__cash-list" data-role="cash-pay"></div>
+            </details>
+            <details class="planner-section__cash-group" data-role="cash-receive-wrap" hidden>
+              <summary class="planner-section__cash-summary">
+                <span>Cuentas por cobrar</span>
+                <span class="planner-section__cash-count" data-role="cash-receive-count">0</span>
+              </summary>
+              <div class="planner-section__cash-list" data-role="cash-receive"></div>
+            </details>
+            <details class="planner-section__cash-group" data-role="cash-shopping-wrap" hidden>
+              <summary class="planner-section__cash-summary">
+                <span>Compras</span>
+                <span class="planner-section__cash-count" data-role="cash-shopping-count">0</span>
+              </summary>
+              <div class="planner-section__cash-list" data-role="cash-shopping"></div>
+            </details>
+          </div>
           <p class="lc-empty" data-role="cash-flow-empty" hidden>Sin movimientos para este día.</p>
         </div>
         <div class="lc-card">

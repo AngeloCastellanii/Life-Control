@@ -1,3 +1,5 @@
+import { formatTaskSlotLabel } from '../../../Utils/taskSlotTimes.js';
+
 export default class TaskCard extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'task-card' },
@@ -20,6 +22,7 @@ export default class TaskCard extends HTMLElement {
       this.$title = this.querySelector('[data-role="title"]');
       this.$domain = this.querySelector('[data-role="domain"]');
       this.$urgency = this.querySelector('[data-role="urgency"]');
+      this.$slot = this.querySelector('[data-role="slot"]');
       this.$minutes = this.querySelector('[data-role="minutes"]');
       this.$accent = this.querySelector('[data-role="accent"]');
       this.$assign = this.querySelector('[data-role="assign-wrap"]');
@@ -111,6 +114,15 @@ export default class TaskCard extends HTMLElement {
       const completed = !!task.completed;
 
       this.$title.textContent = task.title;
+      const slotLabel = formatTaskSlotLabel(task.slotStart, task.slotEnd);
+      if (this.$slot) {
+         if (slotLabel) {
+            this.$slot.textContent = slotLabel;
+            this.$slot.hidden = false;
+         } else {
+            this.$slot.hidden = true;
+         }
+      }
       this.$minutes.textContent = `${task.minutes} min`;
       if (this.$domain) {
          const name = this.domainName?.trim();

@@ -172,6 +172,10 @@
     @apply text-xs text-lc-muted;
   }
 
+  .task-card__slot {
+    @apply text-xs font-medium text-lc-text;
+  }
+
   .task-card__accent {
     @apply w-1 rounded-full;
   }
@@ -1519,6 +1523,41 @@
     @apply flex flex-col gap-2;
   }
 
+  .planner-section__cash-group {
+    @apply rounded-xl border;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .planner-section__cash-summary {
+    @apply flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-sm font-semibold;
+    color: var(--font-primary-color);
+  }
+
+  .planner-section__cash-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .planner-section__cash-summary::before {
+    content: '▸';
+    @apply mr-1 inline-block text-xs transition-transform;
+    color: var(--font-secondary-color);
+  }
+
+  .planner-section__cash-group[open] .planner-section__cash-summary::before {
+    transform: rotate(90deg);
+  }
+
+  .planner-section__cash-count {
+    @apply rounded-full px-2 py-0.5 text-xs font-bold;
+    color: var(--font-secondary-color);
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  }
+
+  .planner-section__cash-list {
+    @apply flex flex-col gap-2 border-t px-2 py-2;
+    border-color: var(--tertiary-background-color);
+  }
+
   .planner-section__cash-item {
     @apply grid grid-cols-[auto_1fr_auto] items-center gap-2 rounded-lg border px-3 py-2 text-sm;
     border-color: var(--tertiary-background-color);
@@ -1526,6 +1565,18 @@
 
   .planner-section__cash-label {
     @apply text-[0.62rem] font-bold uppercase tracking-wide;
+  }
+
+  .planner-section__cash-item--pay .planner-section__cash-label {
+    color: var(--danger-color);
+  }
+
+  .planner-section__cash-item--receive .planner-section__cash-label {
+    color: var(--success-color);
+  }
+
+  .planner-section__cash-item--shopping .planner-section__cash-label {
+    color: var(--primary-color);
   }
 
   .planner-section__cash-item--debt .planner-section__cash-label {
