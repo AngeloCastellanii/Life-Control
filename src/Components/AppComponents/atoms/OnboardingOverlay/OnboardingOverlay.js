@@ -3,6 +3,7 @@ const STORAGE_KEY = 'lc_onboarded';
 const THEME_OPTIONS = [
    { id: 'Light', label: 'Claro', bg: '#f8fafc', fg: '#0f172a', accent: '#6366f1' },
    { id: 'Dark', label: 'Oscuro', bg: '#1e293b', fg: '#f8fafc', accent: '#818cf8' },
+   { id: 'Slice', label: 'Slice', bg: '#d4dfd8', fg: '#171717', accent: '#3f7359' },
    { id: 'Obsidian', label: 'Obsidiana', bg: '#0b0f19', fg: '#e2e8f0', accent: '#22d3ee' }
 ];
 
