@@ -2,7 +2,7 @@
 
 Organizador personal web: tareas, planificador por bloques, finanzas, compras y dominios. Construido con **Slice.js** como proyecto del Proyecto 1 (paradigma de componentes).
 
-**Demo:** https://lifecontrol-a5i4.onrender.com
+**Demo:** *(actualizar tras desplegar en Vercel)*
 
 ---
 
@@ -28,7 +28,7 @@ pnpm dev
 ```
 
 1. **`pnpm install`** — instala Slice, Express, Tailwind y el resto de dependencias en `node_modules/`.
-2. **`pnpm dev`** — compila CSS y levanta el servidor de desarrollo de Slice (`slicejs-cli dev` + `api/index.js`). La consola muestra la URL (por defecto `http://localhost:3001`).
+2. **`pnpm dev`** — compila CSS y levanta el servidor de desarrollo de Slice (`slicejs-cli dev` + `server/index.js`). La consola muestra la URL (por defecto `http://localhost:3001`).
 
 No hace falta `npm i -g slice` ni `slice init`: el proyecto ya está inicializado.
 
@@ -39,17 +39,39 @@ pnpm run build
 pnpm start
 ```
 
-`pnpm run build` genera la carpeta `dist/` con Slice CLI. `pnpm start` ejecuta `node api/index.js`, que sirve `dist/` cuando `NODE_ENV=production`.
+`pnpm run build` genera la carpeta `dist/` con Slice CLI. `pnpm start` ejecuta `server/index.js`, que sirve `dist/` cuando `NODE_ENV=production`.
 
 ---
 
-## Despliegue (Render)
+## Despliegue (Vercel)
+
+La app se despliega como **sitio estático** en Vercel (CDN global, sin cold start). El build genera `dist/` y copia `Slice.js` al bundle.
 
 | Campo | Valor |
 |--------|--------|
-| Build Command | `pnpm install --prod=false && pnpm run build` |
-| Start Command | `node api/index.js` |
-| Variable de entorno | `NODE_ENV=production` |
+| Framework Preset | Other |
+| Build Command | `pnpm run build:vercel` |
+| Output Directory | `dist` |
+| Install Command | `pnpm install` |
+
+`vercel.json` ya incluye rewrites para rutas SPA (`/planner`, `/finances`, etc.) y el endpoint `/slice-env.json`.
+
+### Despliegue local con servidor Node (opcional)
+
+```powershell
+pnpm run build
+pnpm start
+```
+
+`pnpm start` ejecuta `server/index.js` (Express), útil para probar producción en local sin Vercel CLI.
+
+### Migrar desde Render
+
+1. Conecta el repositorio en [vercel.com](https://vercel.com) (importar desde GitHub).
+2. Vercel detectará `vercel.json` automáticamente.
+3. Despliega; la URL será algo como `life-control.vercel.app`.
+4. Opcional: configura dominio personalizado en el panel de Vercel.
+5. Puedes desactivar el servicio en Render cuando confirmes que Vercel funciona.
 
 ---
 

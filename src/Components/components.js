@@ -9,6 +9,7 @@ const components = {
   "CapacityRing": "atoms",
   "TimeBlock": "atoms",
   "Fab": "atoms",
+  "OnboardingOverlay": "atoms",
   "BlockForm": "forms",
   "Sidebar": "shell",
   "ModalShell": "shell",
@@ -21,7 +22,13 @@ const components = {
   "FinanceDetailPanel": "forms",
   "ExchangeCalculatorPanel": "forms",
   "ShoppingForm": "forms",
-  "DomainsSection": "sections",
+  "NoteForm": "forms",
+  "VisionForm": "forms",
+  "SearchPanel": "forms",
+  "NotesSection": "sections",
+  "VisionSection": "sections",
+  "StatsSection": "sections",
+  "FocusSection": "sections",
   "SettingsSection": "sections",
   "Button": "Visual",
   "Link": "Visual",
@@ -37,7 +44,10 @@ const components = {
   "TimeBlockService": "Service",
   "FinanceService": "Service",
   "ShoppingService": "Service",
-  "ProfileService": "Service"
+  "ProfileService": "Service",
+  "NotesService": "Service",
+  "ReminderService": "Service",
+  "VisionService": "Service"
 };
 
 export default components;

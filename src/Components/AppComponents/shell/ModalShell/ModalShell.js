@@ -45,6 +45,8 @@ export default class ModalShell extends HTMLElement {
          payload.domainId ??
          payload.shoppingId ??
          payload.financeId ??
+         payload.noteId ??
+         payload.visionId ??
          null;
       return `modal-${payload.form?.toLowerCase() ?? 'form'}${resourceId ? `-${resourceId}` : ''}`;
    }
@@ -107,7 +109,9 @@ export default class ModalShell extends HTMLElement {
          taskId: payload.taskId ?? null,
          domainId: payload.domainId ?? null,
          shoppingId: payload.shoppingId ?? null,
-         financeId: payload.financeId ?? null
+         financeId: payload.financeId ?? null,
+         noteId: payload.noteId ?? null,
+         visionId: payload.visionId ?? null
       });
 
       if (token !== this._openToken) {

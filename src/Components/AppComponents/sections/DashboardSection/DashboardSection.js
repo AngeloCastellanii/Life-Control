@@ -1,6 +1,6 @@
 import { FINANCE_TYPE } from '../lifeControlConstants.js';
 import { getDueStatus } from '../shoppingDue.js';
-import { formatDayLong, taskShowsOnCalendarDay, daysUntil, todayISO } from '../plannerDates.js';
+import { formatDayLong, taskShowsOnCalendarDay, daysUntil, todayISO, taskDateRange } from '../plannerDates.js';
 import { domainForTask } from '../domainLookup.js';
 import { greetingForName } from '../profileGreeting.js';
 
@@ -43,6 +43,8 @@ export default class DashboardSection extends HTMLElement {
       this.$recentEmpty = this.querySelector('[data-role="recent-empty"]');
       this.$domainSummaryList = this.querySelector('[data-role="domain-summary-list"]');
       this.$domainSummaryEmpty = this.querySelector('[data-role="domain-summary-empty"]');
+      this.$todayList = this.querySelector('[data-role="today-list"]');
+      this.$todayEmpty = this.querySelector('[data-role="today-empty"]');
       this._capacityRing = null;
       slice.controller.setComponentProps(this, props);
    }
@@ -181,8 +183,105 @@ export default class DashboardSection extends HTMLElement {
       this.renderFinances(finances);
       this.renderShoppingDue();
       this.renderIncomingLiquidity(finances, exchangeRate);
+      this.renderDueToday(tasks, finances);
       this.renderLists(pending, tasks);
       this.renderDomainSummary(domains ?? this.domainService?.getAll?.() ?? [], tasks);
+   }
+
+   renderDueToday(tasks, finances) {
+      if (!this.$todayList) {
+         return;
+      }
+      const today = todayISO();
+      const rows = [];
+
+      for (const task of Array.isArray(tasks) ? tasks : []) {
+         if (task.completed) {
+            continue;
+         }
+         const { end } = taskDateRange(task);
+         if (end && end <= today) {
+            rows.push({ kind: 'Tarea', label: task.title, route: '/planner', overdue: end < today });
+         }
+      }
+
+      const dueFinances =
+         typeof this.financeService?.getDueOnDate === 'function'
+            ? this.financeService.getDueOnDate(today)
+            : (Array.isArray(finances) ? finances : []).filter(
+                 (item) => !item.settled && item.dueDate && item.dueDate <= today
+              );
+      for (const item of dueFinances) {
+         rows.push({
+            kind: item.type === 'receive' ? 'Cobro' : 'Pago',
+            label: `${item.description} · ${this.formatMoney(item.amount)}`,
+            route: '/finances',
+            overdue: item.dueDate < today
+         });
+      }
+
+      const dueShopping =
+         typeof this.shoppingService?.getDueItems === 'function'
+            ? this.shoppingService.getDueItems({ withinDays: 0 })
+            : [];
+      for (const item of dueShopping) {
+         rows.push({
+            kind: 'Compra',
+            label: item.name,
+            route: '/shopping',
+            overdue: (item.nextDueAt ?? today) < today
+         });
+      }
+
+      const notesService = slice.getComponent('notes-service');
+      const notes = notesService?.getAll?.() ?? [];
+      for (const note of notes) {
+         if (!note.remindAt) {
+            continue;
+         }
+         const day = note.remindAt.slice(0, 10);
+         if (day <= today) {
+            rows.push({ kind: 'Nota', label: note.title, route: '/notes', overdue: day < today });
+         }
+      }
+
+      rows.sort((a, b) => Number(b.overdue) - Number(a.overdue));
+
+      this.$todayList.innerHTML = '';
+      this.$todayEmpty.hidden = rows.length > 0;
+
+      for (const row of rows.slice(0, 10)) {
+         const li = document.createElement('li');
+         li.className = 'dashboard-section__today-item';
+         if (row.overdue) {
+            li.classList.add('dashboard-section__today-item--overdue');
+         }
+         li.setAttribute('role', 'button');
+         li.tabIndex = 0;
+
+         const kind = document.createElement('span');
+         kind.className = 'dashboard-section__today-kind';
+         kind.textContent = row.kind;
+
+         const label = document.createElement('span');
+         label.className = 'dashboard-section__today-label';
+         label.textContent = row.label;
+
+         const state = document.createElement('span');
+         state.className = 'dashboard-section__today-state';
+         state.textContent = row.overdue ? 'Vencido' : 'Hoy';
+
+         li.append(kind, label, state);
+         const go = () => slice.router?.navigate?.(row.route);
+         li.addEventListener('click', go);
+         li.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+               event.preventDefault();
+               go();
+            }
+         });
+         this.$todayList.appendChild(li);
+      }
    }
 
    createDomainBadge(domainId) {

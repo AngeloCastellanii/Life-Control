@@ -30,6 +30,7 @@ export default class TaskForm extends HTMLElement {
       this.$titleInput = this.querySelector('#task-form-title');
       this.$urgencySelect = this.querySelector('#task-form-urgency');
       this.$minutesInput = this.querySelector('#task-form-minutes');
+      this.$recurrenceSelect = this.querySelector('#task-form-recurrence');
       this.$startInput = this.querySelector('#task-form-start');
       this.$dueInput = this.querySelector('#task-form-due');
       this.$slotSection = this.querySelector('[data-role="slot-section"]');
@@ -232,6 +233,7 @@ export default class TaskForm extends HTMLElement {
       this.$titleInput.value = task.title;
       this.$urgencySelect.value = task.urgency ?? 'medium';
       this.$minutesInput.value = String(task.minutes ?? 30);
+      this.$recurrenceSelect.value = task.recurrence ?? 'none';
       this.$domainSelect.value = task.domainId;
       this.$blockSelect.value = task.blockId ?? '';
       this.$slotStart.value = task.slotStart ?? '';
@@ -292,6 +294,7 @@ export default class TaskForm extends HTMLElement {
          domainId,
          urgency: this.$urgencySelect.value,
          minutes: slotResult.duration ?? this.$minutesInput.value,
+         recurrence: this.$recurrenceSelect.value,
          startDate: startDate || (dueDate ? dueDate : todayISO()),
          dueDate,
          slotStart: slotResult.slotStart,

@@ -1,0 +1,25 @@
+<section class="notes-section">
+  <header class="lc-view-hero">
+    <span class="lc-view-hero__icon lc-view-hero__icon--notes" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <path d="M5 3h9l5 5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke-linejoin="round" />
+        <path d="M14 3v5h5M8 13h8M8 17h5" stroke-linecap="round" />
+      </svg>
+    </span>
+    <div class="lc-view-hero__text">
+      <h1 class="lc-section-title lc-view-hero__title">Notas</h1>
+      <p class="lc-view-hero__subtitle">Guarda ideas y pendientes. Añade un recordatorio y te avisamos con una notificación.</p>
+    </div>
+  </header>
+
+  <div class="notes-section__reminder-cta lc-card" data-role="reminder-cta" hidden>
+    <div>
+      <h2 class="lc-view-card-label">Activa las notificaciones</h2>
+      <p class="lc-view-hint">Permite las notificaciones para recibir tus recordatorios.</p>
+    </div>
+    <button type="button" class="settings-section__save" data-role="enable-notifications">Activar</button>
+  </div>
+
+  <div class="notes-section__grid" data-role="list"></div>
+  <p class="lc-empty" data-role="empty" hidden>Sin notas todavía. Pulsa + para crear una.</p>
+</section>

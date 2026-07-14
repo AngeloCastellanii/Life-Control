@@ -11,6 +11,8 @@ async function bootstrapLifeControl() {
       timeBlocks: [],
       finances: [],
       shopping: [],
+      notes: [],
+      vision: [],
       profile: { displayName: '' }
    });
 
@@ -70,6 +72,25 @@ async function bootstrapLifeControl() {
       throw new Error('No se pudo crear ProfileService');
    }
    await profileService.init();
+
+   const notesService = await slice.build('NotesService', { sliceId: 'notes-service', singleton: true });
+   if (!notesService) {
+      throw new Error('No se pudo crear NotesService');
+   }
+   await notesService.init();
+
+   const visionService = await slice.build('VisionService', { sliceId: 'vision-service', singleton: true });
+   if (visionService) {
+      await visionService.init();
+   }
+
+   const reminderService = await slice.build('ReminderService', {
+      sliceId: 'reminder-service',
+      singleton: true
+   });
+   if (reminderService) {
+      await reminderService.init();
+   }
 }
 
 slice.router.afterEach((to) => {
@@ -89,4 +110,17 @@ try {
 
 if (bootstrapOk && !slice.router._started) {
    await slice.router.start();
+}
+
+// Service Worker (offline). Evitamos localhost para no interferir con desarrollo.
+if ('serviceWorker' in navigator) {
+   const host = window.location.hostname;
+   const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+   if (!isLocal) {
+      window.addEventListener('load', () => {
+         navigator.serviceWorker.register('/service-worker.js').catch((error) => {
+            console.warn('No se pudo registrar el Service Worker:', error);
+         });
+      });
+   }
 }

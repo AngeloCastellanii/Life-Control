@@ -57,7 +57,7 @@ export default class DomainService {
       return general?.id ?? this.getAll()[0]?.id ?? null;
    }
 
-   async create({ name, color }) {
+   async create({ name, color, monthlyBudget = 0 }) {
       const trimmed = name?.trim();
       if (!trimmed) {
          return null;
@@ -66,7 +66,8 @@ export default class DomainService {
       const domain = {
          id: crypto.randomUUID(),
          name: trimmed,
-         color: color || '#2563eb'
+         color: color || '#2563eb',
+         monthlyBudget: Number(monthlyBudget) > 0 ? Number(monthlyBudget) : 0
       };
 
       await this.storage.put(STORE, domain);
@@ -91,6 +92,12 @@ export default class DomainService {
          ...existing,
          name: trimmed,
          color: patch.color ?? existing.color,
+         monthlyBudget:
+            patch.monthlyBudget !== undefined
+               ? Number(patch.monthlyBudget) > 0
+                  ? Number(patch.monthlyBudget)
+                  : 0
+               : existing.monthlyBudget ?? 0,
          id
       };
 

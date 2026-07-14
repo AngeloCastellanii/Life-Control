@@ -1,0 +1,24 @@
+<div class="onboarding" data-role="root" hidden>
+  <div class="onboarding__backdrop" data-role="backdrop"></div>
+  <div class="onboarding__card lc-card" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+    <div class="onboarding__dots" data-role="dots"></div>
+    <span class="onboarding__step" data-role="step-indicator">1 / 1</span>
+    <h2 class="onboarding__title" id="onboarding-title" data-role="title"></h2>
+    <p class="onboarding__text" data-role="text"></p>
+
+    <label class="onboarding__field" data-role="name-field" hidden>
+      <span class="lc-label">¿Cómo te llamas?</span>
+      <input class="lc-input" type="text" data-role="name-input" placeholder="Tu nombre" />
+    </label>
+
+    <div class="onboarding__themes" data-role="theme-field" hidden></div>
+
+    <div class="onboarding__actions">
+      <button type="button" class="lc-btn-ghost" data-role="skip">Omitir</button>
+      <div class="onboarding__nav">
+        <button type="button" class="lc-btn-outline" data-role="back" hidden>Atrás</button>
+        <button type="button" class="onboarding__next" data-role="next">Siguiente</button>
+      </div>
+    </div>
+  </div>
+</div>

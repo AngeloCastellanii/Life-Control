@@ -1,0 +1,47 @@
+<section class="stats-section">
+  <header class="lc-view-hero">
+    <span class="lc-view-hero__icon lc-view-hero__icon--stats" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </span>
+    <div class="lc-view-hero__text">
+      <h1 class="lc-section-title lc-view-hero__title">Estadísticas</h1>
+      <p class="lc-view-hero__subtitle">Tu progreso y presupuestos.</p>
+    </div>
+  </header>
+
+  <div class="lc-view-stat-grid">
+    <div class="lc-card lc-view-stat">
+      <span class="lc-view-stat__label">Tareas completadas</span>
+      <span class="lc-view-stat__value" data-role="done-total">0</span>
+      <span class="lc-view-stat__meta" data-role="done-week">0 esta semana</span>
+    </div>
+    <div class="lc-card lc-view-stat">
+      <span class="lc-view-stat__label">Tareas pendientes</span>
+      <span class="lc-view-stat__value" data-role="pending-total">0</span>
+      <span class="lc-view-stat__meta" data-role="pending-breakdown">—</span>
+    </div>
+    <div class="lc-card lc-view-stat">
+      <span class="lc-view-stat__label">Liquidado este mes</span>
+      <span class="lc-view-stat__value text-xl" data-role="settled-month">$0.00</span>
+    </div>
+    <div class="lc-card lc-view-stat">
+      <span class="lc-view-stat__label">Notas</span>
+      <span class="lc-view-stat__value" data-role="notes-total">0</span>
+      <span class="lc-view-stat__meta" data-role="reminders-total">0 con recordatorio</span>
+    </div>
+  </div>
+
+  <div class="lc-card stats-section__budgets">
+    <div class="lc-view-card-head">
+      <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
+      <div>
+        <h2 class="lc-view-card-label">Presupuesto por dominio</h2>
+        <p class="lc-view-hint">Pagos del mes vs. presupuesto asignado.</p>
+      </div>
+    </div>
+    <ul class="stats-section__budget-list" data-role="budget-list"></ul>
+    <p class="lc-empty" data-role="budget-empty" hidden>Asigna un presupuesto mensual a tus dominios para verlos aquí.</p>
+  </div>
+</section>

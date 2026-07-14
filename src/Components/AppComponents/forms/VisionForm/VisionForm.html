@@ -1,0 +1,23 @@
+<form class="vision-form flex flex-col gap-4" data-role="form">
+  <div>
+    <label class="lc-label" for="vision-form-title">Meta</label>
+    <input class="lc-input" id="vision-form-title" type="text" placeholder="Viajar a Japón, comprar casa…" required />
+  </div>
+  <div>
+    <label class="lc-label" for="vision-form-description">Descripción</label>
+    <textarea class="lc-input" id="vision-form-description" rows="3" placeholder="¿Por qué es importante para ti?"></textarea>
+  </div>
+  <div>
+    <label class="lc-label" for="vision-form-date">Fecha objetivo</label>
+    <input class="lc-input" id="vision-form-date" type="date" />
+  </div>
+  <div>
+    <label class="lc-label" for="vision-form-image">Imagen</label>
+    <p class="lc-hint">Sube una foto o pega una URL de imagen.</p>
+    <input class="lc-input" id="vision-form-image" type="file" accept="image/*" />
+    <input class="lc-input mt-2" id="vision-form-image-url" type="url" placeholder="https://…" />
+    <img class="vision-form__preview" data-role="preview" alt="Vista previa" hidden />
+  </div>
+  <p class="block-form__error" data-role="error" hidden></p>
+  <div class="flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>
+</form>

@@ -18,6 +18,7 @@ export default class DomainForm extends HTMLElement {
       this.$actions = this.querySelector('[data-role="actions"]');
       this.$nameInput = this.querySelector('#domain-form-name');
       this.$colorInput = this.querySelector('#domain-form-color');
+      this.$budgetInput = this.querySelector('#domain-form-budget');
       this.$error = this.querySelector('[data-role="error"]');
       this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
@@ -72,6 +73,7 @@ export default class DomainForm extends HTMLElement {
 
       this.$nameInput.value = domain.name;
       this.$colorInput.value = domain.color || '#2563eb';
+      this.$budgetInput.value = domain.monthlyBudget ? String(domain.monthlyBudget) : '';
    }
 
    async handleSubmit() {
@@ -93,7 +95,8 @@ export default class DomainForm extends HTMLElement {
 
       const payload = {
          name,
-         color: this.$colorInput.value
+         color: this.$colorInput.value,
+         monthlyBudget: Number(this.$budgetInput.value) || 0
       };
 
       this._submitting = true;

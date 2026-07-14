@@ -8,6 +8,27 @@ export const TASK_URGENCY = {
    LOW: 'low'
 };
 
+export const TASK_RECURRENCE = {
+   NONE: 'none',
+   DAILY: 'daily',
+   WEEKLY: 'weekly',
+   MONTHLY: 'monthly'
+};
+
+function addPeriodISO(iso, recurrence) {
+   const d = new Date(`${iso}T12:00:00`);
+   if (recurrence === TASK_RECURRENCE.DAILY) {
+      d.setDate(d.getDate() + 1);
+   } else if (recurrence === TASK_RECURRENCE.WEEKLY) {
+      d.setDate(d.getDate() + 7);
+   } else if (recurrence === TASK_RECURRENCE.MONTHLY) {
+      d.setMonth(d.getMonth() + 1);
+   } else {
+      return iso;
+   }
+   return d.toISOString().slice(0, 10);
+}
+
 export default class TaskService {
    async init() {
       this.storage = slice.getComponent('storage-service');
@@ -47,7 +68,7 @@ export default class TaskService {
       return this.getAll().find((t) => t.id === id) ?? null;
    }
 
-   async create({ title, urgency, minutes, domainId, blockId = null, startDate = null, dueDate = null, scheduledDate = null, slotStart = null, slotEnd = null }) {
+   async create({ title, urgency, minutes, domainId, blockId = null, startDate = null, dueDate = null, scheduledDate = null, slotStart = null, slotEnd = null, recurrence = TASK_RECURRENCE.NONE }) {
       const trimmed = title?.trim();
       if (!trimmed || !domainId) {
          return null;
@@ -69,6 +90,7 @@ export default class TaskService {
          startDate: resolvedStart,
          dueDate: resolvedDue,
          scheduledDate: resolvedDue,
+         recurrence: recurrence || TASK_RECURRENCE.NONE,
          completed: false
       };
 
@@ -130,8 +152,54 @@ export default class TaskService {
 
    async toggleComplete(id, completed) {
       const willComplete = !!completed;
+      const existing = this.getById(id);
       const patch = { completed: willComplete, completedAt: willComplete ? todayISO() : null };
-      return this.update(id, patch);
+      const updated = await this.update(id, patch);
+
+      if (willComplete && existing?.recurrence && existing.recurrence !== TASK_RECURRENCE.NONE) {
+         await this.spawnNextOccurrence(existing);
+      }
+
+      return updated;
+   }
+
+   async spawnNextOccurrence(task) {
+      const recurrence = task.recurrence;
+      const nextStart = task.startDate ? addPeriodISO(task.startDate, recurrence) : null;
+      const nextDue = task.dueDate ? addPeriodISO(task.dueDate, recurrence) : null;
+
+      const clone = {
+         ...task,
+         id: crypto.randomUUID(),
+         completed: false,
+         completedAt: null,
+         startDate: nextStart ?? nextDue ?? todayISO(),
+         dueDate: nextDue,
+         scheduledDate: nextDue
+      };
+
+      await this.storage.put(STORE, clone);
+
+      if (clone.blockId) {
+         const blocks = await this.storage.getAll('timeBlocks');
+         const block = blocks.find((b) => b.id === clone.blockId);
+         if (block) {
+            const taskIds = Array.isArray(block.taskIds) ? block.taskIds : [];
+            if (!taskIds.includes(clone.id)) {
+               await this.storage.put('timeBlocks', { ...block, taskIds: [...taskIds, clone.id] });
+            }
+         }
+      }
+
+      await this.syncToContext();
+
+      const timeBlockService = slice.getComponent('time-block-service');
+      if (clone.blockId && timeBlockService) {
+         await timeBlockService.syncToContext();
+      }
+
+      slice.events.emit('task:changed', { action: 'recurring-next', task: clone });
+      return clone;
    }
 
    async remove(id) {

@@ -1,0 +1,25 @@
+<form class="note-form flex flex-col gap-4" data-role="form">
+  <div class="note-form__field">
+    <label class="lc-label" for="note-form-title">Título</label>
+    <input class="lc-input" id="note-form-title" type="text" maxlength="80" placeholder="Idea, recordatorio, pendiente…" />
+  </div>
+  <div class="note-form__field">
+    <label class="lc-label" for="note-form-body">Contenido</label>
+    <textarea class="lc-input note-form__textarea" id="note-form-body" rows="5" placeholder="Escribe tu nota…"></textarea>
+  </div>
+  <div class="note-form__field">
+    <label class="lc-label" for="note-form-remind">Recordatorio (opcional)</label>
+    <input class="lc-input" id="note-form-remind" type="datetime-local" />
+    <p class="note-form__hint lc-view-hint">Te avisamos con una notificación a esa hora si la app está abierta o en segundo plano.</p>
+  </div>
+  <div class="note-form__field">
+    <span class="lc-label">Color</span>
+    <div class="note-form__colors" data-role="colors"></div>
+  </div>
+  <label class="note-form__pinned">
+    <input type="checkbox" id="note-form-pinned" />
+    <span>Fijar arriba</span>
+  </label>
+  <p class="block-form__error" data-role="error" hidden></p>
+  <div class="note-form__actions flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>
+</form>

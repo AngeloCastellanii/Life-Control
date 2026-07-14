@@ -1,0 +1,27 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm run build:vercel",
+  "installCommand": "pnpm install",
+  "outputDirectory": "dist",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/slice-env.json",
+      "destination": "/api/slice-env"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/App/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*\\.(js|css|html|json)$)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Pragma", "value": "no-cache" },
+        { "key": "Expires", "value": "0" }
+      ]
+    }
+  ]
+}

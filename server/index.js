@@ -1,15 +1,15 @@
-// api/index.js - Seguridad automática sin configuración
+// server/index.js — Servidor Express local (desarrollo y producción con pnpm start)
 import express from 'slicejs-web-framework/api/framework/express.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { 
-  securityMiddleware, 
-  sliceFrameworkProtection, 
+import {
+  securityMiddleware,
+  sliceFrameworkProtection,
   suspiciousRequestLogger
-} from './middleware/securityMiddleware.js';
-import { createPublicEnvProvider } from './utils/publicEnvResolver.js';
+} from '../api/middleware/securityMiddleware.js';
+import { createPublicEnvProvider } from '../api/utils/publicEnvResolver.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,9 +17,6 @@ import sliceConfig from '../src/sliceConfig.json' with { type: 'json' };
 
 let server;
 const app = express();
-
-// Parsear argumentos de línea de comandos
-const args = process.argv.slice(2);
 
 const runMode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 const folderDeployed = runMode === 'production' ? 'dist' : 'src';
@@ -49,26 +46,30 @@ const publicEnvProvider = createPublicEnvProvider({
   envFilePath: path.join(__dirname, '..', '.env')
 });
 
-// Obtener puerto desde process.env.PORT con fallback a sliceConfig.json
+function applyNoCacheHeaders(res) {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+}
+
+function noCacheStaticOptions() {
+  return {
+    setHeaders(res, filePath) {
+      if (/\.(css|js|html|json)$/i.test(filePath)) {
+        applyNoCacheHeaders(res);
+      }
+    }
+  };
+}
+
 const PORT = process.env.PORT || sliceConfig.server?.port || 3001;
 
-// ==============================================
-// MIDDLEWARES DE SEGURIDAD (APLICAR PRIMERO)
-// ==============================================
-
-// 1. Logger de peticiones sospechosas (solo observación, no bloquea)
 app.use(suspiciousRequestLogger());
-
-// 2. Protección del framework - TOTALMENTE AUTOMÁTICA
-// Detecta automáticamente el dominio desde los headers
-// Funciona en localhost, IP, y cualquier dominio
 app.use(sliceFrameworkProtection());
-
-// 3. Middleware de seguridad general
 app.use(securityMiddleware({
   allowedExtensions: [
-    '.js', '.css', '.html', '.json', 
-    '.svg', '.png', '.jpg', '.jpeg', '.gif', 
+    '.js', '.css', '.html', '.json',
+    '.svg', '.png', '.jpg', '.jpeg', '.gif',
     '.woff', '.woff2', '.ttf', '.ico'
   ],
   blockedPaths: [
@@ -82,39 +83,27 @@ app.use(securityMiddleware({
   allowPublicAssets: true
 }));
 
-// ==============================================
-// MIDDLEWARES DE APLICACIÓN
-// ==============================================
-
-// Middleware global para archivos JavaScript con MIME types correctos
 app.use((req, res, next) => {
   if (req.path.endsWith('.js')) {
-    // Forzar headers correctos para TODOS los archivos .js
     res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
   }
   next();
 });
 
-// Middleware para parsear JSON y formularios
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configurar headers de CORS
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
+
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
   } else {
     next();
   }
 });
-
-// ==============================================
-// RUNTIME MODE ENDPOINT
-// ==============================================
 
 app.get('/slice-env.json', (req, res) => {
   const payload = publicEnvProvider.getPayload();
@@ -124,68 +113,48 @@ app.get('/slice-env.json', (req, res) => {
   res.json(payload);
 });
 
-// ==============================================
-// ARCHIVOS ESTÁTICOS (DESPUÉS DE SEGURIDAD)
-// ==============================================
-
 if (runMode === 'production') {
   app.get('/Slice/Slice.js', (req, res) => {
     const slicePath = path.join(__dirname, '..', 'node_modules', 'slicejs-web-framework', 'Slice', 'Slice.js');
     if (fs.existsSync(slicePath)) {
       res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      applyNoCacheHeaders(res);
       return res.send(fs.readFileSync(slicePath, 'utf8'));
     }
     return res.status(404).send('Slice.js not found');
   });
 
   app.use('/Slice', (req, res) => res.status(404).send('Not found'));
-  // Servicios, forms y registry viven fuera de los route bundles
-  app.use('/Components', express.static(path.join(deployRoot, 'Components')));
+  app.use('/Components', express.static(path.join(deployRoot, 'Components'), noCacheStaticOptions()));
 }
 
-// Middleware personalizado para archivos de bundles con MIME types correctos
-// ⚠️ DEBE IR ANTES del middleware general para tener prioridad
 app.use('/bundles/', (req, res, next) => {
-  // Solo procesar archivos .js
   if (req.path.endsWith('.js')) {
     const filePath = path.join(deployRoot, 'bundles', req.path);
-    console.log(`📂 Processing bundle: ${req.path} -> ${filePath}`);
 
-    // Verificar que el archivo existe
     if (fs.existsSync(filePath)) {
       try {
-        // Leer y servir el archivo con headers correctos
         const fileContent = fs.readFileSync(filePath, 'utf8');
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // No cachear para permitir actualizaciones en tiempo real
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
-        console.log(`✅ Serving bundle: ${req.path} (${fileContent.length} bytes, ${Buffer.byteLength(fileContent, 'utf8')} bytes UTF-8)`);
         return res.send(fileContent);
       } catch (error) {
-        console.log(`❌ Error reading bundle file: ${error.message}`);
         return res.status(500).send('Error reading bundle file');
       }
-    } else {
-      console.log(`❌ Bundle file not found: ${filePath}`);
-      return res.status(404).send('Bundle file not found');
     }
+    return res.status(404).send('Bundle file not found');
   }
-
-  // Para archivos no .js, continuar con el middleware estático normal
   next();
 });
 
-// Servir otros archivos de bundles (JSON, CSS, etc.) con el middleware estático normal
 app.use('/bundles/', express.static(path.join(deployRoot, 'bundles')));
-console.log(`📦 Serving bundles from ${deployRoot}/bundles`);
 
-// Servir framework Slice.js (solo development)
 if (runMode === 'development') {
   app.use('/Slice/', express.static(path.join(__dirname, '..', 'node_modules', 'slicejs-web-framework', 'Slice')));
 }
 
-// Servir archivos estáticos del proyecto con allowlist
 const publicFolders = Array.isArray(sliceConfig.publicFolders) ? sliceConfig.publicFolders : [];
 const normalizedPublicFolders = publicFolders
   .filter((entry) => typeof entry === 'string')
@@ -196,7 +165,7 @@ const normalizedPublicFolders = publicFolders
 if (runMode === 'development') {
   app.use(express.static(deployRoot));
 } else {
-  app.use('/App', express.static(path.join(deployRoot, 'App')));
+  app.use('/App', express.static(path.join(deployRoot, 'App'), noCacheStaticOptions()));
   app.get('/manifest.json', (req, res) => {
     const manifestPath = path.join(deployRoot, 'manifest.json');
     if (fs.existsSync(manifestPath)) {
@@ -230,17 +199,12 @@ if (runMode === 'development') {
     return res.status(404).send('sliceConfig.json not found');
   });
   for (const folder of normalizedPublicFolders) {
-    app.use(folder, express.static(path.join(deployRoot, folder.replace(/^\//, ''))));
+    app.use(folder, express.static(path.join(deployRoot, folder.replace(/^\//, '')), noCacheStaticOptions()));
   }
   app.use('/bundles/', express.static(path.join(deployRoot, 'bundles')));
   app.use('/dist/', express.static(deployRoot));
 }
 
-// ==============================================
-// RUTAS DE API
-// ==============================================
-
-// Ruta de ejemplo para API
 app.get('/api/status', (req, res) => {
   res.json({
     status: 'ok',
@@ -257,14 +221,9 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-
-// ==============================================
-// SPA FALLBACK
-// ==============================================
-
-// SPA fallback - servir index.html para rutas no encontradas
 app.get('*', (req, res) => {
   const indexPath = path.join(deployRoot, 'App', 'index.html');
+  applyNoCacheHeaders(res);
   res.sendFile(indexPath, (err) => {
     if (err) {
       res.status(404).send(`
@@ -273,16 +232,12 @@ app.get('*', (req, res) => {
         <p>Make sure you've run the appropriate build command:</p>
         <ul>
           <li>For development: Files should be in /src</li>
-          <li>For production: Run "npm run slice:build" first</li>
+          <li>For production: Run "pnpm run build" first</li>
         </ul>
       `);
     }
   });
 });
-
-// ==============================================
-// INICIO DEL SERVIDOR
-// ==============================================
 
 function startServer() {
   const host = '0.0.0.0';
@@ -293,7 +248,6 @@ function startServer() {
   });
 }
 
-// Manejar cierre del proceso
 process.on('SIGINT', () => {
   console.log('\n🛑 Slice server stopped');
   process.exit(0);
@@ -304,7 +258,6 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
-// Iniciar servidor
 startServer();
 
 export default app;

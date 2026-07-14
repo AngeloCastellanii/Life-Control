@@ -79,6 +79,21 @@
     border-color: var(--tertiary-background-color);
   }
 
+  .sidebar__search {
+    @apply flex w-full cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--font-primary-color);
+    border: none;
+  }
+
+  .sidebar__search:hover {
+    background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  }
+
+  .sidebar__search svg {
+    @apply h-4 w-4 shrink-0;
+  }
+
   @media (max-width: 768px) {
     .sidebar {
       @apply min-h-0 flex-row border-t;
@@ -576,6 +591,26 @@
     color: #fff;
   }
 
+  .lc-view-hero__icon--notes {
+    background: linear-gradient(135deg, #b45309, #f59e0b);
+    color: #fff;
+  }
+
+  .lc-view-hero__icon--vision {
+    background: linear-gradient(135deg, #be185d, #ec4899);
+    color: #fff;
+  }
+
+  .lc-view-hero__icon--stats {
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    color: #fff;
+  }
+
+  .lc-view-hero__icon--focus {
+    background: linear-gradient(135deg, #4338ca, #6366f1);
+    color: #fff;
+  }
+
   .lc-view-hero__text {
     @apply min-w-0;
   }
@@ -801,6 +836,14 @@
     @apply w-full py-2.5 text-sm font-semibold;
   }
 
+  .settings-section__backup-actions {
+    @apply flex flex-col gap-3 sm:flex-row sm:flex-wrap;
+  }
+
+  .settings-section__backup-btn {
+    @apply w-full sm:w-auto;
+  }
+
   .settings-section__status {
     @apply m-0 rounded-lg px-3 py-2 text-center text-sm;
     background: color-mix(in srgb, var(--success-color) 12%, transparent);
@@ -856,6 +899,37 @@
   .settings-section__guide-icon--domains {
     background: color-mix(in srgb, #a855f7 16%, transparent);
     color: #7e22ce;
+  }
+
+  .settings-section__guide-icon--notes {
+    background: color-mix(in srgb, #f59e0b 16%, transparent);
+    color: #b45309;
+  }
+
+  .settings-section__guide-icon--focus {
+    background: color-mix(in srgb, #6366f1 16%, transparent);
+    color: #4338ca;
+  }
+
+  .settings-section__guide-icon--stats {
+    background: color-mix(in srgb, #14b8a6 16%, transparent);
+    color: #0f766e;
+  }
+
+  .settings-section__guide-icon--vision {
+    background: color-mix(in srgb, #ec4899 16%, transparent);
+    color: #be185d;
+  }
+
+  .settings-section__guide-icon--tools {
+    background: color-mix(in srgb, var(--font-secondary-color) 16%, transparent);
+    color: var(--font-secondary-color);
+  }
+
+  .settings-section__guide-group {
+    @apply mt-3 mb-1 text-[0.7rem] font-semibold uppercase;
+    letter-spacing: var(--tracking-lc-label, 0.12em);
+    color: var(--font-secondary-color);
   }
 
   .settings-section__guide-list dt {
@@ -966,6 +1040,396 @@
 
   .domains-section__swatch {
     @apply h-4 w-4 shrink-0 rounded-full;
+  }
+
+  /* Notes */
+  .notes-section__reminder-cta {
+    @apply mb-4 flex items-center justify-between gap-3;
+  }
+
+  .notes-section__grid {
+    @apply grid gap-3 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .notes-section__card {
+    @apply relative flex flex-col gap-2;
+    border-left: 4px solid var(--note-accent, var(--primary-color));
+  }
+
+  .notes-section__card--pinned {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--note-accent, var(--primary-color)) 45%, transparent);
+  }
+
+  .notes-section__card-head {
+    @apply flex items-start justify-between gap-2;
+  }
+
+  .notes-section__card-title {
+    @apply m-0 text-base font-semibold;
+    color: var(--font-primary-color);
+  }
+
+  .notes-section__pin {
+    @apply shrink-0 cursor-pointer border-0 bg-transparent text-lg leading-none;
+    color: var(--font-secondary-color);
+  }
+
+  .notes-section__pin--active {
+    color: var(--note-accent, var(--primary-color));
+  }
+
+  .notes-section__card-body {
+    @apply m-0 whitespace-pre-wrap break-words text-sm leading-relaxed;
+    color: var(--font-secondary-color);
+  }
+
+  .notes-section__reminder {
+    @apply inline-flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--font-primary-color);
+  }
+
+  .notes-section__reminder--overdue {
+    background: color-mix(in srgb, var(--danger-color) 15%, transparent);
+    color: var(--danger-color);
+  }
+
+  .notes-section__actions {
+    @apply mt-1 flex items-center gap-2;
+  }
+
+  .notes-section__edit,
+  .notes-section__delete {
+    @apply cursor-pointer rounded-xl border px-3 py-1.5 text-sm transition-colors;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .notes-section__edit:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .notes-section__delete:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+  }
+
+  /* NoteForm */
+  .note-form__textarea {
+    @apply resize-y;
+    min-height: 6rem;
+  }
+
+  .note-form__colors {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .note-form__color {
+    @apply h-8 w-8 cursor-pointer rounded-full border-2 border-transparent transition-transform;
+  }
+
+  .note-form__color--active {
+    @apply scale-110;
+    border-color: var(--font-primary-color);
+  }
+
+  .note-form__pinned {
+    @apply flex cursor-pointer items-center gap-2 text-sm;
+    color: var(--font-secondary-color);
+  }
+
+  /* VisionForm */
+  .vision-form__preview {
+    @apply mt-2 max-h-48 w-full rounded-xl object-cover;
+    border: 1px solid var(--tertiary-background-color);
+  }
+
+  /* Vision Board */
+  .vision-section__grid {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .vision-section__card {
+    @apply flex flex-col gap-0 overflow-hidden p-0;
+  }
+
+  .vision-section__card--achieved {
+    opacity: 0.7;
+  }
+
+  .vision-section__media {
+    @apply aspect-video w-full overflow-hidden;
+    background: var(--secondary-background-color);
+  }
+
+  .vision-section__media img {
+    @apply h-full w-full object-cover;
+  }
+
+  .vision-section__body {
+    @apply flex flex-col gap-2 p-4;
+  }
+
+  .vision-section__title {
+    @apply m-0 text-base font-semibold;
+    color: var(--font-primary-color);
+  }
+
+  .vision-section__card--achieved .vision-section__title {
+    @apply line-through;
+  }
+
+  .vision-section__desc {
+    @apply m-0 whitespace-pre-wrap break-words text-sm leading-relaxed;
+    color: var(--font-secondary-color);
+  }
+
+  .vision-section__target {
+    @apply inline-flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--font-primary-color);
+  }
+
+  .vision-section__actions {
+    @apply mt-1 flex flex-wrap items-center gap-2;
+  }
+
+  .vision-section__achieve,
+  .vision-section__edit,
+  .vision-section__delete {
+    @apply cursor-pointer rounded-xl border px-3 py-1.5 text-sm transition-colors;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .vision-section__achieve:hover,
+  .vision-section__edit:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .vision-section__delete:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+  }
+
+  /* Stats */
+  .stats-section__budgets {
+    @apply mt-1;
+  }
+
+  .stats-section__budget-list {
+    @apply flex flex-col gap-4;
+  }
+
+  .stats-section__budget {
+    @apply flex flex-col gap-2;
+  }
+
+  .stats-section__budget-head {
+    @apply flex items-center justify-between gap-3 text-sm;
+  }
+
+  .stats-section__budget-name {
+    @apply flex items-center gap-2 font-medium;
+    color: var(--font-primary-color);
+  }
+
+  .stats-section__budget-dot {
+    @apply h-3 w-3 shrink-0 rounded-full;
+  }
+
+  .stats-section__budget-amount {
+    @apply tabular-nums;
+    color: var(--font-secondary-color);
+  }
+
+  .stats-section__budget-amount--over {
+    color: var(--danger-color);
+    font-weight: 600;
+  }
+
+  .stats-section__budget-bar {
+    @apply h-2.5 w-full overflow-hidden rounded-full;
+    background: var(--tertiary-background-color);
+  }
+
+  .stats-section__budget-fill {
+    @apply h-full rounded-full transition-all;
+    background: var(--budget-color, var(--primary-color));
+  }
+
+  /* Focus */
+  .focus-section__block {
+    @apply flex flex-col gap-3;
+  }
+
+  .focus-section__block-tag {
+    @apply w-fit rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide;
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    color: var(--primary-color);
+  }
+
+  .focus-section__block-label {
+    @apply m-0 text-2xl font-bold;
+    color: var(--font-primary-color);
+  }
+
+  .focus-section__block-range {
+    @apply m-0 text-sm;
+    color: var(--font-secondary-color);
+  }
+
+  .focus-section__tasks {
+    @apply mt-2 flex flex-col gap-2;
+  }
+
+  .focus-section__task {
+    @apply flex items-center gap-3 rounded-xl p-3;
+    background: var(--secondary-background-color);
+  }
+
+  .focus-section__task--done {
+    opacity: 0.55;
+  }
+
+  .focus-section__check {
+    @apply h-5 w-5 shrink-0 cursor-pointer;
+    accent-color: var(--primary-color);
+  }
+
+  .focus-section__task-info {
+    @apply flex min-w-0 flex-col;
+  }
+
+  .focus-section__task-title {
+    @apply truncate font-medium;
+    color: var(--font-primary-color);
+  }
+
+  .focus-section__task--done .focus-section__task-title {
+    @apply line-through;
+  }
+
+  .focus-section__task-meta {
+    @apply text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  /* Onboarding */
+  .onboarding {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+  }
+
+  .onboarding__backdrop {
+    @apply absolute inset-0;
+    background: rgb(0 0 0 / 55%);
+    backdrop-filter: blur(3px);
+  }
+
+  .onboarding__card {
+    @apply relative z-10 flex w-full max-w-md flex-col gap-3;
+  }
+
+  .onboarding__step {
+    @apply w-fit text-xs font-semibold uppercase tracking-wide;
+    color: var(--primary-color);
+  }
+
+  .onboarding__title {
+    @apply m-0 text-xl font-bold;
+    color: var(--font-primary-color);
+  }
+
+  .onboarding__text {
+    @apply m-0 text-sm leading-relaxed;
+    color: var(--font-secondary-color);
+  }
+
+  .onboarding__field {
+    @apply mt-1 flex flex-col gap-1;
+  }
+
+  .onboarding__actions {
+    @apply mt-2 flex items-center justify-between gap-3;
+  }
+
+  .onboarding__next {
+    @apply cursor-pointer rounded-xl border-0 px-5 py-2.5 text-sm font-semibold;
+    background: var(--primary-color);
+    color: var(--primary-color-contrast);
+  }
+
+  .onboarding__nav {
+    @apply flex items-center gap-2;
+  }
+
+  .onboarding__dots {
+    @apply flex flex-wrap items-center gap-1.5;
+  }
+
+  .onboarding__dot {
+    @apply h-1.5 w-1.5 rounded-full transition-all;
+    background: var(--tertiary-background-color);
+  }
+
+  .onboarding__dot--active {
+    @apply w-5;
+    background: var(--primary-color);
+  }
+
+  .onboarding__dot--done {
+    background: color-mix(in srgb, var(--primary-color) 55%, transparent);
+  }
+
+  .onboarding__themes {
+    @apply grid grid-cols-3 gap-2;
+  }
+
+  .onboarding__theme {
+    @apply flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 p-3 transition-colors;
+    border-color: var(--tertiary-background-color);
+    background: var(--secondary-background-color);
+  }
+
+  .onboarding__theme--active {
+    border-color: var(--primary-color);
+  }
+
+  .onboarding__theme-preview {
+    @apply flex h-10 w-full items-center justify-center rounded-lg;
+    background: var(--onb-bg);
+    border: 1px solid color-mix(in srgb, var(--onb-fg) 12%, transparent);
+  }
+
+  .onboarding__theme-chip {
+    @apply h-4 w-4 rounded-full;
+    background: var(--onb-accent);
+  }
+
+  .onboarding__theme-label {
+    @apply text-xs font-medium;
+    color: var(--font-primary-color);
+  }
+
+  /* Settings — moneda */
+  .settings-section__field {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .settings-section__add-domain {
+    @apply ml-auto shrink-0 cursor-pointer self-start rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .settings-section__add-domain:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
   }
 
   /* Finances */
@@ -1285,6 +1749,82 @@
 
   .dashboard-section__finance-value--receive {
     color: var(--success-color);
+  }
+
+  /* Dashboard: Vence hoy */
+  .dashboard-section__today {
+    @apply mb-4;
+  }
+
+  .dashboard-section__today-list {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+
+  .dashboard-section__today-item {
+    @apply flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-colors;
+    background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-elevated, transparent));
+  }
+
+  .dashboard-section__today-item:hover {
+    background: color-mix(in srgb, var(--primary-color) 9%, var(--surface-elevated, transparent));
+  }
+
+  .dashboard-section__today-kind {
+    @apply shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide;
+    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+    color: var(--primary-color);
+  }
+
+  .dashboard-section__today-label {
+    @apply min-w-0 flex-1 truncate text-sm font-medium;
+    color: var(--font-primary-color);
+  }
+
+  .dashboard-section__today-state {
+    @apply shrink-0 text-xs font-semibold;
+    color: var(--font-secondary-color);
+  }
+
+  .dashboard-section__today-item--overdue .dashboard-section__today-state {
+    color: var(--danger-color);
+  }
+
+  /* SearchPanel */
+  .search-panel {
+    @apply flex flex-col gap-3;
+  }
+
+  .search-panel__input {
+    @apply w-full;
+  }
+
+  .search-panel__results {
+    @apply m-0 flex max-h-[50vh] list-none flex-col gap-1.5 overflow-y-auto p-0;
+  }
+
+  .search-panel__result {
+    @apply flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-colors;
+    background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-elevated, transparent));
+  }
+
+  .search-panel__result:hover {
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  }
+
+  .search-panel__kind {
+    @apply shrink-0 rounded-full px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide;
+    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+    color: var(--primary-color);
+  }
+
+  .search-panel__text {
+    @apply flex min-w-0 flex-1 flex-col;
+    color: var(--font-primary-color);
+  }
+
+  .search-panel__sub {
+    @apply truncate text-xs;
+    color: var(--font-secondary-color);
   }
 
   .dashboard-section__due-list {

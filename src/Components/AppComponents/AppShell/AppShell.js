@@ -1,4 +1,5 @@
 import { preloadModalForms } from '../forms/preloadForms.js';
+import { shouldShowOnboarding } from '../atoms/OnboardingOverlay/OnboardingOverlay.js';
 
 export default class AppShell extends HTMLElement {
    constructor(props) {
@@ -19,7 +20,10 @@ export default class AppShell extends HTMLElement {
             { text: 'Planificador', path: '/planner' },
             { text: 'Finanzas', path: '/finances' },
             { text: 'Compras', path: '/shopping' },
-            { text: 'Dominios', path: '/domains' },
+            { text: 'Notas', path: '/notes' },
+            { text: 'Enfoque', path: '/focus' },
+            { text: 'Estadísticas', path: '/stats' },
+            { text: 'Vision Board', path: '/vision' },
             { text: 'Perfil', path: '/settings' }
          ]
       });
@@ -32,7 +36,10 @@ export default class AppShell extends HTMLElement {
             { path: '/planner', component: 'PlannerSection' },
             { path: '/finances', component: 'FinancesSection' },
             { path: '/shopping', component: 'ShoppingSection' },
-            { path: '/domains', component: 'DomainsSection' },
+            { path: '/notes', component: 'NotesSection' },
+            { path: '/focus', component: 'FocusSection' },
+            { path: '/stats', component: 'StatsSection' },
+            { path: '/vision', component: 'VisionSection' },
             { path: '/settings', component: 'SettingsSection' }
          ]
       });
@@ -46,6 +53,13 @@ export default class AppShell extends HTMLElement {
 
       const fab = await slice.build('Fab', { sliceId: 'app-fab' });
       this.appendChild(fab);
+
+      if (shouldShowOnboarding() && !slice.controller.activeComponents.has('onboarding-overlay')) {
+         const onboarding = await slice.build('OnboardingOverlay', { sliceId: 'onboarding-overlay' });
+         if (onboarding) {
+            this.appendChild(onboarding);
+         }
+      }
    }
 
    async update() {

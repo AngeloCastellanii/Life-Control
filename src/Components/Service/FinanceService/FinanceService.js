@@ -108,7 +108,7 @@ export default class FinanceService {
       return settled ? -amount : amount;
    }
 
-   async create({ description, amount, type, dueDate = null }) {
+   async create({ description, amount, type, dueDate = null, domainId = null }) {
       const trimmed = description?.trim();
       const value = Number(amount);
       if (!trimmed || !Number.isFinite(value) || value <= 0) {
@@ -121,6 +121,7 @@ export default class FinanceService {
          amount: value,
          type: type === FINANCE_TYPE.RECEIVE ? FINANCE_TYPE.RECEIVE : FINANCE_TYPE.PAY,
          dueDate: dueDate || null,
+         domainId: domainId || null,
          settled: false,
          createdAt: new Date().toISOString()
       };
@@ -143,6 +144,7 @@ export default class FinanceService {
       const amount = patch.amount !== undefined ? Number(patch.amount) : oldAmount;
       const type = patch.type === FINANCE_TYPE.RECEIVE ? FINANCE_TYPE.RECEIVE : patch.type === FINANCE_TYPE.PAY ? FINANCE_TYPE.PAY : existing.type;
       const dueDate = patch.dueDate !== undefined ? patch.dueDate || null : existing.dueDate ?? null;
+      const domainId = patch.domainId !== undefined ? patch.domainId || null : existing.domainId ?? null;
 
       if (!description || !Number.isFinite(amount) || amount <= 0) {
          return null;
@@ -159,7 +161,8 @@ export default class FinanceService {
          description,
          amount,
          type,
-         dueDate
+         dueDate,
+         domainId
       };
 
       await this.storage.put(STORE, updated);

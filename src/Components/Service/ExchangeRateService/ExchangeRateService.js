@@ -1,8 +1,10 @@
+import { getPreferredCurrency } from '../../AppComponents/sections/currency.js';
+
 const API_URL = 'https://open.er-api.com/v6/latest/USD';
 
 export default class ExchangeRateService {
    async init() {
-      this.syncToContext({ status: 'idle', rate: null, target: 'VES', message: null });
+      this.syncToContext({ status: 'idle', rate: null, target: getPreferredCurrency(), message: null });
       await this.fetchRate();
    }
 
@@ -27,7 +29,12 @@ export default class ExchangeRateService {
          }
 
          const data = await response.json();
-         const target = data.rates?.VES ? 'VES' : 'EUR';
+         const preferred = getPreferredCurrency();
+         const target = data.rates?.[preferred]
+            ? preferred
+            : data.rates?.VES
+              ? 'VES'
+              : 'EUR';
          const rate = data.rates?.[target];
 
          if (!rate) {

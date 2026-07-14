@@ -20,6 +20,7 @@ export default class FinanceForm extends HTMLElement {
       this.$descriptionInput = this.querySelector('#finance-form-description');
       this.$amountInput = this.querySelector('#finance-form-amount');
       this.$dueInput = this.querySelector('#finance-form-due');
+      this.$domainSelect = this.querySelector('#finance-form-domain');
       this.$error = this.querySelector('[data-role="error"]');
       this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
@@ -38,8 +39,23 @@ export default class FinanceForm extends HTMLElement {
 
    populate() {
       hideFormError(this.$error);
+      this.fillDomains();
       if (this.financeId) {
          this.loadFinance(this.financeId);
+      }
+   }
+
+   fillDomains() {
+      if (!this.$domainSelect) {
+         return;
+      }
+      const domains = getService('domain-service', ['getAll'])?.getAll() ?? [];
+      this.$domainSelect.innerHTML = '<option value="">Sin dominio</option>';
+      for (const domain of domains) {
+         const option = document.createElement('option');
+         option.value = domain.id;
+         option.textContent = domain.name;
+         this.$domainSelect.appendChild(option);
       }
    }
 
@@ -55,6 +71,9 @@ export default class FinanceForm extends HTMLElement {
       this.$descriptionInput.value = item.description;
       this.$amountInput.value = String(item.amount);
       this.$dueInput.value = item.dueDate ?? '';
+      if (this.$domainSelect) {
+         this.$domainSelect.value = item.domainId ?? '';
+      }
    }
 
    async ensureButtons() {
@@ -107,7 +126,8 @@ export default class FinanceForm extends HTMLElement {
             type: this.$typeSelect.value,
             description,
             amount,
-            dueDate: this.$dueInput.value || null
+            dueDate: this.$dueInput.value || null,
+            domainId: this.$domainSelect?.value || null
          };
 
          const saved = this.financeId

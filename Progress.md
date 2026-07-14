@@ -2,7 +2,7 @@
 
 Registro de avance del proyecto web **Life Control**, desarrollado con **Slice.js**, **pnpm**, **Tailwind CSS v4** e **IndexedDB**. Organizador personal de tareas, planificación, finanzas y compras.
 
-**Demo en producción:** https://lifecontrol-a5i4.onrender.com  
+**Demo en producción:** *(actualizar tras desplegar en Vercel)*  
 **Repositorio:** GitHub — `AngeloCastellanii/Life-Control`
 
 ---
@@ -53,7 +53,8 @@ Life Control centraliza la gestión diaria en una SPA componentizada: dashboard 
 - PWA: `manifest.json`, iconos SVG/PNG, meta theme-color, apple-touch-icon.
 
 ### Deploy
-- **Render:** build `pnpm run build`, start `node api/index.js`, `NODE_ENV=production`.
+- **Vercel:** build `pnpm run build:vercel`, output `dist/`. Sitio estático en CDN + funciones serverless mínimas (`/slice-env.json`, `/api/status`). Sin cold start en la SPA.
+- **Local prod:** `pnpm run build` + `pnpm start` → `server/index.js` (Express).
 
 
 ---
@@ -83,7 +84,12 @@ src/
 ├── Styles/              # Tailwind + lifeControl.components.css
 └── images/              # Iconos PWA
 api/
-└── index.js             # Express: sirve src (dev) o dist (prod)
+├── slice-env.js         # Función serverless Vercel
+├── status.js            # Health check Vercel
+├── middleware/          # Seguridad (servidor local)
+└── utils/               # publicEnvResolver
+server/
+└── index.js             # Express: dev local y pnpm start
 ```
 
 **Relaciones entre entidades:** tarea → `domainId` (dominio); tarea → `blockId` (bloque de tiempo); finanzas y compras independientes pero visibles en planificador/dashboard por fecha.

@@ -20,6 +20,16 @@
     <label class="lc-label" for="task-form-minutes">Duración (min)</label>
     <input class="lc-input" id="task-form-minutes" type="number" min="1" step="1" value="30" required />
   </div>
+  <div>
+    <label class="lc-label" for="task-form-recurrence">Repetición</label>
+    <p class="lc-hint">Al completarla se crea automáticamente la siguiente.</p>
+    <select class="lc-input" id="task-form-recurrence">
+      <option value="none" selected>No se repite</option>
+      <option value="daily">Cada día</option>
+      <option value="weekly">Cada semana</option>
+      <option value="monthly">Cada mes</option>
+    </select>
+  </div>
   <div class="grid gap-4 sm:grid-cols-2">
     <div>
       <label class="lc-label" for="task-form-start">Desde (inbox)</label>

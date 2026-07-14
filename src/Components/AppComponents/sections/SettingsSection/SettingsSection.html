@@ -54,6 +54,88 @@
       <div data-role="theme-mount"></div>
     </div>
 
+    <div class="lc-card settings-section__card settings-section__card--currency">
+      <div class="settings-section__card-head">
+        <span class="settings-section__card-icon lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
+        <div>
+          <h2 class="settings-section__card-label">Moneda</h2>
+          <p class="settings-section__hint">Divisa para el tipo de cambio del Dashboard.</p>
+        </div>
+      </div>
+      <label class="settings-section__field" for="settings-currency">
+        <span class="lc-label">Convertir USD a</span>
+        <select class="lc-input" id="settings-currency" data-role="currency-select"></select>
+      </label>
+    </div>
+
+    <div class="lc-card settings-section__card settings-section__card--domains md:col-span-2">
+      <div class="settings-section__card-head">
+        <span class="settings-section__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 3v2M12 19v2M3 12h2M19 12h2" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="settings-section__card-label">Dominios</h2>
+          <p class="settings-section__hint">Áreas de tu vida con color para clasificar tareas y presupuestos.</p>
+        </div>
+        <button type="button" class="settings-section__add-domain" data-role="add-domain">+ Nuevo</button>
+      </div>
+      <ul class="domains-section__list" data-role="domain-list"></ul>
+      <p class="lc-empty" data-role="domain-empty" hidden>Sin dominios todavía.</p>
+    </div>
+
+    <div class="lc-card settings-section__card settings-section__card--backup md:col-span-2">
+      <div class="settings-section__card-head">
+        <span class="settings-section__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="settings-section__card-label">Respaldar datos</h2>
+          <p class="settings-section__hint">
+            Guarda o restaura tareas, finanzas y compras. En iPhone, al exportar usa Compartir → Guardar en Archivos.
+          </p>
+        </div>
+      </div>
+      <div class="settings-section__backup-actions">
+        <button type="button" class="settings-section__save settings-section__backup-btn" data-role="export-data">
+          Exportar mis datos
+        </button>
+        <button type="button" class="lc-btn-outline settings-section__backup-btn" data-role="import-data">
+          Importar respaldo
+        </button>
+        <input
+          type="file"
+          accept="application/json,.json"
+          data-role="import-file"
+          hidden
+        />
+      </div>
+      <p class="settings-section__status" data-role="backup-status" hidden></p>
+    </div>
+
+    <div class="lc-card settings-section__card settings-section__card--notifications md:col-span-2">
+      <div class="settings-section__card-head">
+        <span class="settings-section__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M13.7 21a2 2 0 0 1-3.4 0" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="settings-section__card-label">Recordatorios</h2>
+          <p class="settings-section__hint">Activa las notificaciones para recibir avisos de tus notas con recordatorio.</p>
+        </div>
+      </div>
+      <button type="button" class="settings-section__save settings-section__notif-btn" data-role="enable-notifications">
+        Activar notificaciones
+      </button>
+      <p class="settings-section__status" data-role="notif-status" hidden></p>
+    </div>
+
     <div class="lc-card settings-section__card settings-section__card--cache md:col-span-2">
       <div class="settings-section__card-head">
         <span class="settings-section__card-icon" aria-hidden="true">
@@ -83,6 +165,7 @@
         <p class="settings-section__hint">Qué hace cada vista y cómo usarla.</p>
       </div>
     </div>
+    <p class="settings-section__guide-group">Vistas</p>
     <dl class="settings-section__guide-list">
       <div class="settings-section__guide-item">
         <span class="settings-section__guide-icon settings-section__guide-icon--dashboard" aria-hidden="true">
@@ -95,7 +178,7 @@
         </span>
         <div>
           <dt>Dashboard</dt>
-          <dd>Resumen del día: saludo, tareas, bloques, dominios y vencimientos.</dd>
+          <dd>Resumen del día: capacidad, "Vence hoy", finanzas, prioridades y dominios.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
@@ -107,14 +190,14 @@
         </span>
         <div>
           <dt>Planificador</dt>
-          <dd>Calendario día, semana o mes con bloques, tareas y caja por fecha.</dd>
+          <dd>Calendario día, semana o mes con bloques de tiempo, tareas y capacidad por fecha.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
         <span class="settings-section__guide-icon settings-section__guide-icon--finances lc-icon-dollar lc-icon-dollar--xs" aria-hidden="true">$</span>
         <div>
           <dt>Finanzas</dt>
-          <dd>Registra pagos y cobros. Ajusta saldo y consulta historial.</dd>
+          <dd>Registra pagos y cobros, ajusta tu saldo y consulta el tipo de cambio del día.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
@@ -131,6 +214,82 @@
         </div>
       </div>
       <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--notes" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M5 3h9l5 5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke-linejoin="round" />
+            <path d="M14 3v5h5M8 13h8M8 17h5" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Notas</dt>
+          <dd>Guarda ideas y pendientes. Fíjalas, dales color y añade un recordatorio con aviso.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--focus" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="12" cy="12" r="0.6" fill="currentColor" />
+          </svg>
+        </span>
+        <div>
+          <dt>Modo enfoque</dt>
+          <dd>Muestra solo el bloque de tiempo actual y sus tareas para concentrarte.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--stats" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Estadísticas</dt>
+          <dd>Tareas completadas, pendientes por urgencia y avance de presupuestos por dominio.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--vision" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </span>
+        <div>
+          <dt>Vision Board</dt>
+          <dd>Tablero visual con tus metas e imágenes. Márcalas como logradas.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--tools" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M5 20c0-4 3.5-6 7-6s7 2 7 6" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Perfil</dt>
+          <dd>Nombre, tema, moneda, dominios, notificaciones, respaldo y esta guía.</dd>
+        </div>
+      </div>
+    </dl>
+
+    <p class="settings-section__guide-group">Funciones</p>
+    <dl class="settings-section__guide-list">
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--dashboard" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Búsqueda global</dt>
+          <dd>Botón de lupa en el menú: busca tareas, finanzas, compras, notas y dominios.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
         <span class="settings-section__guide-icon settings-section__guide-icon--domains" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
             <circle cx="12" cy="12" r="3" />
@@ -139,7 +298,93 @@
         </span>
         <div>
           <dt>Dominios</dt>
-          <dd>Etiquetas con color para clasificar tareas (trabajo, salud…).</dd>
+          <dd>Áreas de tu vida con color (trabajo, salud…) para clasificar tareas y presupuestos.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--planner" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M17 2v4M21 4l-4 4M21 12a9 9 0 1 1-9-9" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Tareas recurrentes</dt>
+          <dd>Al crear una tarea elige que se repita cada día, semana o mes; al completarla nace la siguiente.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--stats" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <rect x="3" y="10" width="18" height="4" rx="2" />
+            <path d="M3 12h11" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Presupuestos por dominio</dt>
+          <dd>Asigna un presupuesto mensual a un dominio y vincula tus pagos; el avance se ve en Estadísticas.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--notes" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M13.7 21a2 2 0 0 1-3.4 0" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Recordatorios y notificaciones</dt>
+          <dd>Activa las notificaciones aquí para recibir avisos de las notas con recordatorio.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--finances lc-icon-dollar lc-icon-dollar--xs" aria-hidden="true">$</span>
+        <div>
+          <dt>Moneda y tipo de cambio</dt>
+          <dd>Elige Bs, € o US$; el Dashboard muestra la conversión desde el dólar actualizada.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--focus" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Tema</dt>
+          <dd>Cambia entre Claro, Oscuro y Obsidiana cuando quieras. Se recuerda en tu dispositivo.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--tools" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>Respaldo de datos</dt>
+          <dd>Exporta un archivo con todo y vuélvelo a importar en otro dispositivo. En iPhone: Compartir → Archivos.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--vision" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <rect x="6" y="3" width="12" height="18" rx="2" />
+            <path d="M11 18h2" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <dt>App instalable y sin conexión</dt>
+          <dd>Instálala desde tu navegador ("Añadir a inicio") y funciona offline; tus datos viven en el dispositivo.</dd>
+        </div>
+      </div>
+      <div class="settings-section__guide-item">
+        <span class="settings-section__guide-icon settings-section__guide-icon--tools" aria-hidden="true">
+          <svg fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-5 4v6m4-6v6M6 7l1 14h10l1-14"/></svg>
+        </span>
+        <div>
+          <dt>Actualizar / limpiar caché</dt>
+          <dd>Fuerza la última versión de la app sin borrar tus datos.</dd>
         </div>
       </div>
     </dl>
