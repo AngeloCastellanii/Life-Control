@@ -4,7 +4,7 @@
     "dev": "node scripts/write-style-version.mjs && node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js dev",
     "css:build": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify",
     "css:watch": "node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --watch",
-    "build": "node scripts/write-style-version.mjs && node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js build --no-obfuscate --no-minify",
+    "build": "node scripts/write-style-version.mjs && node node_modules/@tailwindcss/cli/dist/index.mjs -i ./src/Styles/tailwind.input.css -o ./src/Styles/tailwind.css --minify && node ./node_modules/slicejs-cli/client.js build --no-obfuscate --no-minify && node scripts/strip-bundles.mjs",
     "build:vercel": "pnpm run build && node scripts/prepare-vercel.mjs",
     "icons:generate": "node scripts/generate-icons.mjs",
     "start": "node server/index.js",

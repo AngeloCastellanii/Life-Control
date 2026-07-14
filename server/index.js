@@ -114,17 +114,14 @@ app.get('/slice-env.json', (req, res) => {
 });
 
 if (runMode === 'production') {
-  app.get('/Slice/Slice.js', (req, res) => {
-    const slicePath = path.join(__dirname, '..', 'node_modules', 'slicejs-web-framework', 'Slice', 'Slice.js');
-    if (fs.existsSync(slicePath)) {
-      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-      applyNoCacheHeaders(res);
-      return res.send(fs.readFileSync(slicePath, 'utf8'));
-    }
-    return res.status(404).send('Slice.js not found');
-  });
-
-  app.use('/Slice', (req, res) => res.status(404).send('Not found'));
+  // Sin bundles: servimos TODO el framework Slice desde node_modules (igual que en
+  // dev), para que la carga de clases estructurales por módulos individuales
+  // (/Slice/Components/Structural/...) funcione. Antes solo se servía Slice.js y el
+  // resto de /Slice devolvía 404, lo que rompía la app cuando no hay bundles.
+  app.use(
+    '/Slice',
+    express.static(path.join(__dirname, '..', 'node_modules', 'slicejs-web-framework', 'Slice'), noCacheStaticOptions())
+  );
   app.use('/Components', express.static(path.join(deployRoot, 'Components'), noCacheStaticOptions()));
 }
 
