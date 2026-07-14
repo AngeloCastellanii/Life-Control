@@ -32,12 +32,19 @@ export default class StorageService {
    }
 
    async getAll(storeName) {
+      if (!this.db || !this.db.objectStoreNames.contains(storeName)) {
+         return [];
+      }
       return new Promise((resolve, reject) => {
-         const tx = this.db.transaction(storeName, 'readonly');
-         const store = tx.objectStore(storeName);
-         const req = store.getAll();
-         req.onsuccess = () => resolve(req.result ?? []);
-         req.onerror = () => reject(req.error);
+         try {
+            const tx = this.db.transaction(storeName, 'readonly');
+            const store = tx.objectStore(storeName);
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result ?? []);
+            req.onerror = () => reject(req.error);
+         } catch (error) {
+            resolve([]);
+         }
       });
    }
 

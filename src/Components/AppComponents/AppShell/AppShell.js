@@ -54,11 +54,15 @@ export default class AppShell extends HTMLElement {
       const fab = await slice.build('Fab', { sliceId: 'app-fab' });
       this.appendChild(fab);
 
-      if (shouldShowOnboarding() && !slice.controller.activeComponents.has('onboarding-overlay')) {
-         const onboarding = await slice.build('OnboardingOverlay', { sliceId: 'onboarding-overlay' });
-         if (onboarding) {
-            this.appendChild(onboarding);
+      try {
+         if (shouldShowOnboarding() && !slice.controller.activeComponents?.has?.('onboarding-overlay')) {
+            const onboarding = await slice.build('OnboardingOverlay', { sliceId: 'onboarding-overlay' });
+            if (onboarding) {
+               this.appendChild(onboarding);
+            }
          }
+      } catch (error) {
+         console.error('No se pudo mostrar el onboarding:', error);
       }
    }
 

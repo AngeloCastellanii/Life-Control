@@ -1,6 +1,8 @@
 // Life Control — Service Worker (offline PWA)
-// Estrategia: network-first para navegación/HTML, stale-while-revalidate para assets.
-const CACHE = 'life-control-v1';
+// Estrategia: network-first para TODO el mismo origen (HTML y assets),
+// con caché de respaldo solo cuando no hay red. Evita servir JS/CSS viejos
+// tras un despliegue (causa de pantallas en blanco por código desincronizado).
+const CACHE = 'life-control-v2';
 const APP_SHELL = '/App/index.html';
 const PRECACHE = [
    '/App/index.html',
@@ -41,7 +43,7 @@ self.addEventListener('fetch', (event) => {
 
    const url = new URL(request.url);
 
-   // Solo cacheamos mismo origen; APIs y terceros van directo a la red.
+   // Solo gestionamos mismo origen; APIs y terceros van directo a la red.
    if (url.origin !== self.location.origin) {
       return;
    }
@@ -49,31 +51,22 @@ self.addEventListener('fetch', (event) => {
       return;
    }
 
-   if (isHtmlRequest(request)) {
-      event.respondWith(
-         fetch(request)
-            .then((response) => {
-               const copy = response.clone();
-               caches.open(CACHE).then((cache) => cache.put(APP_SHELL, copy)).catch(() => undefined);
-               return response;
-            })
-            .catch(() => caches.match(APP_SHELL).then((cached) => cached ?? caches.match(request)))
-      );
-      return;
-   }
-
+   // Network-first: siempre intentamos la red primero para tener el código al día.
    event.respondWith(
-      caches.match(request).then((cached) => {
-         const network = fetch(request)
-            .then((response) => {
-               if (response && response.status === 200) {
-                  const copy = response.clone();
-                  caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => undefined);
-               }
-               return response;
-            })
-            .catch(() => cached);
-         return cached ?? network;
-      })
+      fetch(request)
+         .then((response) => {
+            if (response && response.status === 200 && response.type === 'basic') {
+               const copy = response.clone();
+               const cacheKey = isHtmlRequest(request) ? APP_SHELL : request;
+               caches.open(CACHE).then((cache) => cache.put(cacheKey, copy)).catch(() => undefined);
+            }
+            return response;
+         })
+         .catch(() => {
+            if (isHtmlRequest(request)) {
+               return caches.match(APP_SHELL).then((cached) => cached ?? caches.match(request));
+            }
+            return caches.match(request);
+         })
    );
 });

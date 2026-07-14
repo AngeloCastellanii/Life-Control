@@ -4,6 +4,29 @@ installFetchCacheBust();
 
 import Slice from '/Slice/Slice.js';
 
+/**
+ * Inicializa un servicio de forma tolerante a fallos: si su init() lanza,
+ * se registra el error pero NO se aborta el arranque de la app. Así un
+ * servicio con problemas (p. ej. un store nuevo en una base de datos vieja)
+ * nunca deja la pantalla en blanco.
+ */
+async function initService(name, sliceId) {
+   try {
+      const service = await slice.build(name, { sliceId, singleton: true });
+      if (!service) {
+         console.error(`No se pudo crear ${name}`);
+         return null;
+      }
+      if (typeof service.init === 'function') {
+         await service.init();
+      }
+      return service;
+   } catch (error) {
+      console.error(`Fallo al iniciar ${name}:`, error);
+      return null;
+   }
+}
+
 async function bootstrapLifeControl() {
    slice.context.create('lifeControl', {
       domains: [],
@@ -16,100 +39,41 @@ async function bootstrapLifeControl() {
       profile: { displayName: '' }
    });
 
-   const storage = await slice.build('StorageService', { sliceId: 'storage-service', singleton: true });
-   if (!storage) {
-      throw new Error('No se pudo crear StorageService');
-   }
-   await storage.init();
+   // El almacenamiento es la base; se inicia primero (tolerante a fallos).
+   await initService('StorageService', 'storage-service');
 
-   const domainService = await slice.build('DomainService', { sliceId: 'domain-service', singleton: true });
-   if (!domainService) {
-      throw new Error('No se pudo crear DomainService');
-   }
-   await domainService.init();
-
-   const taskService = await slice.build('TaskService', { sliceId: 'task-service', singleton: true });
-   if (!taskService) {
-      throw new Error('No se pudo crear TaskService');
-   }
-   await taskService.init();
-
-   const exchangeRateService = await slice.build('ExchangeRateService', {
-      sliceId: 'exchange-rate-service',
-      singleton: true
-   });
-   if (!exchangeRateService) {
-      throw new Error('No se pudo crear ExchangeRateService');
-   }
-   await exchangeRateService.init();
-
-   const timeBlockService = await slice.build('TimeBlockService', {
-      sliceId: 'time-block-service',
-      singleton: true
-   });
-   if (!timeBlockService) {
-      throw new Error('No se pudo crear TimeBlockService');
-   }
-   await timeBlockService.init();
-
-   const financeService = await slice.build('FinanceService', { sliceId: 'finance-service', singleton: true });
-   if (!financeService) {
-      throw new Error('No se pudo crear FinanceService');
-   }
-   await financeService.init();
-
-   const shoppingService = await slice.build('ShoppingService', { sliceId: 'shopping-service', singleton: true });
-   if (!shoppingService) {
-      throw new Error('No se pudo crear ShoppingService');
-   }
-   await shoppingService.init();
-
-   const profileService = await slice.build('ProfileService', {
-      sliceId: 'profile-service',
-      singleton: true
-   });
-   if (!profileService) {
-      throw new Error('No se pudo crear ProfileService');
-   }
-   await profileService.init();
-
-   const notesService = await slice.build('NotesService', { sliceId: 'notes-service', singleton: true });
-   if (!notesService) {
-      throw new Error('No se pudo crear NotesService');
-   }
-   await notesService.init();
-
-   const visionService = await slice.build('VisionService', { sliceId: 'vision-service', singleton: true });
-   if (visionService) {
-      await visionService.init();
-   }
-
-   const reminderService = await slice.build('ReminderService', {
-      sliceId: 'reminder-service',
-      singleton: true
-   });
-   if (reminderService) {
-      await reminderService.init();
-   }
+   await initService('DomainService', 'domain-service');
+   await initService('TaskService', 'task-service');
+   await initService('ExchangeRateService', 'exchange-rate-service');
+   await initService('TimeBlockService', 'time-block-service');
+   await initService('FinanceService', 'finance-service');
+   await initService('ShoppingService', 'shopping-service');
+   await initService('ProfileService', 'profile-service');
+   await initService('NotesService', 'notes-service');
+   await initService('VisionService', 'vision-service');
+   await initService('ReminderService', 'reminder-service');
 }
 
 slice.router.afterEach((to) => {
    document.title = `${to.metadata?.title ?? 'Life Control'} · Life Control`;
 });
 
-let bootstrapOk = false;
-
 try {
    await bootstrapLifeControl();
-   bootstrapOk = true;
 } catch (error) {
    console.error('Error al iniciar Life Control:', error);
 } finally {
    slice.loading?.stop();
 }
 
-if (bootstrapOk && !slice.router._started) {
-   await slice.router.start();
+// Arrancamos el router SIEMPRE: aunque algún servicio haya fallado, la app
+// se muestra (mejor una vista parcial que una pantalla en blanco).
+if (!slice.router._started) {
+   try {
+      await slice.router.start();
+   } catch (error) {
+      console.error('Error al arrancar el router:', error);
+   }
 }
 
 // Service Worker (offline). Evitamos localhost para no interferir con desarrollo.
