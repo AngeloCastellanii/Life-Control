@@ -9,6 +9,10 @@ function formatTarget(iso) {
    return date.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function todayISO() {
+   return new Date().toISOString().slice(0, 10);
+}
+
 export default class VisionSection extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'vision-section' },
@@ -53,6 +57,7 @@ export default class VisionSection extends HTMLElement {
       const items = this.service.getAll();
       this.$grid.innerHTML = '';
       this.$empty.hidden = items.length > 0;
+      const today = todayISO();
 
       for (const item of items) {
          const card = document.createElement('article');
@@ -68,6 +73,9 @@ export default class VisionSection extends HTMLElement {
             img.src = item.image;
             img.alt = item.title;
             img.loading = 'lazy';
+            img.addEventListener('error', () => {
+               media.hidden = true;
+            });
             media.appendChild(img);
             card.appendChild(media);
          }
@@ -90,7 +98,9 @@ export default class VisionSection extends HTMLElement {
          if (item.targetDate) {
             const badge = document.createElement('span');
             badge.className = 'vision-section__target';
-            badge.textContent = `🎯 ${formatTarget(item.targetDate)}`;
+            const overdue = !item.achieved && item.targetDate < today;
+            badge.classList.toggle('vision-section__target--overdue', overdue);
+            badge.textContent = `${overdue ? '⚠️' : '🎯'} ${formatTarget(item.targetDate)}`;
             body.appendChild(badge);
          }
 
@@ -113,7 +123,11 @@ export default class VisionSection extends HTMLElement {
          deleteBtn.type = 'button';
          deleteBtn.className = 'vision-section__delete';
          deleteBtn.textContent = 'Eliminar';
-         deleteBtn.addEventListener('click', () => this.service.remove(item.id));
+         deleteBtn.addEventListener('click', () => {
+            if (confirm('¿Eliminar esta meta del Vision Board?')) {
+               this.service.remove(item.id);
+            }
+         });
 
          actions.append(achieveBtn, editBtn, deleteBtn);
          body.appendChild(actions);

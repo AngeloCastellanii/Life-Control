@@ -4,8 +4,23 @@
     <input class="lc-input" id="note-form-title" type="text" maxlength="80" placeholder="Idea, recordatorio, pendiente…" />
   </div>
   <div class="note-form__field">
+    <span class="lc-label">Tipo</span>
+    <div class="note-form__types" data-role="types">
+      <button type="button" class="note-form__type note-form__type--active" data-type="text">Texto</button>
+      <button type="button" class="note-form__type" data-type="list">Lista</button>
+    </div>
+  </div>
+  <div class="note-form__field" data-role="body-field">
     <label class="lc-label" for="note-form-body">Contenido</label>
     <textarea class="lc-input note-form__textarea" id="note-form-body" rows="5" placeholder="Escribe tu nota…"></textarea>
+  </div>
+  <div class="note-form__field" data-role="list-field" hidden>
+    <label class="lc-label" for="note-form-list-input">Ítems de la lista</label>
+    <ul class="note-form__checklist" data-role="checklist"></ul>
+    <div class="note-form__list-add">
+      <input class="lc-input" id="note-form-list-input" type="text" placeholder="Añadir ítem…" maxlength="120" />
+      <button type="button" class="lc-btn-outline note-form__list-add-btn" data-role="add-item">Añadir</button>
+    </div>
   </div>
   <div class="note-form__field">
     <label class="lc-label" for="note-form-remind">Recordatorio (opcional)</label>
@@ -13,7 +28,7 @@
     <p class="note-form__hint lc-view-hint">Te avisamos con una notificación a esa hora si la app está abierta o en segundo plano.</p>
   </div>
   <div class="note-form__field">
-    <span class="lc-label">Color</span>
+    <span class="lc-label">Color (dominios)</span>
     <div class="note-form__colors" data-role="colors"></div>
   </div>
   <label class="note-form__pinned">

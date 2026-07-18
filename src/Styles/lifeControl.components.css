@@ -1,37 +1,38 @@
 @layer components {
-  /* AppShell */
+  /* AppShell — top navbar */
   .app-shell {
     @apply min-h-screen;
   }
 
   .app-shell__sidebar {
-    @apply fixed left-0 top-0 z-[100] shrink-0 border-r;
-    width: min(280px, 20vw);
+    @apply fixed left-0 right-0 top-0 z-100 w-full border-b;
+    height: var(--lc-nav-height, 3.5rem);
     border-color: var(--tertiary-background-color);
   }
 
   .app-shell__stage {
     @apply min-h-screen;
-    margin-left: min(280px, 20vw);
+    padding-top: var(--lc-nav-height, 3.5rem);
   }
 
   .app-shell__content {
     @apply mx-auto max-w-[1100px] px-5 pb-8 pt-5;
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
   }
 
-  @media (max-width: 768px) {
-    .app-shell__sidebar {
-      @apply bottom-0 left-0 right-0 top-auto w-full border-r-0;
-    }
-
-    .app-shell__stage {
-      @apply ml-0 pb-[4.5rem];
-    }
+  .app-shell__content--swipe-left {
+    transform: translateX(-18px);
+    opacity: 0.55;
   }
 
-  /* Sidebar */
+  .app-shell__content--swipe-right {
+    transform: translateX(18px);
+    opacity: 0.55;
+  }
+
+  /* Top nav (antes sidebar lateral / bottom) */
   .sidebar {
-    @apply flex min-h-screen flex-col;
+    @apply flex h-full min-h-0 flex-row items-center;
     background: var(--surface-glass, var(--secondary-background-color));
     backdrop-filter: var(--surface-blur, none);
     -webkit-backdrop-filter: var(--surface-blur, none);
@@ -39,27 +40,27 @@
   }
 
   .sidebar__brand {
-    @apply flex items-center gap-3 border-b px-4 py-5;
+    @apply flex shrink-0 items-center gap-2.5 border-r px-3 py-2;
     border-color: var(--tertiary-background-color);
   }
 
   .sidebar__logo {
-    @apply flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold;
+    @apply flex h-8 w-8 items-center justify-center rounded-lg text-[0.7rem] font-bold;
     background-color: var(--primary-color);
     color: var(--primary-color-contrast);
   }
 
   .sidebar__title {
-    @apply text-[1.05rem] font-semibold tracking-tight;
+    @apply text-sm font-semibold tracking-tight;
     letter-spacing: -0.015em;
   }
 
   .sidebar__list {
-    @apply m-0 flex flex-1 list-none flex-col gap-1 px-3 py-4;
+    @apply m-0 flex flex-1 list-none flex-row items-center gap-0.5 overflow-x-auto px-2 py-1.5;
   }
 
   .sidebar__link {
-    @apply block rounded-xl px-3.5 py-2.5 text-[0.875rem] font-medium no-underline transition-colors;
+    @apply block whitespace-nowrap rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium no-underline transition-colors;
     color: var(--font-secondary-color);
   }
 
@@ -75,12 +76,12 @@
   }
 
   .sidebar__footer {
-    @apply border-t p-4;
+    @apply shrink-0 border-l p-2;
     border-color: var(--tertiary-background-color);
   }
 
   .sidebar__search {
-    @apply flex w-full cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors;
+    @apply flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors;
     background: color-mix(in srgb, var(--primary-color) 10%, transparent);
     color: var(--font-primary-color);
     border: none;
@@ -95,28 +96,28 @@
   }
 
   @media (max-width: 768px) {
-    .sidebar {
-      @apply min-h-0 flex-row border-t;
+    .app-shell__sidebar {
+      height: var(--lc-nav-height, 3.25rem);
     }
 
-    .sidebar__brand {
-      @apply border-b-0 border-r px-3 py-3;
+    .app-shell__stage {
+      padding-top: var(--lc-nav-height, 3.25rem);
     }
 
     .sidebar__title {
       @apply hidden;
     }
 
-    .sidebar__list {
-      @apply flex-row items-center gap-0.5 overflow-x-auto p-2;
+    .sidebar__brand {
+      @apply px-2.5;
     }
 
     .sidebar__link {
-      @apply whitespace-nowrap px-2.5 py-2 text-xs;
+      @apply px-2.5 py-1.5 text-xs;
     }
 
-    .sidebar__footer {
-      @apply border-l border-t-0 p-2;
+    .sidebar__search span {
+      @apply sr-only;
     }
   }
 
@@ -443,7 +444,7 @@
 
   /* Modal + Fab */
   .modal-shell {
-    @apply fixed inset-0 z-[300];
+    @apply fixed inset-0 z-300;
   }
 
   .modal-shell__backdrop {
@@ -507,7 +508,7 @@
   }
 
   .block-form__field--cap {
-    @apply min-w-[5.5rem];
+    @apply min-w-22;
   }
 
   .block-form__label {
@@ -529,7 +530,7 @@
   }
 
   .fab {
-    @apply fixed bottom-6 right-6 z-[200] flex h-14 w-14 items-center justify-center rounded-full border-0 text-3xl leading-none transition-[transform,box-shadow] hover:scale-105;
+    @apply fixed bottom-6 right-6 z-200 flex h-14 w-14 items-center justify-center rounded-full border-0 text-3xl leading-none transition-[transform,box-shadow] hover:scale-105;
     background: var(--primary-color);
     color: var(--primary-color-contrast);
     box-shadow:
@@ -539,7 +540,7 @@
 
   @media (max-width: 768px) {
     .fab {
-      @apply bottom-[5.25rem] right-4;
+      @apply bottom-4 right-4;
     }
   }
 
@@ -1079,8 +1080,32 @@
   }
 
   .notes-section__card-body {
-    @apply m-0 whitespace-pre-wrap break-words text-sm leading-relaxed;
+    @apply m-0 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed;
     color: var(--font-secondary-color);
+  }
+
+  .notes-section__checklist {
+    @apply m-0 flex list-none flex-col gap-1.5 p-0;
+  }
+
+  .notes-section__check-item {
+    @apply flex items-start gap-2 text-sm;
+    color: var(--font-secondary-color);
+  }
+
+  .notes-section__check-item--done .notes-section__check-text {
+    @apply line-through opacity-60;
+  }
+
+  .notes-section__check {
+    @apply mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[0.65rem] font-bold;
+    border-color: var(--note-accent, var(--primary-color));
+    color: var(--primary-color-contrast);
+    background: transparent;
+  }
+
+  .notes-section__check-item--done .notes-section__check {
+    background: var(--note-accent, var(--primary-color));
   }
 
   .notes-section__reminder {
@@ -1117,6 +1142,45 @@
   }
 
   /* NoteForm */
+  .note-form__types {
+    @apply flex gap-2;
+  }
+
+  .note-form__type {
+    @apply cursor-pointer rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors;
+    background: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-secondary-color);
+  }
+
+  .note-form__type--active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  }
+
+  .note-form__checklist {
+    @apply m-0 mb-2 flex list-none flex-col gap-1.5 p-0;
+  }
+
+  .note-form__check-item {
+    @apply flex items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-sm;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .note-form__check-remove {
+    @apply cursor-pointer border-0 bg-transparent text-lg leading-none;
+    color: var(--font-secondary-color);
+  }
+
+  .note-form__list-add {
+    @apply flex gap-2;
+  }
+
+  .note-form__list-add-btn {
+    @apply shrink-0;
+  }
+
   .note-form__textarea {
     @apply resize-y;
     min-height: 6rem;
@@ -1182,7 +1246,7 @@
   }
 
   .vision-section__desc {
-    @apply m-0 whitespace-pre-wrap break-words text-sm leading-relaxed;
+    @apply m-0 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed;
     color: var(--font-secondary-color);
   }
 
@@ -1190,6 +1254,11 @@
     @apply inline-flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium;
     background: color-mix(in srgb, var(--primary-color) 10%, transparent);
     color: var(--font-primary-color);
+  }
+
+  .vision-section__target--overdue {
+    background: color-mix(in srgb, var(--danger-color) 14%, transparent);
+    color: var(--danger-color);
   }
 
   .vision-section__actions {
@@ -1802,9 +1871,18 @@
     @apply m-0 flex max-h-[50vh] list-none flex-col gap-1.5 overflow-y-auto p-0;
   }
 
+  .search-panel__hint {
+    @apply px-1 py-1 text-xs font-semibold uppercase tracking-wide;
+    color: var(--font-secondary-color);
+  }
+
   .search-panel__result {
     @apply flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-colors;
     background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-elevated, transparent));
+  }
+
+  .search-panel__result--view {
+    background: color-mix(in srgb, var(--primary-color) 10%, var(--surface-elevated, transparent));
   }
 
   .search-panel__result:hover {
@@ -1825,6 +1903,38 @@
   .search-panel__sub {
     @apply truncate text-xs;
     color: var(--font-secondary-color);
+  }
+
+  .lc-toast-host {
+    @apply pointer-events-none fixed inset-x-0 bottom-4 z-400 flex flex-col items-center gap-2 px-4;
+  }
+
+  .lc-toast {
+    @apply pointer-events-auto flex max-w-md cursor-pointer flex-col gap-0.5 rounded-2xl border px-4 py-3 text-left shadow-lg;
+    background: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+    animation: lc-toast-in 0.28s ease;
+  }
+
+  .lc-toast__title {
+    @apply text-sm font-semibold;
+  }
+
+  .lc-toast__body {
+    @apply text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  @keyframes lc-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .dashboard-section__due-list {
@@ -2030,7 +2140,7 @@
   }
 
   .planner-section__period {
-    @apply min-w-[10rem] text-center text-sm font-semibold capitalize;
+    @apply min-w-40 text-center text-sm font-semibold capitalize;
     color: var(--font-primary-color);
   }
 

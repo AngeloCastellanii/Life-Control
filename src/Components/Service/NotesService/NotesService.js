@@ -1,4 +1,4 @@
-import { NOTE_COLORS } from '../../AppComponents/sections/noteColors.js';
+import { getNoteColors } from '../../AppComponents/sections/noteColors.js';
 
 const STORE = 'notes';
 
@@ -6,12 +6,31 @@ function nowISO() {
    return new Date().toISOString();
 }
 
+function normalizeChecklist(items) {
+   if (!Array.isArray(items)) {
+      return [];
+   }
+   return items
+      .map((item) => ({
+         id: item.id || crypto.randomUUID(),
+         text: (item.text ?? '').trim(),
+         done: Boolean(item.done)
+      }))
+      .filter((item) => item.text.length > 0);
+}
+
 function normalizeNote(note) {
+   const type = note.type === 'list' ? 'list' : 'text';
+   const checklist = type === 'list' ? normalizeChecklist(note.checklist) : [];
+   const colors = getNoteColors();
+
    return {
       id: note.id,
       title: (note.title ?? '').trim(),
       body: note.body ?? '',
-      color: note.color ?? NOTE_COLORS[0],
+      type,
+      checklist,
+      color: note.color ?? colors[0],
       pinned: Boolean(note.pinned),
       remindAt: note.remindAt ?? null,
       notified: Boolean(note.notified),
@@ -31,6 +50,13 @@ function compareNotes(a, b) {
       return a.remindAt ? -1 : 1;
    }
    return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '');
+}
+
+function hasContent(note) {
+   if (note.type === 'list') {
+      return note.checklist.length > 0 || Boolean(note.title?.trim());
+   }
+   return Boolean(note.title?.trim() || note.body?.trim());
 }
 
 export default class NotesService {
@@ -63,24 +89,25 @@ export default class NotesService {
       return this.getAll().find((note) => note.id === id) ?? null;
    }
 
-   async create({ title, body, color, remindAt, pinned }) {
-      const trimmedTitle = title?.trim() ?? '';
-      const trimmedBody = body?.trim() ?? '';
-      if (!trimmedTitle && !trimmedBody) {
-         return null;
-      }
-
+   async create({ title, body, type, checklist, color, remindAt, pinned }) {
+      const colors = getNoteColors();
       const note = normalizeNote({
          id: crypto.randomUUID(),
-         title: trimmedTitle || 'Nota',
-         body: trimmedBody,
-         color: color || NOTE_COLORS[0],
+         title: title?.trim() || (type === 'list' ? 'Lista' : 'Nota'),
+         body: body ?? '',
+         type: type === 'list' ? 'list' : 'text',
+         checklist: checklist ?? [],
+         color: color || colors[0],
          pinned: Boolean(pinned),
          remindAt: remindAt || null,
          notified: false,
          createdAt: nowISO(),
          updatedAt: nowISO()
       });
+
+      if (!hasContent(note)) {
+         return null;
+      }
 
       await this.storage.put(STORE, note);
       await this.syncToContext();
@@ -104,6 +131,10 @@ export default class NotesService {
          updatedAt: nowISO()
       });
 
+      if (!hasContent(updated)) {
+         return null;
+      }
+
       await this.storage.put(STORE, updated);
       await this.syncToContext();
       slice.events.emit('note:changed', { action: 'update', note: updated });
@@ -116,6 +147,17 @@ export default class NotesService {
          return null;
       }
       return this.update(id, { pinned: !existing.pinned });
+   }
+
+   async toggleChecklistItem(noteId, itemId) {
+      const existing = this.getById(noteId);
+      if (!existing || existing.type !== 'list') {
+         return null;
+      }
+      const checklist = existing.checklist.map((item) =>
+         item.id === itemId ? { ...item, done: !item.done } : item
+      );
+      return this.update(noteId, { checklist });
    }
 
    async markNotified(id) {
@@ -136,7 +178,6 @@ export default class NotesService {
       return true;
    }
 
-   /** Notas con recordatorio vencido y aún no notificadas. */
    getDueReminders(reference = new Date()) {
       const nowStamp = reference.getTime();
       return this.getAll().filter((note) => {
@@ -148,7 +189,6 @@ export default class NotesService {
       });
    }
 
-   /** Notas con recordatorio futuro dentro de las próximas horas/días. */
    getUpcomingReminders({ withinHours = 48 } = {}) {
       const now = Date.now();
       const limit = now + withinHours * 60 * 60 * 1000;

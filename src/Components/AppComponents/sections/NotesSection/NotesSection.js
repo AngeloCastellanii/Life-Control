@@ -114,7 +114,34 @@ export default class NotesSection extends HTMLElement {
          head.append(title, pinBtn);
          card.appendChild(head);
 
-         if (note.body) {
+         if (note.type === 'list' && note.checklist?.length) {
+            const checklist = document.createElement('ul');
+            checklist.className = 'notes-section__checklist';
+            for (const item of note.checklist) {
+               const li = document.createElement('li');
+               li.className = 'notes-section__check-item';
+               if (item.done) {
+                  li.classList.add('notes-section__check-item--done');
+               }
+
+               const check = document.createElement('button');
+               check.type = 'button';
+               check.className = 'notes-section__check';
+               check.setAttribute('aria-label', item.done ? 'Marcar pendiente' : 'Marcar hecho');
+               check.textContent = item.done ? '✓' : '';
+               check.addEventListener('click', () =>
+                  this.notesService.toggleChecklistItem(note.id, item.id)
+               );
+
+               const text = document.createElement('span');
+               text.className = 'notes-section__check-text';
+               text.textContent = item.text;
+
+               li.append(check, text);
+               checklist.appendChild(li);
+            }
+            card.appendChild(checklist);
+         } else if (note.body) {
             const body = document.createElement('p');
             body.className = 'notes-section__card-body';
             body.textContent = note.body;
@@ -143,7 +170,11 @@ export default class NotesSection extends HTMLElement {
          deleteBtn.type = 'button';
          deleteBtn.className = 'notes-section__delete';
          deleteBtn.textContent = 'Eliminar';
-         deleteBtn.addEventListener('click', () => this.notesService.remove(note.id));
+         deleteBtn.addEventListener('click', () => {
+            if (confirm('¿Eliminar esta nota?')) {
+               this.notesService.remove(note.id);
+            }
+         });
 
          actions.append(editBtn, deleteBtn);
          card.appendChild(actions);

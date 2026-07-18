@@ -1,6 +1,18 @@
 import { preloadModalForms } from '../forms/preloadForms.js';
 import { shouldShowOnboarding } from '../atoms/OnboardingOverlay/OnboardingOverlay.js';
 
+const NAV_ROUTES = [
+   '/',
+   '/planner',
+   '/finances',
+   '/shopping',
+   '/notes',
+   '/focus',
+   '/stats',
+   '/vision',
+   '/settings'
+];
+
 export default class AppShell extends HTMLElement {
    constructor(props) {
       super();
@@ -54,6 +66,8 @@ export default class AppShell extends HTMLElement {
       const fab = await slice.build('Fab', { sliceId: 'app-fab' });
       this.appendChild(fab);
 
+      this.setupSwipeNavigation();
+
       try {
          if (shouldShowOnboarding() && !slice.controller.activeComponents?.has?.('onboarding-overlay')) {
             const onboarding = await slice.build('OnboardingOverlay', { sliceId: 'onboarding-overlay' });
@@ -64,6 +78,90 @@ export default class AppShell extends HTMLElement {
       } catch (error) {
          console.error('No se pudo mostrar el onboarding:', error);
       }
+   }
+
+   setupSwipeNavigation() {
+      const stage = this.querySelector('.app-shell__stage');
+      if (!stage || this._swipeBound) {
+         return;
+      }
+
+      let startX = 0;
+      let startY = 0;
+      let tracking = false;
+
+      const isInteractive = (target) =>
+         Boolean(
+            target?.closest?.(
+               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding'
+            )
+         );
+
+      stage.addEventListener(
+         'touchstart',
+         (event) => {
+            if (event.touches.length !== 1 || isInteractive(event.target)) {
+               tracking = false;
+               return;
+            }
+            startX = event.touches[0].clientX;
+            startY = event.touches[0].clientY;
+            tracking = true;
+         },
+         { passive: true }
+      );
+
+      stage.addEventListener(
+         'touchend',
+         (event) => {
+            if (!tracking || !event.changedTouches?.[0]) {
+               return;
+            }
+            tracking = false;
+
+            const dx = event.changedTouches[0].clientX - startX;
+            const dy = event.changedTouches[0].clientY - startY;
+            if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.35) {
+               return;
+            }
+
+            // Deslizar izquierda → vista siguiente; derecha → anterior
+            this.navigateBySwipe(dx < 0 ? 1 : -1);
+         },
+         { passive: true }
+      );
+
+      this._swipeBound = true;
+   }
+
+   navigateBySwipe(direction) {
+      if (this.classList.contains('app-shell--modal-open')) {
+         return;
+      }
+
+      const current = window.location.pathname.replace(/\/+$/, '') || '/';
+      const index = NAV_ROUTES.indexOf(current);
+      if (index < 0) {
+         return;
+      }
+
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= NAV_ROUTES.length) {
+         return;
+      }
+
+      const content = this.$content;
+      content?.classList.remove('app-shell__content--swipe-left', 'app-shell__content--swipe-right');
+      // force reflow for animation restart
+      void content?.offsetWidth;
+      content?.classList.add(
+         direction > 0 ? 'app-shell__content--swipe-left' : 'app-shell__content--swipe-right'
+      );
+
+      window.setTimeout(() => {
+         slice.router?.navigate?.(NAV_ROUTES[nextIndex]);
+         content?.classList.remove('app-shell__content--swipe-left', 'app-shell__content--swipe-right');
+      }, 160);
    }
 
    async update() {

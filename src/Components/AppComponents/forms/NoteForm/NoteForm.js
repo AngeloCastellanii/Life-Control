@@ -5,7 +5,7 @@ import {
    hideFormError,
    showFormError
 } from '../formHelpers.js';
-import { NOTE_COLORS } from '../../sections/noteColors.js';
+import { getNoteColors } from '../../sections/noteColors.js';
 
 function isoToLocalInput(iso) {
    if (!iso) {
@@ -39,32 +39,123 @@ export default class NoteForm extends HTMLElement {
       this.$actions = this.querySelector('[data-role="actions"]');
       this.$title = this.querySelector('#note-form-title');
       this.$body = this.querySelector('#note-form-body');
+      this.$bodyField = this.querySelector('[data-role="body-field"]');
+      this.$listField = this.querySelector('[data-role="list-field"]');
+      this.$checklist = this.querySelector('[data-role="checklist"]');
+      this.$listInput = this.querySelector('#note-form-list-input');
+      this.$addItem = this.querySelector('[data-role="add-item"]');
+      this.$types = this.querySelector('[data-role="types"]');
       this.$remind = this.querySelector('#note-form-remind');
       this.$pinned = this.querySelector('#note-form-pinned');
       this.$colors = this.querySelector('[data-role="colors"]');
       this.$error = this.querySelector('[data-role="error"]');
-      this._color = NOTE_COLORS[0];
+      this._type = 'text';
+      this._checklist = [];
+      this._color = getNoteColors()[0];
       this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
       this.renderColors();
+      this.bindTypeButtons();
+      this.bindListControls();
       await this.ensureButtons();
       this.bindForm();
       this.populate();
    }
 
    async update() {
+      this.renderColors(true);
       await this.ensureButtons();
       this.populate();
    }
 
-   renderColors() {
-      if (this.$colors.childElementCount > 0) {
+   bindTypeButtons() {
+      if (this._typesBound) {
          return;
       }
-      for (const color of NOTE_COLORS) {
+      this.$types.addEventListener('click', (event) => {
+         const button = event.target.closest('[data-type]');
+         if (!button) {
+            return;
+         }
+         this.setType(button.dataset.type);
+      });
+      this._typesBound = true;
+   }
+
+   bindListControls() {
+      if (this._listBound) {
+         return;
+      }
+      this.$addItem.addEventListener('click', () => this.addChecklistItem());
+      this.$listInput.addEventListener('keydown', (event) => {
+         if (event.key === 'Enter') {
+            event.preventDefault();
+            this.addChecklistItem();
+         }
+      });
+      this._listBound = true;
+   }
+
+   setType(type) {
+      this._type = type === 'list' ? 'list' : 'text';
+      for (const button of this.$types.querySelectorAll('[data-type]')) {
+         button.classList.toggle('note-form__type--active', button.dataset.type === this._type);
+      }
+      this.$bodyField.hidden = this._type !== 'text';
+      this.$listField.hidden = this._type !== 'list';
+   }
+
+   addChecklistItem() {
+      const text = this.$listInput.value.trim();
+      if (!text) {
+         return;
+      }
+      this._checklist.push({ id: crypto.randomUUID(), text, done: false });
+      this.$listInput.value = '';
+      this.renderChecklist();
+      this.$listInput.focus();
+   }
+
+   removeChecklistItem(id) {
+      this._checklist = this._checklist.filter((item) => item.id !== id);
+      this.renderChecklist();
+   }
+
+   renderChecklist() {
+      this.$checklist.innerHTML = '';
+      for (const item of this._checklist) {
+         const li = document.createElement('li');
+         li.className = 'note-form__check-item';
+
+         const text = document.createElement('span');
+         text.className = 'note-form__check-text';
+         text.textContent = item.text;
+
+         const remove = document.createElement('button');
+         remove.type = 'button';
+         remove.className = 'note-form__check-remove';
+         remove.setAttribute('aria-label', 'Quitar ítem');
+         remove.textContent = '×';
+         remove.addEventListener('click', () => this.removeChecklistItem(item.id));
+
+         li.append(text, remove);
+         this.$checklist.appendChild(li);
+      }
+   }
+
+   renderColors(force = false) {
+      if (!force && this.$colors.childElementCount > 0) {
+         return;
+      }
+      this.$colors.innerHTML = '';
+      const colors = getNoteColors();
+      if (!colors.includes(this._color)) {
+         this._color = colors[0];
+      }
+      for (const color of colors) {
          const swatch = document.createElement('button');
          swatch.type = 'button';
          swatch.className = 'note-form__color';
@@ -74,6 +165,7 @@ export default class NoteForm extends HTMLElement {
          swatch.addEventListener('click', () => this.selectColor(color));
          this.$colors.appendChild(swatch);
       }
+      this.selectColor(this._color);
    }
 
    selectColor(color) {
@@ -106,10 +198,13 @@ export default class NoteForm extends HTMLElement {
 
    populate() {
       hideFormError(this.$error);
+      this._checklist = [];
       if (this.noteId) {
          this.loadNote(this.noteId);
       } else {
-         this.selectColor(NOTE_COLORS[0]);
+         this.setType('text');
+         this.selectColor(getNoteColors()[0]);
+         this.renderChecklist();
       }
    }
 
@@ -125,7 +220,10 @@ export default class NoteForm extends HTMLElement {
       this.$body.value = note.body;
       this.$remind.value = isoToLocalInput(note.remindAt);
       this.$pinned.checked = note.pinned;
-      this.selectColor(note.color || NOTE_COLORS[0]);
+      this._checklist = (note.checklist ?? []).map((item) => ({ ...item }));
+      this.setType(note.type === 'list' ? 'list' : 'text');
+      this.renderChecklist();
+      this.selectColor(note.color || getNoteColors()[0]);
    }
 
    async handleSubmit() {
@@ -141,14 +239,22 @@ export default class NoteForm extends HTMLElement {
 
       const title = this.$title.value.trim();
       const body = this.$body.value.trim();
-      if (!title && !body) {
+
+      if (this._type === 'list') {
+         if (!title && this._checklist.length === 0) {
+            showFormError(this.$error, 'Añade un título o al menos un ítem.');
+            return;
+         }
+      } else if (!title && !body) {
          showFormError(this.$error, 'Escribe un título o contenido.');
          return;
       }
 
       const payload = {
          title,
-         body,
+         body: this._type === 'text' ? body : '',
+         type: this._type,
+         checklist: this._type === 'list' ? this._checklist : [],
          color: this._color,
          remindAt: localInputToIso(this.$remind.value),
          pinned: this.$pinned.checked

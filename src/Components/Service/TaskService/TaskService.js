@@ -91,7 +91,8 @@ export default class TaskService {
          dueDate: resolvedDue,
          scheduledDate: resolvedDue,
          recurrence: recurrence || TASK_RECURRENCE.NONE,
-         completed: false
+         completed: false,
+         dueNotified: false
       };
 
       await this.storage.put(STORE, task);
@@ -139,6 +140,12 @@ export default class TaskService {
                  : existing.dueDate ?? existing.scheduledDate ?? null
       };
 
+      const nextDue = updated.dueDate ?? updated.scheduledDate;
+      const prevDue = existing.dueDate ?? existing.scheduledDate;
+      if (nextDue !== prevDue) {
+         updated.dueNotified = false;
+      }
+
       if (!updated.blockId) {
          updated.slotStart = null;
          updated.slotEnd = null;
@@ -173,6 +180,7 @@ export default class TaskService {
          id: crypto.randomUUID(),
          completed: false,
          completedAt: null,
+         dueNotified: false,
          startDate: nextStart ?? nextDue ?? todayISO(),
          dueDate: nextDue,
          scheduledDate: nextDue
@@ -231,5 +239,25 @@ export default class TaskService {
 
       slice.events.emit('task:changed', { action: 'delete', id });
       return true;
+   }
+
+   /** Tareas pendientes cuya fecha de vencimiento ya llegó y aún no se notificó. */
+   getDueReminders(reference = new Date()) {
+      const today = reference.toISOString().slice(0, 10);
+      return this.getAll().filter((task) => {
+         if (task.completed || task.dueNotified) {
+            return false;
+         }
+         const due = task.dueDate || task.scheduledDate;
+         return Boolean(due) && due <= today;
+      });
+   }
+
+   async markDueNotified(id) {
+      const existing = this.getById(id);
+      if (!existing || existing.dueNotified) {
+         return null;
+      }
+      return this.update(id, { dueNotified: true });
    }
 }

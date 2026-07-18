@@ -33,6 +33,7 @@ export default class VisionForm extends HTMLElement {
       this.$imageFile = this.querySelector('#vision-form-image');
       this.$imageUrl = this.querySelector('#vision-form-image-url');
       this.$preview = this.querySelector('[data-role="preview"]');
+      this.$clearImage = this.querySelector('[data-role="clear-image"]');
       this.$error = this.querySelector('[data-role="error"]');
       this._image = '';
       this._buttonsReady = false;
@@ -69,17 +70,32 @@ export default class VisionForm extends HTMLElement {
          this.handleSubmit();
       });
       this.$imageFile.addEventListener('change', () => this.onFileChange());
-      this.$imageUrl.addEventListener('input', () => {
+      this.$imageUrl.addEventListener('change', () => {
          const url = this.$imageUrl.value.trim();
          if (url) {
             this.setImage(url);
+         } else if (!this.$imageFile.files?.length) {
+            this.setImage('');
          }
+      });
+      this.$preview.addEventListener('error', () => {
+         if (this._image) {
+            showFormError(this.$error, 'No se pudo cargar la imagen. Revisa la URL o sube un archivo.');
+            this.$preview.hidden = true;
+         }
+      });
+      this.$clearImage.addEventListener('click', () => {
+         this.$imageFile.value = '';
+         this.$imageUrl.value = '';
+         this.setImage('');
+         hideFormError(this.$error);
       });
       this._formBound = true;
    }
 
    setImage(src) {
       this._image = src ?? '';
+      this.$clearImage.hidden = !this._image;
       if (this._image) {
          this.$preview.src = this._image;
          this.$preview.hidden = false;
@@ -111,6 +127,9 @@ export default class VisionForm extends HTMLElement {
 
    populate() {
       hideFormError(this.$error);
+      this.$imageFile.value = '';
+      this.$imageUrl.value = '';
+      this.setImage('');
       if (this.visionId) {
          this.loadItem(this.visionId);
       }

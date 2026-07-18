@@ -331,9 +331,9 @@ export default class SettingsSection extends HTMLElement {
 
          const mode = await downloadJsonBackup(backup);
          if (mode === 'shared') {
-            this.showBackupStatus(`Respaldo listo (${total} registros). Guárdalo en Archivos o envíalo a tu Mac.`);
+            this.showBackupStatus(`Respaldo listo (${total} registros). Guárdalo en Archivos o envíalo a tu otro dispositivo.`);
          } else {
-            this.showBackupStatus(`Respaldo descargado (${total} registros).`);
+            this.showBackupStatus(`Respaldo descargado (${total} registros). Impórtalo en el otro dispositivo.`);
          }
       } catch (error) {
          if (error?.name === 'AbortError') {
@@ -360,43 +360,47 @@ export default class SettingsSection extends HTMLElement {
       this.showBackupStatus('Leyendo archivo…');
 
       try {
-         const storage = await this.ensureStorageService();
-         if (!storage) {
-            throw new Error('StorageService no disponible');
-         }
-
          const backup = await readBackupFile(file);
-         const summary = summarizeBackup(backup);
-         const total = Object.values(summary).reduce((sum, count) => sum + count, 0);
-
-         if (total === 0) {
-            throw new Error('El respaldo está vacío.');
-         }
-
-         const hasData = await hasStoredData(storage);
-         if (hasData) {
-            const confirmed = window.confirm(
-               'Esto reemplazará todos tus datos actuales en este dispositivo. ¿Continuar?'
-            );
-            if (!confirmed) {
-               this.showBackupStatus('Importación cancelada.');
-               return;
-            }
-         }
-
-         this.showBackupStatus('Importando datos…');
-         await importAppData(storage, backup);
-         this.showBackupStatus(`Datos importados (${total} registros). Recargando…`);
-
-         setTimeout(() => {
-            window.location.reload();
-         }, 700);
+         await this.applyBackup(backup);
       } catch (error) {
          console.error('SettingsSection importData:', error);
          this.showBackupStatus(error.message || 'No se pudo importar. Revisa el archivo.', true);
       } finally {
          this._importingData = false;
       }
+   }
+
+   async applyBackup(backup) {
+      const storage = await this.ensureStorageService();
+      if (!storage) {
+         throw new Error('StorageService no disponible');
+      }
+
+      const summary = summarizeBackup(backup);
+      const total = Object.values(summary).reduce((sum, count) => sum + count, 0);
+
+      if (total === 0) {
+         throw new Error('El respaldo está vacío.');
+      }
+
+      const hasData = await hasStoredData(storage);
+      if (hasData) {
+         const confirmed = window.confirm(
+            'Esto reemplazará todos tus datos actuales en este dispositivo. ¿Continuar?'
+         );
+         if (!confirmed) {
+            this.showBackupStatus('Importación cancelada.');
+            return;
+         }
+      }
+
+      this.showBackupStatus('Importando datos…');
+      await importAppData(storage, backup);
+      this.showBackupStatus(`Datos sincronizados (${total} registros). Recargando…`);
+
+      setTimeout(() => {
+         window.location.reload();
+      }, 700);
    }
 
    async clearCache() {
