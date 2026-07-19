@@ -1,33 +1,107 @@
 :root {
   --font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  --font-primary-color: #18181b;
-  --font-secondary-color: #71717a;
 
-  --primary-color: #2563eb;
-  --primary-color-rgb: 37, 99, 235;
-  --primary-background-color: #fafafa;
+  /* Light — cielo suave, acentos azules luminosos */
+  --font-primary-color: #0f172a;
+  --font-secondary-color: #64748b;
+
+  --primary-color: #3b82f6;
+  --primary-color-rgb: 59, 130, 246;
+  --primary-background-color: #f1f5f9;
   --primary-color-contrast: #ffffff;
-  --primary-color-shade: #dbeafe;
+  --primary-color-shade: #1d4ed8;
 
+  --secondary-color: #60a5fa;
+  --secondary-color-rgb: 96, 165, 250;
   --secondary-background-color: #ffffff;
-  --secondary-color: #2563eb;
-  --secondary-color-rgb: 37, 99, 235;
   --secondary-color-contrast: #ffffff;
 
-  --tertiary-background-color: #e4e4e7;
+  --tertiary-background-color: #dbe4f0;
 
   --success-color: #10b981;
   --success-contrast: #ffffff;
-  --warning-color: #eab308;
-  --warning-contrast: #18181b;
+  --warning-color: #f59e0b;
+  --warning-contrast: #0f172a;
   --danger-color: #ef4444;
   --danger-contrast: #ffffff;
-  --accent-warning-soft: #f97316;
+  --accent-warning-soft: #fb923c;
 
-  --medium-color: #a1a1aa;
-  --disabled-color: #a1a1aa;
+  --medium-color: #94a3b8;
+  --medium-contrast: #0f172a;
+  --disabled-color: #cbd5e1;
+
+  --accent-color: #38bdf8;
+
+  /* Glass + brillo (técnica Obsidian, colores Light) */
+  --surface-glass: color-mix(in srgb, #ffffff 78%, transparent);
+  --surface-elevated: #ffffff;
+  --surface-blur: blur(16px);
+  --border-glow: color-mix(in srgb, var(--primary-color) 32%, #e2e8f0);
+
+  --app-background: linear-gradient(
+    155deg,
+    #eef6ff 0%,
+    #f8fafc 22%,
+    #dbeafe 48%,
+    #e0f2fe 72%,
+    #f0f9ff 100%
+  );
+
+  --box-shadow-primary: 0 10px 36px rgb(59 130 246 / 18%);
+  --box-shadow-secondary: 0 4px 18px rgb(56 189 248 / 14%);
 
   --lc-radius-lg: 1rem;
   --lc-radius-xl: 1.5rem;
-  --lc-shadow: 0 1px 3px rgb(24 24 27 / 8%);
+  --lc-shadow:
+    0 1px 2px rgb(15 23 42 / 4%),
+    0 8px 28px rgb(59 130 246 / 12%);
+}
+
+/* Cards y paneles: cristal + borde luminoso */
+:root .lc-card,
+:root .sidebar,
+:root .task-card,
+:root .time-block,
+:root .modal-shell__dialog,
+:root .finances-section__wallet,
+:root .finances-section__col,
+:root .shopping-section__col,
+:root .shopping-section__detail {
+  background: var(--surface-glass);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
+  border-color: var(--border-glow);
+  box-shadow: var(--lc-shadow);
+}
+
+:root .sidebar__item--active .sidebar__link {
+  background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 35%, transparent),
+    0 0 18px rgb(59 130 246 / 18%);
+}
+
+:root .sidebar__link:hover {
+  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
+}
+
+:root .fab {
+  box-shadow:
+    0 8px 28px rgb(59 130 246 / 42%),
+    0 0 24px rgb(56 189 248 / 35%),
+    inset 0 1px 0 rgb(255 255 255 / 28%);
+}
+
+:root .lc-view-hero__icon {
+  box-shadow:
+    0 6px 20px rgb(59 130 246 / 22%),
+    0 0 16px rgb(56 189 248 / 20%);
+}
+
+:root .planner-week__day--today,
+:root .planner-month__cell--today {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 10%, #ffffff);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 25%, transparent),
+    0 4px 16px rgb(59 130 246 / 16%);
 }

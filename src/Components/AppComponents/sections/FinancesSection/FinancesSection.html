@@ -3,7 +3,7 @@
     <span class="lc-view-hero__icon lc-view-hero__icon--finances lc-icon-dollar" aria-hidden="true">$</span>
     <div class="lc-view-hero__text">
       <h1 class="lc-section-title lc-view-hero__title">Finanzas</h1>
-      <p class="lc-view-hero__subtitle">Billetera, pagos y cobros. Pulsa + para agregar.</p>
+      <p class="lc-view-hero__subtitle">Fondos por método de pago, cobros y egresos. Pulsa + para agregar.</p>
     </div>
   </header>
 
@@ -11,14 +11,16 @@
     <div class="lc-view-card-head finances-section__wallet-head">
       <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
       <div>
-        <h2 class="lc-view-card-label">Dinero actual</h2>
-        <p class="lc-view-hint">Al marcar pagado se descuenta; al cobrar se suma.</p>
+        <h2 class="lc-view-card-label">Fondo total</h2>
+        <p class="lc-view-hint">Suma de tus métodos. Al cobrar se suma al medio elegido; al pagar se descuenta.</p>
       </div>
     </div>
     <div class="finances-section__wallet-actions">
       <span class="finances-section__wallet-balance" data-role="wallet-balance">$0.00</span>
-      <button type="button" class="finances-section__wallet-adjust" data-role="wallet-adjust">Ajustar saldo</button>
+      <button type="button" class="finances-section__wallet-adjust" data-role="add-method">+ Método</button>
     </div>
+    <ul class="finances-section__accounts" data-role="accounts-list"></ul>
+    <p class="finances-section__accounts-empty lc-empty" data-role="accounts-empty" hidden>Añade un método (Zelle, Binance, efectivo…).</p>
   </div>
 
   <div class="finances-section__balance">
@@ -30,7 +32,7 @@
           </svg>
         </span>
         <div>
-          <h2 class="lc-view-card-label">Por pagar</h2>
+          <h2 class="lc-view-card-label">Por pagar / egresos</h2>
           <p class="finances-section__total" data-role="pay-total">$0.00</p>
         </div>
       </div>
@@ -38,7 +40,7 @@
       <p class="finances-section__empty lc-empty" data-role="pay-empty" hidden>Sin pendientes por pagar.</p>
       <details class="finances-section__history" data-role="pay-settled-wrap" hidden>
         <summary class="finances-section__history-toggle">
-          <span>Cuentas pagadas</span>
+          <span>Pagados</span>
           <span class="finances-section__history-count" data-role="pay-settled-count">0</span>
         </summary>
         <ul class="finances-section__list finances-section__list--settled" data-role="pay-settled-list"></ul>
@@ -53,7 +55,7 @@
           </svg>
         </span>
         <div>
-          <h2 class="lc-view-card-label">Por cobrar</h2>
+          <h2 class="lc-view-card-label">Por cobrar / ingresos</h2>
           <p class="finances-section__total" data-role="receive-total">$0.00</p>
         </div>
       </div>
@@ -61,7 +63,7 @@
       <p class="finances-section__empty lc-empty" data-role="receive-empty" hidden>Sin pendientes por cobrar.</p>
       <details class="finances-section__history" data-role="receive-settled-wrap" hidden>
         <summary class="finances-section__history-toggle">
-          <span>Cuentas cobradas</span>
+          <span>Cobrados</span>
           <span class="finances-section__history-count" data-role="receive-settled-count">0</span>
         </summary>
         <ul class="finances-section__list finances-section__list--settled" data-role="receive-settled-list"></ul>

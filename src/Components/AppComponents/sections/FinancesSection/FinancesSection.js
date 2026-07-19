@@ -11,7 +11,9 @@ export default class FinancesSection extends HTMLElement {
       super();
       slice.attachTemplate(this);
       this.$walletBalance = this.querySelector('[data-role="wallet-balance"]');
-      this.$walletAdjust = this.querySelector('[data-role="wallet-adjust"]');
+      this.$addMethod = this.querySelector('[data-role="add-method"]');
+      this.$accountsList = this.querySelector('[data-role="accounts-list"]');
+      this.$accountsEmpty = this.querySelector('[data-role="accounts-empty"]');
       this.$payList = this.querySelector('[data-role="pay-list"]');
       this.$receiveList = this.querySelector('[data-role="receive-list"]');
       this.$payEmpty = this.querySelector('[data-role="pay-empty"]');
@@ -31,14 +33,13 @@ export default class FinancesSection extends HTMLElement {
 
    async init() {
       this.financeService = slice.getComponent('finance-service');
+      this.paymentMethodService = slice.getComponent('payment-method-service');
       if (typeof this.financeService?.getAll !== 'function') {
          slice.logger.logError('FinancesSection', 'FinanceService no disponible');
          return;
       }
 
-      if (this.$walletAdjust) {
-         this.$walletAdjust.addEventListener('click', () => this.adjustWallet());
-      }
+      this.$addMethod?.addEventListener('click', () => this.openMethodForm());
 
       slice.context.watch(
          'lifeControl',
@@ -46,7 +47,8 @@ export default class FinancesSection extends HTMLElement {
          (state) => this.render(state),
          (state) => ({
             finances: state?.finances ?? [],
-            walletBalance: state?.walletBalance ?? 0
+            walletBalance: state?.walletBalance ?? 0,
+            paymentMethods: state?.paymentMethods ?? []
          })
       );
 
@@ -55,6 +57,7 @@ export default class FinancesSection extends HTMLElement {
 
    async update() {
       this.financeService = slice.getComponent('finance-service');
+      this.paymentMethodService = slice.getComponent('payment-method-service');
       this.renderFromState();
    }
 
@@ -62,7 +65,8 @@ export default class FinancesSection extends HTMLElement {
       const state = slice.context.getState('lifeControl') ?? {};
       this.render({
          finances: state.finances ?? [],
-         walletBalance: state.walletBalance ?? 0
+         walletBalance: state.walletBalance ?? 0,
+         paymentMethods: state.paymentMethods ?? []
       });
    }
 
@@ -78,10 +82,15 @@ export default class FinancesSection extends HTMLElement {
       return `${d}/${m}/${y}`;
    }
 
-   adjustWallet() {
+   methodName(accountId) {
+      return this.paymentMethodService?.getById?.(accountId)?.name ?? '';
+   }
+
+   openMethodForm(paymentMethodId = null) {
       slice.events.emit('ui:modal:open', {
-         title: 'Ajustar saldo de billetera',
-         form: 'WalletForm'
+         title: paymentMethodId ? 'Editar método de pago' : 'Nuevo método de pago',
+         form: 'PaymentMethodForm',
+         paymentMethodId
       });
    }
 
@@ -99,6 +108,68 @@ export default class FinancesSection extends HTMLElement {
          form: 'FinanceDetailPanel',
          financeId
       });
+   }
+
+   renderAccounts(methods, total) {
+      this.$accountsList.innerHTML = '';
+      const list = Array.isArray(methods) ? methods : [];
+      this.$accountsEmpty.hidden = list.length > 0;
+
+      for (const method of list) {
+         const li = document.createElement('li');
+         li.className = 'finances-section__account';
+         li.style.setProperty('--account-color', method.color || '#6366f1');
+
+         const pct = total > 0 ? Math.min(100, (Math.abs(method.balance) / total) * 100) : 0;
+
+         const head = document.createElement('div');
+         head.className = 'finances-section__account-head';
+
+         const name = document.createElement('span');
+         name.className = 'finances-section__account-name';
+         name.textContent = method.name;
+
+         const amount = document.createElement('span');
+         amount.className = 'finances-section__account-amount';
+         amount.textContent = this.formatMoney(method.balance);
+
+         head.append(name, amount);
+
+         const bar = document.createElement('div');
+         bar.className = 'finances-section__account-bar';
+         const fill = document.createElement('span');
+         fill.className = 'finances-section__account-fill';
+         fill.style.width = `${pct}%`;
+         bar.appendChild(fill);
+
+         const actions = document.createElement('div');
+         actions.className = 'finances-section__account-actions';
+
+         const edit = document.createElement('button');
+         edit.type = 'button';
+         edit.className = 'finances-section__account-edit';
+         edit.textContent = 'Editar';
+         edit.addEventListener('click', () => this.openMethodForm(method.id));
+
+         const remove = document.createElement('button');
+         remove.type = 'button';
+         remove.className = 'finances-section__account-delete';
+         remove.textContent = 'Eliminar';
+         remove.addEventListener('click', async () => {
+            if (!confirm(`¿Eliminar el método "${method.name}"?`)) {
+               return;
+            }
+            try {
+               await this.paymentMethodService.remove(method.id);
+            } catch (error) {
+               alert(error.message || 'No se pudo eliminar.');
+            }
+         });
+
+         actions.append(edit, remove);
+         li.append(head, bar, actions);
+         this.$accountsList.appendChild(li);
+      }
    }
 
    renderItemRow(item, { settledSection = false } = {}) {
@@ -143,14 +214,19 @@ export default class FinancesSection extends HTMLElement {
       const meta = document.createElement('span');
       meta.className = 'finances-section__item-meta';
       const isPay = item.type === FINANCE_TYPE.PAY;
-      if (item.settled) {
-         const label = isPay ? 'Pagado' : 'Cobrado';
-         meta.textContent = item.settledAt ? `${label} el ${this.formatDate(item.settledAt)}` : label;
-      } else if (item.dueDate) {
-         meta.textContent = `Vence ${this.formatDate(item.dueDate)}`;
-      } else {
-         meta.textContent = 'Pendiente';
+      const method = this.methodName(item.accountId);
+      const bits = [];
+      if (method) {
+         bits.push(method);
       }
+      if (item.settled) {
+         bits.push(item.settledAt ? `${isPay ? 'Pagado' : 'Cobrado'} ${this.formatDate(item.settledAt)}` : isPay ? 'Pagado' : 'Cobrado');
+      } else if (item.dueDate) {
+         bits.push(`Vence ${this.formatDate(item.dueDate)}`);
+      } else {
+         bits.push('Pendiente');
+      }
+      meta.textContent = bits.join(' · ');
 
       body.appendChild(title);
       body.appendChild(meta);
@@ -208,12 +284,19 @@ export default class FinancesSection extends HTMLElement {
          .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
    }
 
-   render({ finances, walletBalance }) {
+   render({ finances, walletBalance, paymentMethods }) {
       if (!this.$walletBalance) {
          return;
       }
 
-      this.$walletBalance.textContent = this.formatMoney(walletBalance);
+      const methods = Array.isArray(paymentMethods) ? paymentMethods : [];
+      const total =
+         methods.length > 0
+            ? methods.reduce((sum, method) => sum + (Number(method.balance) || 0), 0)
+            : walletBalance;
+
+      this.$walletBalance.textContent = this.formatMoney(total);
+      this.renderAccounts(methods, total);
 
       const list = Array.isArray(finances) ? finances : [];
       const payPending = list.filter((item) => item.type === FINANCE_TYPE.PAY && !item.settled);

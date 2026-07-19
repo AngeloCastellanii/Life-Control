@@ -19,11 +19,19 @@ export default class FinanceService {
       await this.syncToContext();
    }
 
+   paymentMethods() {
+      return slice.getComponent('payment-method-service');
+   }
+
    async syncToContext() {
       const finances = await this.storage.getAll(STORE);
       finances.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
 
-      const walletBalance = await this.getWalletBalanceRaw();
+      const methods = this.paymentMethods()?.getAll?.() ?? [];
+      const walletBalance =
+         methods.length > 0
+            ? methods.reduce((sum, method) => sum + (Number(method.balance) || 0), 0)
+            : await this.getWalletBalanceRaw();
 
       slice.context.setState('lifeControl', (prev) => ({
          ...(prev ?? {}),
@@ -50,7 +58,28 @@ export default class FinanceService {
       return Number(wallet?.balance) || 0;
    }
 
+   resolveAccountId(accountId) {
+      const pm = this.paymentMethods();
+      if (!pm) {
+         return null;
+      }
+      if (accountId && pm.getById(accountId)) {
+         return accountId;
+      }
+      return pm.getDefaultId();
+   }
+
    async setWalletBalance(balance) {
+      const pm = this.paymentMethods();
+      const methods = pm?.getAll?.() ?? [];
+      if (methods.length === 1) {
+         await pm.setBalance(methods[0].id, balance);
+         return Number(balance) || 0;
+      }
+      if (methods.length > 1) {
+         throw new Error('Ajusta el saldo desde cada método de pago.');
+      }
+
       const value = Number(balance) || 0;
       await this.storage.put(META_STORE, { id: WALLET_ID, balance: value });
       slice.context.setState('lifeControl', (prev) => ({
@@ -61,9 +90,16 @@ export default class FinanceService {
       return value;
    }
 
-   async adjustWallet(delta) {
+   async adjustAccount(accountId, delta) {
+      const pm = this.paymentMethods();
+      const id = this.resolveAccountId(accountId);
+      if (pm && id) {
+         await pm.adjustBalance(id, delta);
+         await this.syncToContext();
+         return;
+      }
       const current = await this.getWalletBalanceRaw();
-      return this.setWalletBalance(current + delta);
+      await this.setWalletBalance(current + delta);
    }
 
    getByType(type) {
@@ -108,7 +144,7 @@ export default class FinanceService {
       return settled ? -amount : amount;
    }
 
-   async create({ description, amount, type, dueDate = null, domainId = null }) {
+   async create({ description, amount, type, dueDate = null, domainId = null, accountId = null }) {
       const trimmed = description?.trim();
       const value = Number(amount);
       if (!trimmed || !Number.isFinite(value) || value <= 0) {
@@ -122,6 +158,7 @@ export default class FinanceService {
          type: type === FINANCE_TYPE.RECEIVE ? FINANCE_TYPE.RECEIVE : FINANCE_TYPE.PAY,
          dueDate: dueDate || null,
          domainId: domainId || null,
+         accountId: this.resolveAccountId(accountId),
          settled: false,
          createdAt: new Date().toISOString()
       };
@@ -142,18 +179,34 @@ export default class FinanceService {
       const oldAmount = Number(existing.amount) || 0;
       const description = patch.description?.trim() ?? existing.description;
       const amount = patch.amount !== undefined ? Number(patch.amount) : oldAmount;
-      const type = patch.type === FINANCE_TYPE.RECEIVE ? FINANCE_TYPE.RECEIVE : patch.type === FINANCE_TYPE.PAY ? FINANCE_TYPE.PAY : existing.type;
+      const type =
+         patch.type === FINANCE_TYPE.RECEIVE
+            ? FINANCE_TYPE.RECEIVE
+            : patch.type === FINANCE_TYPE.PAY
+              ? FINANCE_TYPE.PAY
+              : existing.type;
       const dueDate = patch.dueDate !== undefined ? patch.dueDate || null : existing.dueDate ?? null;
       const domainId = patch.domainId !== undefined ? patch.domainId || null : existing.domainId ?? null;
+      const accountId =
+         patch.accountId !== undefined
+            ? this.resolveAccountId(patch.accountId)
+            : existing.accountId ?? this.resolveAccountId(null);
 
       if (!description || !Number.isFinite(amount) || amount <= 0) {
          return null;
       }
 
-      if (existing.settled && amount !== oldAmount) {
-         const oldEffect = type === FINANCE_TYPE.RECEIVE ? oldAmount : -oldAmount;
+      if (existing.settled) {
+         const oldAccount = existing.accountId ?? this.resolveAccountId(null);
+         const oldEffect = existing.type === FINANCE_TYPE.RECEIVE ? oldAmount : -oldAmount;
          const newEffect = type === FINANCE_TYPE.RECEIVE ? amount : -amount;
-         await this.adjustWallet(newEffect - oldEffect);
+
+         if (oldAccount !== accountId) {
+            await this.adjustAccount(oldAccount, -oldEffect);
+            await this.adjustAccount(accountId, newEffect);
+         } else if (amount !== oldAmount || type !== existing.type) {
+            await this.adjustAccount(accountId, newEffect - oldEffect);
+         }
       }
 
       const updated = {
@@ -162,7 +215,8 @@ export default class FinanceService {
          amount,
          type,
          dueDate,
-         domainId
+         domainId,
+         accountId
       };
 
       await this.storage.put(STORE, updated);
@@ -184,13 +238,15 @@ export default class FinanceService {
          return existing;
       }
 
+      const accountId = existing.accountId ?? this.resolveAccountId(null);
       const updated = {
          ...existing,
+         accountId,
          settled: willBeSettled,
          settledAt: willBeSettled ? new Date().toISOString().slice(0, 10) : null
       };
       await this.storage.put(STORE, updated);
-      await this.adjustWallet(this.walletDeltaFor(existing, willBeSettled));
+      await this.adjustAccount(accountId, this.walletDeltaFor(existing, willBeSettled));
       await this.syncToContext();
       slice.events.emit('finance:changed', { action: 'update', item: updated });
       return updated;
@@ -204,7 +260,8 @@ export default class FinanceService {
       }
 
       if (existing.settled) {
-         await this.adjustWallet(this.walletDeltaFor(existing, false));
+         const accountId = existing.accountId ?? this.resolveAccountId(null);
+         await this.adjustAccount(accountId, this.walletDeltaFor(existing, false));
       }
 
       await this.storage.delete(STORE, id);

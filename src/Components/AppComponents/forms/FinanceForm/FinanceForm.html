@@ -2,8 +2,8 @@
   <div>
     <label class="lc-label" for="finance-form-type">Tipo</label>
     <select class="lc-input" id="finance-form-type">
-      <option value="pay">Por pagar</option>
-      <option value="receive">Por cobrar</option>
+      <option value="pay">Egreso / por pagar</option>
+      <option value="receive">Ingreso / por cobrar</option>
     </select>
   </div>
   <div>
@@ -17,6 +17,13 @@
   <div>
     <label class="lc-label" for="finance-form-due">Fecha objetivo</label>
     <input class="lc-input" id="finance-form-due" type="date" />
+  </div>
+  <div>
+    <label class="lc-label" for="finance-form-account">Método de pago</label>
+    <p class="lc-hint">Dónde entra o sale el dinero (Zelle, Binance, efectivo…).</p>
+    <select class="lc-input" id="finance-form-account" required>
+      <option value="">Selecciona un método</option>
+    </select>
   </div>
   <div>
     <label class="lc-label" for="finance-form-domain">Dominio</label>

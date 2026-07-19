@@ -33,9 +33,11 @@ async function bootstrapLifeControl() {
       tasks: [],
       timeBlocks: [],
       finances: [],
+      paymentMethods: [],
       shopping: [],
       notes: [],
       vision: [],
+      walletBalance: 0,
       profile: { displayName: '' }
    });
 
@@ -46,6 +48,7 @@ async function bootstrapLifeControl() {
    await initService('TaskService', 'task-service');
    await initService('ExchangeRateService', 'exchange-rate-service');
    await initService('TimeBlockService', 'time-block-service');
+   await initService('PaymentMethodService', 'payment-method-service');
    await initService('FinanceService', 'finance-service');
    await initService('ShoppingService', 'shopping-service');
    await initService('ProfileService', 'profile-service');

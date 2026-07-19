@@ -127,65 +127,28 @@
     }
   }
 
-  /* Nav lateral (doble clic en Life Control) */
-  .app-shell--nav-side .app-shell__sidebar {
-    @apply bottom-auto left-0 right-auto top-0 h-auto w-[min(280px,20vw)] border-b-0 border-r;
-    height: 100%;
-    min-height: 100vh;
+  /* Nav abajo (doble clic en Life Control) */
+  .app-shell--nav-bottom .app-shell__sidebar {
+    @apply bottom-0 left-0 right-0 top-auto w-full border-b-0 border-t;
+    height: var(--lc-nav-height, 3.5rem);
   }
 
-  .app-shell--nav-side .app-shell__stage {
+  .app-shell--nav-bottom .app-shell__stage {
     padding-top: 0;
-    margin-left: min(280px, 20vw);
+    padding-bottom: var(--lc-nav-height, 3.5rem);
   }
 
-  .app-shell--nav-side .sidebar {
-    @apply min-h-screen flex-col items-stretch;
-  }
-
-  .app-shell--nav-side .sidebar__brand {
-    @apply w-full border-b border-r-0 px-4 py-5;
-  }
-
-  .app-shell--nav-side .sidebar__title {
-    @apply inline;
-  }
-
-  .app-shell--nav-side .sidebar__list {
-    @apply flex-col items-stretch gap-1 overflow-x-visible overflow-y-auto px-3 py-4;
-  }
-
-  .app-shell--nav-side .sidebar__link {
-    @apply whitespace-normal px-3.5 py-2.5 text-[0.875rem];
-  }
-
-  .app-shell--nav-side .sidebar__footer {
-    @apply border-l-0 border-t p-4;
-  }
-
-  .app-shell--nav-side .sidebar__search {
-    @apply w-full;
-  }
-
-  .app-shell--nav-side .sidebar__search span {
-    position: static;
-    width: auto;
-    height: auto;
-    padding: 0;
-    margin: 0;
-    overflow: visible;
-    clip: auto;
-    white-space: normal;
-    @apply inline;
+  .app-shell--nav-bottom .fab {
+    @apply bottom-21;
   }
 
   @media (max-width: 768px) {
-    .app-shell--nav-side .app-shell__sidebar {
-      width: min(240px, 78vw);
+    .app-shell--nav-bottom .app-shell__sidebar {
+      height: var(--lc-nav-height, 3.25rem);
     }
 
-    .app-shell--nav-side .app-shell__stage {
-      margin-left: min(240px, 78vw);
+    .app-shell--nav-bottom .app-shell__stage {
+      padding-bottom: var(--lc-nav-height, 3.25rem);
     }
   }
 
@@ -1719,6 +1682,80 @@
 
   .finances-section__wallet-adjust:hover {
     background: var(--primary-color-shade, var(--primary-color));
+  }
+
+  .finances-section__accounts {
+    @apply m-0 flex list-none flex-col gap-3 p-0;
+  }
+
+  .finances-section__account {
+    @apply flex flex-col gap-1.5 rounded-xl px-3 py-2.5;
+    background: color-mix(in srgb, var(--account-color, var(--primary-color)) 8%, transparent);
+  }
+
+  .finances-section__account-head {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  .finances-section__account-name {
+    @apply flex items-center gap-2 text-sm font-semibold;
+    color: var(--font-primary-color);
+  }
+
+  .finances-section__account-name::before {
+    @apply h-2.5 w-2.5 shrink-0 rounded-full;
+    background: var(--account-color, var(--primary-color));
+    content: "";
+  }
+
+  .finances-section__account-amount {
+    @apply text-sm font-bold tabular-nums;
+    color: var(--font-primary-color);
+  }
+
+  .finances-section__account-bar {
+    @apply h-1.5 w-full overflow-hidden rounded-full;
+    background: color-mix(in srgb, var(--account-color, var(--primary-color)) 18%, transparent);
+  }
+
+  .finances-section__account-fill {
+    @apply block h-full rounded-full;
+    background: var(--account-color, var(--primary-color));
+  }
+
+  .finances-section__account-actions {
+    @apply flex gap-2;
+  }
+
+  .finances-section__account-edit,
+  .finances-section__account-delete {
+    @apply cursor-pointer rounded-lg border px-2 py-1 text-xs;
+    background: transparent;
+    border-color: var(--tertiary-background-color);
+    color: var(--font-secondary-color);
+  }
+
+  .finances-section__account-edit:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .finances-section__account-delete:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+  }
+
+  .payment-method-form__colors {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .payment-method-form__color {
+    @apply h-8 w-8 cursor-pointer rounded-full border-2 border-transparent;
+  }
+
+  .payment-method-form__color--active {
+    border-color: var(--font-primary-color);
+    transform: scale(1.08);
   }
 
   .finances-section__col-head {

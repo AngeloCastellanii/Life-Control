@@ -20,6 +20,7 @@ export default class FinanceForm extends HTMLElement {
       this.$descriptionInput = this.querySelector('#finance-form-description');
       this.$amountInput = this.querySelector('#finance-form-amount');
       this.$dueInput = this.querySelector('#finance-form-due');
+      this.$accountSelect = this.querySelector('#finance-form-account');
       this.$domainSelect = this.querySelector('#finance-form-domain');
       this.$error = this.querySelector('[data-role="error"]');
       this._buttonsReady = false;
@@ -39,9 +40,30 @@ export default class FinanceForm extends HTMLElement {
 
    populate() {
       hideFormError(this.$error);
+      this.fillAccounts();
       this.fillDomains();
       if (this.financeId) {
          this.loadFinance(this.financeId);
+      }
+   }
+
+   fillAccounts() {
+      if (!this.$accountSelect) {
+         return;
+      }
+      const methods = getService('payment-method-service', ['getAll'])?.getAll() ?? [];
+      const previous = this.$accountSelect.value;
+      this.$accountSelect.innerHTML = '<option value="">Selecciona un método</option>';
+      for (const method of methods) {
+         const option = document.createElement('option');
+         option.value = method.id;
+         option.textContent = `${method.name} (${Number(method.balance || 0).toFixed(2)})`;
+         this.$accountSelect.appendChild(option);
+      }
+      if (previous && methods.some((method) => method.id === previous)) {
+         this.$accountSelect.value = previous;
+      } else if (methods[0]) {
+         this.$accountSelect.value = methods[0].id;
       }
    }
 
@@ -71,6 +93,9 @@ export default class FinanceForm extends HTMLElement {
       this.$descriptionInput.value = item.description;
       this.$amountInput.value = String(item.amount);
       this.$dueInput.value = item.dueDate ?? '';
+      if (this.$accountSelect) {
+         this.$accountSelect.value = item.accountId ?? this.$accountSelect.value;
+      }
       if (this.$domainSelect) {
          this.$domainSelect.value = item.domainId ?? '';
       }
@@ -110,12 +135,17 @@ export default class FinanceForm extends HTMLElement {
 
       const description = this.$descriptionInput.value.trim();
       const amount = Number(String(this.$amountInput.value).replace(',', '.'));
+      const accountId = this.$accountSelect?.value || null;
       if (!description) {
          showFormError(this.$error, 'Ingresa una descripción.');
          return;
       }
       if (!Number.isFinite(amount) || amount <= 0) {
          showFormError(this.$error, 'Ingresa un monto válido mayor a 0.');
+         return;
+      }
+      if (!accountId) {
+         showFormError(this.$error, 'Elige un método de pago. Si no tienes, añade uno en Finanzas.');
          return;
       }
 
@@ -127,7 +157,8 @@ export default class FinanceForm extends HTMLElement {
             description,
             amount,
             dueDate: this.$dueInput.value || null,
-            domainId: this.$domainSelect?.value || null
+            domainId: this.$domainSelect?.value || null,
+            accountId
          };
 
          const saved = this.financeId

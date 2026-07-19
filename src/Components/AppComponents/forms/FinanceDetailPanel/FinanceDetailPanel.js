@@ -1,8 +1,8 @@
 import { FINANCE_TYPE } from '../../sections/lifeControlConstants.js';
 
 const TYPE_LABELS = {
-   [FINANCE_TYPE.PAY]: 'Por pagar',
-   [FINANCE_TYPE.RECEIVE]: 'Por cobrar'
+   [FINANCE_TYPE.PAY]: 'Egreso / por pagar',
+   [FINANCE_TYPE.RECEIVE]: 'Ingreso / por cobrar'
 };
 
 export default class FinanceDetailPanel extends HTMLElement {
@@ -18,6 +18,7 @@ export default class FinanceDetailPanel extends HTMLElement {
       this.$status = this.querySelector('[data-role="status"]');
       this.$type = this.querySelector('[data-role="type"]');
       this.$amount = this.querySelector('[data-role="amount"]');
+      this.$account = this.querySelector('[data-role="account"]');
       this.$due = this.querySelector('[data-role="due"]');
       this.$settled = this.querySelector('[data-role="settled"]');
       this.$settledAtRow = this.querySelector('[data-role="settled-at-row"]');
@@ -115,6 +116,11 @@ export default class FinanceDetailPanel extends HTMLElement {
       this.$type.textContent = TYPE_LABELS[item.type] ?? item.type;
       this.$amount.textContent = this.formatMoney(item.amount);
       this.$amount.className = `finance-detail-panel__amount finance-detail-panel__amount--${isPay ? 'pay' : 'receive'}`;
+      const methodName =
+         slice.getComponent('payment-method-service')?.getById?.(item.accountId)?.name ?? '—';
+      if (this.$account) {
+         this.$account.textContent = methodName;
+      }
       this.$due.textContent = this.formatDate(item.dueDate);
       this.$settled.textContent = settled ? (isPay ? 'Pagado' : 'Cobrado') : 'Pendiente';
       this.$settledAtRow.hidden = !settled;

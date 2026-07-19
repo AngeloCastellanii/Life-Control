@@ -3,14 +3,16 @@ const CLICK_DELAY_MS = 280;
 
 export function getNavLayout() {
    try {
-      return localStorage.getItem(NAV_LAYOUT_KEY) === 'side' ? 'side' : 'top';
+      const stored = localStorage.getItem(NAV_LAYOUT_KEY);
+      // 'side' era el modo anterior; lo tratamos como top
+      return stored === 'bottom' ? 'bottom' : 'top';
    } catch {
       return 'top';
    }
 }
 
 export function setNavLayout(layout) {
-   const next = layout === 'side' ? 'side' : 'top';
+   const next = layout === 'bottom' ? 'bottom' : 'top';
    try {
       localStorage.setItem(NAV_LAYOUT_KEY, next);
    } catch {
@@ -24,7 +26,8 @@ export function applyNavLayout(layout = getNavLayout()) {
    if (!root) {
       return layout;
    }
-   root.classList.toggle('app-shell--nav-side', layout === 'side');
+   root.classList.remove('app-shell--nav-side');
+   root.classList.toggle('app-shell--nav-bottom', layout === 'bottom');
    return layout;
 }
 
@@ -80,7 +83,7 @@ export default class Sidebar extends HTMLElement {
    }
 
    toggleNavLayout() {
-      const next = setNavLayout(getNavLayout() === 'side' ? 'top' : 'side');
+      const next = setNavLayout(getNavLayout() === 'bottom' ? 'top' : 'bottom');
       applyNavLayout(next);
       slice.events.emit('nav:layout', { layout: next });
    }
