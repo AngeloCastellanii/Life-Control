@@ -13,6 +13,13 @@ function todayISO() {
    return new Date().toISOString().slice(0, 10);
 }
 
+function getImages(item) {
+   if (Array.isArray(item.images) && item.images.length) {
+      return item.images;
+   }
+   return item.image ? [item.image] : [];
+}
+
 export default class VisionSection extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'vision-section' },
@@ -25,6 +32,7 @@ export default class VisionSection extends HTMLElement {
       slice.attachTemplate(this);
       this.$grid = this.querySelector('[data-role="grid"]');
       this.$empty = this.querySelector('[data-role="empty"]');
+      this._lightbox = null;
       slice.controller.setComponentProps(this, props);
    }
 
@@ -53,6 +61,142 @@ export default class VisionSection extends HTMLElement {
       });
    }
 
+   openLightbox(images, startIndex = 0) {
+      this.closeLightbox();
+      if (!images.length) {
+         return;
+      }
+
+      let index = Math.max(0, Math.min(startIndex, images.length - 1));
+
+      const root = document.createElement('div');
+      root.className = 'vision-lightbox';
+      root.setAttribute('role', 'dialog');
+      root.setAttribute('aria-modal', 'true');
+      root.setAttribute('aria-label', 'Vista de imagen');
+
+      const backdrop = document.createElement('button');
+      backdrop.type = 'button';
+      backdrop.className = 'vision-lightbox__backdrop';
+      backdrop.setAttribute('aria-label', 'Cerrar');
+      backdrop.addEventListener('click', () => this.closeLightbox());
+
+      const figure = document.createElement('div');
+      figure.className = 'vision-lightbox__frame';
+
+      const img = document.createElement('img');
+      img.className = 'vision-lightbox__img';
+      img.alt = 'Foto ampliada';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.className = 'vision-lightbox__close';
+      closeBtn.setAttribute('aria-label', 'Cerrar');
+      closeBtn.textContent = '×';
+      closeBtn.addEventListener('click', () => this.closeLightbox());
+
+      const counter = document.createElement('span');
+      counter.className = 'vision-lightbox__counter';
+
+      const show = () => {
+         img.src = images[index];
+         counter.textContent = images.length > 1 ? `${index + 1} / ${images.length}` : '';
+         counter.hidden = images.length <= 1;
+         if (prevBtn) {
+            prevBtn.hidden = images.length <= 1;
+         }
+         if (nextBtn) {
+            nextBtn.hidden = images.length <= 1;
+         }
+      };
+
+      let prevBtn = null;
+      let nextBtn = null;
+
+      if (images.length > 1) {
+         prevBtn = document.createElement('button');
+         prevBtn.type = 'button';
+         prevBtn.className = 'vision-lightbox__nav vision-lightbox__nav--prev';
+         prevBtn.setAttribute('aria-label', 'Anterior');
+         prevBtn.textContent = '‹';
+         prevBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            index = (index - 1 + images.length) % images.length;
+            show();
+         });
+
+         nextBtn = document.createElement('button');
+         nextBtn.type = 'button';
+         nextBtn.className = 'vision-lightbox__nav vision-lightbox__nav--next';
+         nextBtn.setAttribute('aria-label', 'Siguiente');
+         nextBtn.textContent = '›';
+         nextBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            index = (index + 1) % images.length;
+            show();
+         });
+      }
+
+      const onKey = (event) => {
+         if (event.key === 'Escape') {
+            this.closeLightbox();
+         } else if (event.key === 'ArrowLeft' && images.length > 1) {
+            index = (index - 1 + images.length) % images.length;
+            show();
+         } else if (event.key === 'ArrowRight' && images.length > 1) {
+            index = (index + 1) % images.length;
+            show();
+         }
+      };
+
+      figure.append(img, closeBtn, counter);
+      if (prevBtn) {
+         figure.append(prevBtn, nextBtn);
+      }
+      root.append(backdrop, figure);
+      document.body.appendChild(root);
+      document.addEventListener('keydown', onKey);
+      show();
+
+      this._lightbox = { root, onKey };
+   }
+
+   closeLightbox() {
+      if (!this._lightbox) {
+         return;
+      }
+      document.removeEventListener('keydown', this._lightbox.onKey);
+      this._lightbox.root.remove();
+      this._lightbox = null;
+   }
+
+   buildMediaCollage(images, title) {
+      const media = document.createElement('div');
+      const count = Math.min(images.length, 4);
+      media.className = `vision-section__media vision-section__media--${count}`;
+
+      images.slice(0, 4).forEach((src, index) => {
+         const cell = document.createElement('button');
+         cell.type = 'button';
+         cell.className = 'vision-section__cell';
+         cell.setAttribute('aria-label', `Ver foto ${index + 1} de ${title}`);
+
+         const img = document.createElement('img');
+         img.src = src;
+         img.alt = title;
+         img.loading = 'lazy';
+         img.addEventListener('error', () => {
+            cell.hidden = true;
+         });
+
+         cell.appendChild(img);
+         cell.addEventListener('click', () => this.openLightbox(images, index));
+         media.appendChild(cell);
+      });
+
+      return media;
+   }
+
    renderList() {
       const items = this.service.getAll();
       this.$grid.innerHTML = '';
@@ -66,18 +210,9 @@ export default class VisionSection extends HTMLElement {
             card.classList.add('vision-section__card--achieved');
          }
 
-         if (item.image) {
-            const media = document.createElement('div');
-            media.className = 'vision-section__media';
-            const img = document.createElement('img');
-            img.src = item.image;
-            img.alt = item.title;
-            img.loading = 'lazy';
-            img.addEventListener('error', () => {
-               media.hidden = true;
-            });
-            media.appendChild(img);
-            card.appendChild(media);
+         const images = getImages(item);
+         if (images.length > 0) {
+            card.appendChild(this.buildMediaCollage(images, item.title));
          }
 
          const body = document.createElement('div');
@@ -135,6 +270,10 @@ export default class VisionSection extends HTMLElement {
 
          this.$grid.appendChild(card);
       }
+   }
+
+   disconnectedCallback() {
+      this.closeLightbox();
    }
 }
 

@@ -146,6 +146,8 @@ function normalizeItem(item) {
       normalized.checked = false;
    }
 
+   normalized.lastReminderDate = normalized.lastReminderDate ?? null;
+
    return normalized;
 }
 
@@ -243,6 +245,33 @@ export default class ShoppingService {
          .sort((a, b) => getDueStatus(a).priority - getDueStatus(b).priority);
    }
 
+   /**
+    * Ítems que necesitan aviso diario: dentro de la ventana o vencidos,
+    * y aún no se han repuesto (o toca renovar). Un aviso por día.
+    * Reponer = marcar como comprado (checked), que reinicia nextDueAt.
+    */
+   getDailyReminderItems(reference = new Date()) {
+      const today = reference.toISOString().slice(0, 10);
+      return this.getDueItems().filter((item) => {
+         const status = getDueStatus(item);
+         if (status.state === 'done') {
+            return false;
+         }
+         return item.lastReminderDate !== today;
+      });
+   }
+
+   async markDailyReminder(id, dateISO = todayISO()) {
+      const existing = this.getById(id);
+      if (!existing) {
+         return null;
+      }
+      const updated = { ...existing, lastReminderDate: dateISO };
+      await this.storage.put(STORE, updated);
+      await this.syncToContext();
+      return updated;
+   }
+
    async create({ name, frequency, lastDoneAt, nextDueAt }) {
       const trimmed = name?.trim();
       if (!trimmed) {
@@ -281,13 +310,15 @@ export default class ShoppingService {
             ...existing,
             checked: true,
             lastDoneAt: today,
-            nextDueAt: addPeriod(today, existing.frequency)
+            nextDueAt: addPeriod(today, existing.frequency),
+            lastReminderDate: null
          };
       } else {
          updated = {
             ...existing,
             checked: false,
-            nextDueAt: today
+            nextDueAt: today,
+            lastReminderDate: null
          };
       }
 

@@ -1,3 +1,33 @@
+const NAV_LAYOUT_KEY = 'lc_nav_layout';
+const CLICK_DELAY_MS = 280;
+
+export function getNavLayout() {
+   try {
+      return localStorage.getItem(NAV_LAYOUT_KEY) === 'side' ? 'side' : 'top';
+   } catch {
+      return 'top';
+   }
+}
+
+export function setNavLayout(layout) {
+   const next = layout === 'side' ? 'side' : 'top';
+   try {
+      localStorage.setItem(NAV_LAYOUT_KEY, next);
+   } catch {
+      /* ignore */
+   }
+   return next;
+}
+
+export function applyNavLayout(layout = getNavLayout()) {
+   const root = document.querySelector('.app-shell');
+   if (!root) {
+      return layout;
+   }
+   root.classList.toggle('app-shell--nav-side', layout === 'side');
+   return layout;
+}
+
 export default class Sidebar extends HTMLElement {
    static props = {
       sliceId: { type: 'string', default: 'app-sidebar' },
@@ -9,16 +39,50 @@ export default class Sidebar extends HTMLElement {
       slice.attachTemplate(this);
       this.$list = this.querySelector('[data-role="list"]');
       this.$footer = this.querySelector('[data-role="footer"]');
+      this.$brand = this.querySelector('[data-role="brand"]');
       this._linkItems = [];
+      this._brandClickTimer = null;
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
       await this.renderItems();
       this.renderSearchButton();
+      this.bindBrand();
       this.syncActivePath();
+      applyNavLayout();
 
       slice.events.subscribe('router:change', () => this.syncActivePath());
+   }
+
+   bindBrand() {
+      if (!this.$brand || this._brandBound) {
+         return;
+      }
+
+      this.$brand.addEventListener('click', (event) => {
+         event.preventDefault();
+
+         if (this._brandClickTimer) {
+            clearTimeout(this._brandClickTimer);
+            this._brandClickTimer = null;
+            this.toggleNavLayout();
+            return;
+         }
+
+         this._brandClickTimer = setTimeout(() => {
+            this._brandClickTimer = null;
+            slice.router?.navigate?.('/');
+         }, CLICK_DELAY_MS);
+      });
+
+      this._brandBound = true;
+   }
+
+   toggleNavLayout() {
+      const next = setNavLayout(getNavLayout() === 'side' ? 'top' : 'side');
+      applyNavLayout(next);
+      slice.events.emit('nav:layout', { layout: next });
    }
 
    renderSearchButton() {

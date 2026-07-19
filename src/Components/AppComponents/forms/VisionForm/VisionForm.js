@@ -7,6 +7,7 @@ import {
 } from '../formHelpers.js';
 
 const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
+const MAX_IMAGES = 4;
 
 function readFileAsDataUrl(file) {
    return new Promise((resolve, reject) => {
@@ -32,10 +33,11 @@ export default class VisionForm extends HTMLElement {
       this.$date = this.querySelector('#vision-form-date');
       this.$imageFile = this.querySelector('#vision-form-image');
       this.$imageUrl = this.querySelector('#vision-form-image-url');
-      this.$preview = this.querySelector('[data-role="preview"]');
+      this.$addUrl = this.querySelector('[data-role="add-url"]');
+      this.$thumbs = this.querySelector('[data-role="thumbs"]');
       this.$clearImage = this.querySelector('[data-role="clear-image"]');
       this.$error = this.querySelector('[data-role="error"]');
-      this._image = '';
+      this._images = [];
       this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
    }
@@ -70,66 +72,105 @@ export default class VisionForm extends HTMLElement {
          this.handleSubmit();
       });
       this.$imageFile.addEventListener('change', () => this.onFileChange());
-      this.$imageUrl.addEventListener('change', () => {
-         const url = this.$imageUrl.value.trim();
-         if (url) {
-            this.setImage(url);
-         } else if (!this.$imageFile.files?.length) {
-            this.setImage('');
-         }
-      });
-      this.$preview.addEventListener('error', () => {
-         if (this._image) {
-            showFormError(this.$error, 'No se pudo cargar la imagen. Revisa la URL o sube un archivo.');
-            this.$preview.hidden = true;
+      this.$addUrl.addEventListener('click', () => this.addUrl());
+      this.$imageUrl.addEventListener('keydown', (event) => {
+         if (event.key === 'Enter') {
+            event.preventDefault();
+            this.addUrl();
          }
       });
       this.$clearImage.addEventListener('click', () => {
          this.$imageFile.value = '';
          this.$imageUrl.value = '';
-         this.setImage('');
+         this._images = [];
+         this.renderThumbs();
          hideFormError(this.$error);
       });
       this._formBound = true;
    }
 
-   setImage(src) {
-      this._image = src ?? '';
-      this.$clearImage.hidden = !this._image;
-      if (this._image) {
-         this.$preview.src = this._image;
-         this.$preview.hidden = false;
-      } else {
-         this.$preview.removeAttribute('src');
-         this.$preview.hidden = true;
+   addUrl() {
+      const url = this.$imageUrl.value.trim();
+      if (!url) {
+         return;
       }
+      if (this._images.length >= MAX_IMAGES) {
+         showFormError(this.$error, `Máximo ${MAX_IMAGES} fotos por meta.`);
+         return;
+      }
+      this._images.push(url);
+      this.$imageUrl.value = '';
+      this.renderThumbs();
+      hideFormError(this.$error);
+   }
+
+   removeAt(index) {
+      this._images.splice(index, 1);
+      this.renderThumbs();
+   }
+
+   renderThumbs() {
+      this.$thumbs.innerHTML = '';
+      this.$clearImage.hidden = this._images.length === 0;
+
+      this._images.forEach((src, index) => {
+         const li = document.createElement('li');
+         li.className = 'vision-form__thumb';
+
+         const img = document.createElement('img');
+         img.src = src;
+         img.alt = `Foto ${index + 1}`;
+         img.addEventListener('error', () => {
+            li.classList.add('vision-form__thumb--broken');
+         });
+
+         const remove = document.createElement('button');
+         remove.type = 'button';
+         remove.className = 'vision-form__thumb-remove';
+         remove.setAttribute('aria-label', 'Quitar foto');
+         remove.textContent = '×';
+         remove.addEventListener('click', () => this.removeAt(index));
+
+         li.append(img, remove);
+         this.$thumbs.appendChild(li);
+      });
    }
 
    async onFileChange() {
-      const file = this.$imageFile.files?.[0];
-      if (!file) {
+      const files = [...(this.$imageFile.files ?? [])];
+      this.$imageFile.value = '';
+      if (files.length === 0) {
          return;
       }
-      if (file.size > MAX_IMAGE_BYTES) {
-         showFormError(this.$error, 'La imagen supera 2.5 MB. Usa una más liviana o una URL.');
-         this.$imageFile.value = '';
+
+      const room = MAX_IMAGES - this._images.length;
+      if (room <= 0) {
+         showFormError(this.$error, `Máximo ${MAX_IMAGES} fotos por meta.`);
          return;
       }
+
       hideFormError(this.$error);
-      try {
-         const dataUrl = await readFileAsDataUrl(file);
-         this.$imageUrl.value = '';
-         this.setImage(dataUrl);
-      } catch {
-         showFormError(this.$error, 'No se pudo leer la imagen.');
+      for (const file of files.slice(0, room)) {
+         if (file.size > MAX_IMAGE_BYTES) {
+            showFormError(this.$error, `"${file.name}" supera 2.5 MB.`);
+            continue;
+         }
+         try {
+            const dataUrl = await readFileAsDataUrl(file);
+            this._images.push(dataUrl);
+         } catch {
+            showFormError(this.$error, `No se pudo leer "${file.name}".`);
+         }
       }
+      this.renderThumbs();
    }
 
    populate() {
       hideFormError(this.$error);
       this.$imageFile.value = '';
       this.$imageUrl.value = '';
-      this.setImage('');
+      this._images = [];
+      this.renderThumbs();
       if (this.visionId) {
          this.loadItem(this.visionId);
       }
@@ -144,10 +185,8 @@ export default class VisionForm extends HTMLElement {
       this.$title.value = item.title;
       this.$description.value = item.description ?? '';
       this.$date.value = item.targetDate ?? '';
-      if (item.image?.startsWith('http')) {
-         this.$imageUrl.value = item.image;
-      }
-      this.setImage(item.image ?? '');
+      this._images = [...(item.images?.length ? item.images : item.image ? [item.image] : [])];
+      this.renderThumbs();
    }
 
    async handleSubmit() {
@@ -169,7 +208,7 @@ export default class VisionForm extends HTMLElement {
       const payload = {
          title,
          description: this.$description.value.trim(),
-         image: this._image,
+         images: this._images,
          targetDate: this.$date.value || null
       };
 

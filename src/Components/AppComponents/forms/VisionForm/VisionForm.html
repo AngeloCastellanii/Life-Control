@@ -12,13 +12,16 @@
     <input class="lc-input" id="vision-form-date" type="date" />
   </div>
   <div>
-    <label class="lc-label" for="vision-form-image">Imagen</label>
-    <p class="lc-hint">Sube una foto o pega una URL de imagen.</p>
-    <input class="lc-input" id="vision-form-image" type="file" accept="image/*" />
-    <input class="lc-input mt-2" id="vision-form-image-url" type="url" placeholder="https://…" />
-    <img class="vision-form__preview" data-role="preview" alt="Vista previa" hidden />
+    <label class="lc-label" for="vision-form-image">Fotos (hasta 4)</label>
+    <p class="lc-hint">Sube una o varias fotos, o pega URLs. Con 2–4 fotos se arma un collage tipo Instagram.</p>
+    <input class="lc-input" id="vision-form-image" type="file" accept="image/*" multiple />
+    <div class="vision-form__url-row mt-2">
+      <input class="lc-input" id="vision-form-image-url" type="url" placeholder="https://… (añadir URL)" />
+      <button type="button" class="lc-btn-outline" data-role="add-url">Añadir</button>
+    </div>
+    <ul class="vision-form__thumbs" data-role="thumbs"></ul>
     <button type="button" class="lc-btn-outline vision-form__clear mt-2" data-role="clear-image" hidden>
-      Quitar imagen
+      Quitar todas
     </button>
   </div>
   <p class="block-form__error" data-role="error" hidden></p>

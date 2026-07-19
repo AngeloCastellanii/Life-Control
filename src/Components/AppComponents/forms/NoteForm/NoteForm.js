@@ -6,6 +6,7 @@ import {
    showFormError
 } from '../formHelpers.js';
 import { getNoteColors } from '../../sections/noteColors.js';
+import { looksLikeListText, parseListText } from '../../sections/parseListText.js';
 
 function isoToLocalInput(iso) {
    if (!iso) {
@@ -25,6 +26,14 @@ function localInputToIso(value) {
    }
    const date = new Date(value);
    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function toChecklistItems(parsed) {
+   return parsed.map((item) => ({
+      id: crypto.randomUUID(),
+      text: item.text,
+      done: Boolean(item.done)
+   }));
 }
 
 export default class NoteForm extends HTMLElement {
@@ -60,6 +69,7 @@ export default class NoteForm extends HTMLElement {
       this.renderColors();
       this.bindTypeButtons();
       this.bindListControls();
+      this.bindSmartPaste();
       await this.ensureButtons();
       this.bindForm();
       this.populate();
@@ -99,21 +109,94 @@ export default class NoteForm extends HTMLElement {
       this._listBound = true;
    }
 
-   setType(type) {
-      this._type = type === 'list' ? 'list' : 'text';
+   bindSmartPaste() {
+      if (this._pasteBound) {
+         return;
+      }
+
+      this.$body.addEventListener('paste', (event) => {
+         const text = event.clipboardData?.getData('text/plain') ?? '';
+         if (!looksLikeListText(text)) {
+            return;
+         }
+         event.preventDefault();
+         this.applyParsedList(parseListText(text), { switchToList: true, clearBody: true });
+      });
+
+      this.$listInput.addEventListener('paste', (event) => {
+         const text = event.clipboardData?.getData('text/plain') ?? '';
+         if (!text.trim()) {
+            return;
+         }
+         const parsed = parseListText(text);
+         if (parsed.length <= 1 && !text.includes('\n')) {
+            return;
+         }
+         event.preventDefault();
+         this.applyParsedList(parsed, { switchToList: true });
+         this.$listInput.value = '';
+      });
+
+      this._pasteBound = true;
+   }
+
+   applyParsedList(parsed, { switchToList = false, clearBody = false, replace = false } = {}) {
+      const items = toChecklistItems(parsed);
+      if (items.length === 0) {
+         return;
+      }
+
+      if (replace || this._checklist.length === 0) {
+         this._checklist = items;
+      } else {
+         this._checklist = [...this._checklist, ...items];
+      }
+
+      if (switchToList) {
+         this.setType('list', { convertBody: false });
+      }
+      if (clearBody) {
+         this.$body.value = '';
+      }
+      this.renderChecklist();
+      hideFormError(this.$error);
+   }
+
+   setType(type, { convertBody = true } = {}) {
+      const next = type === 'list' ? 'list' : 'text';
+      const prev = this._type;
+      this._type = next;
+
       for (const button of this.$types.querySelectorAll('[data-type]')) {
          button.classList.toggle('note-form__type--active', button.dataset.type === this._type);
       }
       this.$bodyField.hidden = this._type !== 'text';
       this.$listField.hidden = this._type !== 'list';
+
+      if (convertBody && prev === 'text' && next === 'list') {
+         const body = this.$body.value.trim();
+         if (body && this._checklist.length === 0) {
+            this.applyParsedList(parseListText(body), { clearBody: true, replace: true });
+         } else if (body && looksLikeListText(body)) {
+            this.applyParsedList(parseListText(body), { clearBody: true, replace: false });
+         }
+      }
    }
 
    addChecklistItem() {
-      const text = this.$listInput.value.trim();
-      if (!text) {
+      const raw = this.$listInput.value.trim();
+      if (!raw) {
          return;
       }
-      this._checklist.push({ id: crypto.randomUUID(), text, done: false });
+
+      if (raw.includes('\n') || looksLikeListText(raw)) {
+         this.applyParsedList(parseListText(raw));
+         this.$listInput.value = '';
+         this.$listInput.focus();
+         return;
+      }
+
+      this._checklist.push({ id: crypto.randomUUID(), text: raw, done: false });
       this.$listInput.value = '';
       this.renderChecklist();
       this.$listInput.focus();
@@ -126,9 +209,13 @@ export default class NoteForm extends HTMLElement {
 
    renderChecklist() {
       this.$checklist.innerHTML = '';
-      for (const item of this._checklist) {
+      this._checklist.forEach((item, index) => {
          const li = document.createElement('li');
          li.className = 'note-form__check-item';
+
+         const num = document.createElement('span');
+         num.className = 'note-form__check-num';
+         num.textContent = `${index + 1}.`;
 
          const text = document.createElement('span');
          text.className = 'note-form__check-text';
@@ -141,9 +228,9 @@ export default class NoteForm extends HTMLElement {
          remove.textContent = '×';
          remove.addEventListener('click', () => this.removeChecklistItem(item.id));
 
-         li.append(text, remove);
+         li.append(num, text, remove);
          this.$checklist.appendChild(li);
-      }
+      });
    }
 
    renderColors(force = false) {
@@ -202,7 +289,7 @@ export default class NoteForm extends HTMLElement {
       if (this.noteId) {
          this.loadNote(this.noteId);
       } else {
-         this.setType('text');
+         this.setType('text', { convertBody: false });
          this.selectColor(getNoteColors()[0]);
          this.renderChecklist();
       }
@@ -221,7 +308,7 @@ export default class NoteForm extends HTMLElement {
       this.$remind.value = isoToLocalInput(note.remindAt);
       this.$pinned.checked = note.pinned;
       this._checklist = (note.checklist ?? []).map((item) => ({ ...item }));
-      this.setType(note.type === 'list' ? 'list' : 'text');
+      this.setType(note.type === 'list' ? 'list' : 'text', { convertBody: false });
       this.renderChecklist();
       this.selectColor(note.color || getNoteColors()[0]);
    }

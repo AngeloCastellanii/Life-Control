@@ -1,15 +1,29 @@
 const STORE = 'vision';
+const MAX_IMAGES = 4;
 
 function nowISO() {
    return new Date().toISOString();
 }
 
+function normalizeImages(item) {
+   if (Array.isArray(item.images)) {
+      return item.images.filter((src) => typeof src === 'string' && src.trim()).slice(0, MAX_IMAGES);
+   }
+   if (typeof item.image === 'string' && item.image.trim()) {
+      return [item.image.trim()];
+   }
+   return [];
+}
+
 function normalize(item) {
+   const images = normalizeImages(item);
    return {
       id: item.id,
       title: (item.title ?? '').trim(),
       description: item.description ?? '',
-      image: item.image ?? '',
+      images,
+      /** @deprecated compat: primera imagen */
+      image: images[0] ?? '',
       targetDate: item.targetDate ?? null,
       achieved: Boolean(item.achieved),
       order: Number.isFinite(item.order) ? item.order : 0,
@@ -27,6 +41,8 @@ function compare(a, b) {
    }
    return (a.createdAt ?? '').localeCompare(b.createdAt ?? '');
 }
+
+export { MAX_IMAGES };
 
 export default class VisionService {
    async init() {
@@ -57,16 +73,17 @@ export default class VisionService {
       return this.getAll().find((item) => item.id === id) ?? null;
    }
 
-   async create({ title, description, image, targetDate }) {
+   async create({ title, description, images, image, targetDate }) {
       const trimmed = title?.trim();
       if (!trimmed) {
          return null;
       }
+      const list = normalizeImages({ images, image });
       const item = normalize({
          id: crypto.randomUUID(),
          title: trimmed,
          description: description ?? '',
-         image: image ?? '',
+         images: list,
          targetDate: targetDate || null,
          achieved: false,
          order: this.getAll().length,
@@ -84,7 +101,11 @@ export default class VisionService {
       if (!existing) {
          return null;
       }
-      const updated = normalize({ ...existing, ...patch, id, updatedAt: nowISO() });
+      const next = { ...existing, ...patch, id, updatedAt: nowISO() };
+      if (patch.images !== undefined || patch.image !== undefined) {
+         next.images = normalizeImages(patch.images !== undefined ? patch : { ...existing, ...patch });
+      }
+      const updated = normalize(next);
       await this.storage.put(STORE, updated);
       await this.syncToContext();
       slice.events.emit('vision:changed', { action: 'update', item: updated });

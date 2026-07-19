@@ -115,14 +115,18 @@ export default class NotesSection extends HTMLElement {
          card.appendChild(head);
 
          if (note.type === 'list' && note.checklist?.length) {
-            const checklist = document.createElement('ul');
+            const checklist = document.createElement('ol');
             checklist.className = 'notes-section__checklist';
-            for (const item of note.checklist) {
+            note.checklist.forEach((item, index) => {
                const li = document.createElement('li');
                li.className = 'notes-section__check-item';
                if (item.done) {
                   li.classList.add('notes-section__check-item--done');
                }
+
+               const num = document.createElement('span');
+               num.className = 'notes-section__check-num';
+               num.textContent = `${index + 1}.`;
 
                const check = document.createElement('button');
                check.type = 'button';
@@ -137,9 +141,9 @@ export default class NotesSection extends HTMLElement {
                text.className = 'notes-section__check-text';
                text.textContent = item.text;
 
-               li.append(check, text);
+               li.append(num, check, text);
                checklist.appendChild(li);
-            }
+            });
             card.appendChild(checklist);
          } else if (note.body) {
             const body = document.createElement('p');

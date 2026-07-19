@@ -14,11 +14,12 @@
     <label class="lc-label" for="note-form-body">Contenido</label>
     <textarea class="lc-input note-form__textarea" id="note-form-body" rows="5" placeholder="Escribe tu nota…"></textarea>
   </div>
-  <div class="note-form__field" data-role="list-field" hidden>
+    <div class="note-form__field" data-role="list-field" hidden>
     <label class="lc-label" for="note-form-list-input">Ítems de la lista</label>
-    <ul class="note-form__checklist" data-role="checklist"></ul>
+    <p class="note-form__hint lc-view-hint">Pega viñetas (−, *, °, 1.) o varias líneas y se convierten solos. Al pasar de Texto a Lista también se detectan.</p>
+    <ol class="note-form__checklist" data-role="checklist"></ol>
     <div class="note-form__list-add">
-      <input class="lc-input" id="note-form-list-input" type="text" placeholder="Añadir ítem…" maxlength="120" />
+      <input class="lc-input" id="note-form-list-input" type="text" placeholder="Añadir ítem o pegar una lista…" maxlength="2000" />
       <button type="button" class="lc-btn-outline note-form__list-add-btn" data-role="add-item">Añadir</button>
     </div>
   </div>

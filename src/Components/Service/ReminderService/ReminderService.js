@@ -1,4 +1,5 @@
 import { notificationPermission } from '../../AppComponents/sections/notifications.js';
+import { getDueStatus } from '../../AppComponents/sections/shoppingDue.js';
 
 const CHECK_INTERVAL_MS = 60 * 1000;
 
@@ -27,10 +28,15 @@ function showInAppToast({ title, body, route }) {
    setTimeout(() => toast.remove(), 8000);
 }
 
+function todayISO() {
+   return new Date().toISOString().slice(0, 10);
+}
+
 export default class ReminderService {
    async init() {
       this.notesService = slice.getComponent('notes-service');
       this.taskService = slice.getComponent('task-service');
+      this.shoppingService = slice.getComponent('shopping-service');
       this._timer = null;
       this._wakeLock = null;
       this.start();
@@ -46,6 +52,7 @@ export default class ReminderService {
 
       slice.events.subscribe('note:changed', () => this.check());
       slice.events.subscribe('task:changed', () => this.check());
+      slice.events.subscribe('shopping:changed', () => this.check());
       slice.events.subscribe('reminder:inapp', (payload) => {
          showInAppToast({
             title: payload?.title || 'Recordatorio',
@@ -99,6 +106,7 @@ export default class ReminderService {
    async check() {
       await this.checkNotes();
       await this.checkTasks();
+      await this.checkShopping();
    }
 
    async checkNotes() {
@@ -133,21 +141,48 @@ export default class ReminderService {
          return;
       }
 
+      const today = todayISO();
       const due = taskService.getDueReminders();
       for (const task of due) {
          const delivered = this.notify({
             title: task.title || 'Tarea pendiente',
-            body: 'Tienes una tarea del planificador que vence hoy.',
-            tag: `lc-task-${task.id}`,
+            body: 'Tarea del planificador pendiente o vencida. Márcala hecha para dejar de avisar.',
+            tag: `lc-task-${task.id}-${today}`,
             route: '/planner'
          });
          if (delivered) {
-            await taskService.markDueNotified(task.id);
+            await taskService.markDueNotified(task.id, today);
          }
       }
 
       if (due.length > 0) {
          slice.events.emit('reminder:tasks-due', { tasks: due });
+      }
+   }
+
+   async checkShopping() {
+      const shoppingService = this.shoppingService ?? slice.getComponent('shopping-service');
+      if (!shoppingService?.getDailyReminderItems) {
+         return;
+      }
+
+      const today = todayISO();
+      const items = shoppingService.getDailyReminderItems();
+      for (const item of items) {
+         const status = getDueStatus(item);
+         const delivered = this.notify({
+            title: item.name || 'Compra pendiente',
+            body: `${status.label}. Márcala como comprada cuando la repongas.`,
+            tag: `lc-shop-${item.id}-${today}`,
+            route: '/shopping'
+         });
+         if (delivered) {
+            await shoppingService.markDailyReminder(item.id, today);
+         }
+      }
+
+      if (items.length > 0) {
+         slice.events.emit('reminder:shopping-due', { items });
       }
    }
 
