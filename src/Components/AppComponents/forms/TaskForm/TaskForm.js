@@ -5,14 +5,18 @@ import {
    hideFormError,
    showFormError
 } from '../formHelpers.js';
-import { taskDateRange, todayISO } from '../../sections/plannerDates.js';
+import { addDays, taskDateRange, todayISO } from '../../sections/plannerDates.js';
 import {
    blockNeedsSlotPicker,
    defaultSlotForBlock,
-   slotDurationMinutes,
+   slotEndFromStart,
+   slotStartFromEnd,
    validateTaskSlot
 } from '../../../Utils/taskSlotTimes.js';
-import { addMinutes } from '../../../Service/TimeBlockService/TimeBlockService.js';
+import {
+   durationToMinutes,
+   minutesToDurationParts
+} from '../../../Utils/formatDuration.js';
 
 export default class TaskForm extends HTMLElement {
    static props = {
@@ -29,7 +33,8 @@ export default class TaskForm extends HTMLElement {
       this.$hint = this.querySelector('[data-role="hint"]');
       this.$titleInput = this.querySelector('#task-form-title');
       this.$urgencySelect = this.querySelector('#task-form-urgency');
-      this.$minutesInput = this.querySelector('#task-form-minutes');
+      this.$durationInput = this.querySelector('#task-form-duration');
+      this.$durationUnit = this.querySelector('#task-form-duration-unit');
       this.$recurrenceSelect = this.querySelector('#task-form-recurrence');
       this.$startInput = this.querySelector('#task-form-start');
       this.$dueInput = this.querySelector('#task-form-due');
@@ -39,6 +44,7 @@ export default class TaskForm extends HTMLElement {
       this.$slotEnd = this.querySelector('#task-form-slot-end');
       this.$error = this.querySelector('[data-role="error"]');
       this._buttonsReady = false;
+      this._syncingSlot = false;
       slice.controller.setComponentProps(this, props);
    }
 
@@ -72,10 +78,21 @@ export default class TaskForm extends HTMLElement {
          this.handleSubmit();
       });
       this.$blockSelect.addEventListener('change', () => this.onBlockChange());
-      this.$minutesInput.addEventListener('input', () => this.syncSlotEndFromDuration());
-      this.$slotStart.addEventListener('change', () => this.syncMinutesFromSlot());
-      this.$slotEnd.addEventListener('change', () => this.syncMinutesFromSlot());
+      this.$durationInput.addEventListener('input', () => this.onDurationChange());
+      this.$durationUnit.addEventListener('change', () => this.onDurationChange());
+      this.$slotStart.addEventListener('change', () => this.onSlotStartChange());
+      this.$slotEnd.addEventListener('change', () => this.onSlotEndChange());
       this._formBound = true;
+   }
+
+   getDurationMinutes() {
+      return durationToMinutes(this.$durationInput.value, this.$durationUnit.value);
+   }
+
+   setDurationFromMinutes(minutes) {
+      const parts = minutesToDurationParts(minutes);
+      this.$durationInput.value = String(parts.value);
+      this.$durationUnit.value = parts.unit;
    }
 
    populate() {
@@ -88,6 +105,8 @@ export default class TaskForm extends HTMLElement {
          this.$startInput.value = todayISO();
          this.$dueInput.value = '';
          this.$blockSelect.value = '';
+         this.$durationInput.value = '30';
+         this.$durationUnit.value = 'minutes';
          this.$slotStart.value = '';
          this.$slotEnd.value = '';
          this.updateSlotFieldsVisibility();
@@ -157,7 +176,7 @@ export default class TaskForm extends HTMLElement {
       this.$slotEnd.min = block.start;
       this.$slotEnd.max = blockEnd;
       if (this.$slotHint) {
-         this.$slotHint.textContent = `Dentro de ${block.start} — ${blockEnd}.`;
+         this.$slotHint.textContent = `Dentro de ${block.start} — ${blockEnd}. El fin se ajusta solo a la duración.`;
       }
    }
 
@@ -181,44 +200,91 @@ export default class TaskForm extends HTMLElement {
       if (this._loadingTask) {
          return;
       }
-      const { slotStart, slotEnd } = defaultSlotForBlock(block, this.$minutesInput.value);
+      const { slotStart, slotEnd } = defaultSlotForBlock(block, this.getDurationMinutes());
       this.$slotStart.value = slotStart ?? '';
       this.$slotEnd.value = slotEnd ?? '';
    }
 
+   onDurationChange() {
+      if (this.$durationUnit.value === 'days') {
+         this.applyDaysSpanToDates();
+      }
+      this.syncSlotEndFromDuration();
+   }
+
+   /** Con duración en días: rango desde → tope = N días (aparece cada día hasta completar). */
+   applyDaysSpanToDates() {
+      const days = Math.max(1, Math.ceil(Number(this.$durationInput.value) || 1));
+      const start = this.$startInput.value || todayISO();
+      if (!this.$startInput.value) {
+         this.$startInput.value = start;
+      }
+      this.$dueInput.value = addDays(start, days - 1);
+   }
+
    syncSlotEndFromDuration() {
-      if (this.$slotSection.hidden || !this.$slotStart.value) {
+      if (this._syncingSlot || this.$slotSection.hidden) {
          return;
       }
       const block = this.getSelectedBlock();
       if (!block) {
          return;
       }
-      const mins = Math.max(1, Number(this.$minutesInput.value) || 30);
-      const nextEnd = addMinutes(this.$slotStart.value, mins);
-      const blockEnd = block.end ?? block.start;
-      this.$slotEnd.value = nextEnd <= blockEnd ? nextEnd : blockEnd;
-   }
-
-   syncMinutesFromSlot() {
-      if (this.$slotSection.hidden) {
+      if (!this.$slotStart.value) {
+         const defaults = defaultSlotForBlock(block, this.getDurationMinutes());
+         this.$slotStart.value = defaults.slotStart ?? '';
+         this.$slotEnd.value = defaults.slotEnd ?? '';
          return;
       }
-      const duration = slotDurationMinutes(this.$slotStart.value, this.$slotEnd.value);
-      if (duration && duration > 0) {
-         this.$minutesInput.value = String(duration);
+      this._syncingSlot = true;
+      const end = slotEndFromStart(this.$slotStart.value, this.getDurationMinutes(), block);
+      if (end) {
+         this.$slotEnd.value = end;
       }
+      this._syncingSlot = false;
+   }
+
+   onSlotStartChange() {
+      if (this._syncingSlot || this.$slotSection.hidden) {
+         return;
+      }
+      this.syncSlotEndFromDuration();
+   }
+
+   onSlotEndChange() {
+      if (this._syncingSlot || this.$slotSection.hidden) {
+         return;
+      }
+      const block = this.getSelectedBlock();
+      if (!block || !this.$slotEnd.value) {
+         return;
+      }
+      this._syncingSlot = true;
+      const start = slotStartFromEnd(this.$slotEnd.value, this.getDurationMinutes(), block);
+      if (start) {
+         this.$slotStart.value = start;
+      }
+      this._syncingSlot = false;
    }
 
    resolveSlotForSubmit(block) {
       if (!block || !blockNeedsSlotPicker(block)) {
-         return { ok: true, slotStart: null, slotEnd: null };
+         return { ok: true, slotStart: null, slotEnd: null, duration: this.getDurationMinutes() };
       }
-      return validateTaskSlot({
+      if (!this.$slotStart.value || !this.$slotEnd.value) {
+         const defaults = defaultSlotForBlock(block, this.getDurationMinutes());
+         this.$slotStart.value = defaults.slotStart ?? '';
+         this.$slotEnd.value = defaults.slotEnd ?? '';
+      }
+      const result = validateTaskSlot({
          slotStart: this.$slotStart.value,
          slotEnd: this.$slotEnd.value,
          block
       });
+      if (result.ok) {
+         return { ...result, duration: this.getDurationMinutes() };
+      }
+      return result;
    }
 
    loadTask(taskId) {
@@ -232,7 +298,7 @@ export default class TaskForm extends HTMLElement {
       this._loadingTask = true;
       this.$titleInput.value = task.title;
       this.$urgencySelect.value = task.urgency ?? 'medium';
-      this.$minutesInput.value = String(task.minutes ?? 30);
+      this.setDurationFromMinutes(task.minutes ?? 30);
       this.$recurrenceSelect.value = task.recurrence ?? 'none';
       this.$domainSelect.value = task.domainId;
       this.$blockSelect.value = task.blockId ?? '';
@@ -276,14 +342,24 @@ export default class TaskForm extends HTMLElement {
          return;
       }
 
+      if (this.$durationUnit.value === 'days') {
+         this.applyDaysSpanToDates();
+      }
+
+      const minutes = this.getDurationMinutes();
       const slotResult = this.resolveSlotForSubmit(block);
       if (!slotResult.ok) {
          showFormError(this.$error, slotResult.message);
          return;
       }
 
-      const startDate = this.$startInput.value || null;
-      const dueDate = this.$dueInput.value || null;
+      let startDate = this.$startInput.value || null;
+      let dueDate = this.$dueInput.value || null;
+      if (this.$durationUnit.value === 'days') {
+         const days = Math.max(1, Math.ceil(Number(this.$durationInput.value) || 1));
+         startDate = startDate || todayISO();
+         dueDate = addDays(startDate, days - 1);
+      }
       if (startDate && dueDate && startDate > dueDate) {
          showFormError(this.$error, 'La fecha tope no puede ser anterior al inicio.');
          return;
@@ -293,7 +369,7 @@ export default class TaskForm extends HTMLElement {
          title,
          domainId,
          urgency: this.$urgencySelect.value,
-         minutes: slotResult.duration ?? this.$minutesInput.value,
+         minutes,
          recurrence: this.$recurrenceSelect.value,
          startDate: startDate || (dueDate ? dueDate : todayISO()),
          dueDate,
@@ -320,7 +396,7 @@ export default class TaskForm extends HTMLElement {
                      await taskService.update(this.taskId, {
                         slotStart: slotResult.slotStart,
                         slotEnd: slotResult.slotEnd,
-                        minutes: slotResult.duration ?? payload.minutes
+                        minutes
                      });
                   }
                } else if (!blockId && previousBlock) {
@@ -344,7 +420,7 @@ export default class TaskForm extends HTMLElement {
                await taskService.update(saved.id, {
                   slotStart: slotResult.slotStart,
                   slotEnd: slotResult.slotEnd,
-                  minutes: slotResult.duration ?? payload.minutes
+                  minutes
                });
             }
          }

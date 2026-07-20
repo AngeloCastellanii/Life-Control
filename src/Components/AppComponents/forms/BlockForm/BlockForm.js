@@ -1,5 +1,6 @@
 import { BLOCK_RULE } from '../../sections/lifeControlConstants.js';
 import { closeModal, getService } from '../formHelpers.js';
+import { formatDuration } from '../../../Utils/formatDuration.js';
 
 function minutesBetween(start, end) {
    const [sh, sm] = start.split(':').map(Number);
@@ -142,7 +143,7 @@ export default class BlockForm extends HTMLElement {
 
       const duration = minutesBetween(start, end);
       const valid = duration >= 15;
-      this.$capacity.value = String(duration);
+      this.$capacity.value = formatDuration(duration, { short: true });
       if (valid) {
          this.$error.hidden = true;
       }

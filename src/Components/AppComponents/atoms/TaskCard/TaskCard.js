@@ -1,4 +1,5 @@
 import { formatTaskSlotLabel } from '../../../Utils/taskSlotTimes.js';
+import { formatDuration } from '../../../Utils/formatDuration.js';
 
 export default class TaskCard extends HTMLElement {
    static props = {
@@ -123,7 +124,7 @@ export default class TaskCard extends HTMLElement {
             this.$slot.hidden = true;
          }
       }
-      this.$minutes.textContent = `${task.minutes} min`;
+      this.$minutes.textContent = formatDuration(task.minutes ?? 0, { short: true });
       if (this.$domain) {
          const name = this.domainName?.trim();
          if (name) {

@@ -1,6 +1,7 @@
 import { domainForTask } from '../../sections/domainLookup.js';
 import { taskDateRange } from '../../sections/plannerDates.js';
 import { formatTaskSlotLabel } from '../../../Utils/taskSlotTimes.js';
+import { formatDuration } from '../../../Utils/formatDuration.js';
 
 const URGENCY_LABELS = { high: 'Alta', medium: 'Media', low: 'Baja' };
 
@@ -101,7 +102,7 @@ export default class TaskDetailPanel extends HTMLElement {
       this.$domain.appendChild(badge);
 
       this.$urgency.textContent = URGENCY_LABELS[task.urgency] ?? 'Media';
-      this.$minutes.textContent = `${task.minutes ?? 0} min`;
+      this.$minutes.textContent = formatDuration(task.minutes ?? 0);
       this.$start.textContent = this.formatDate(start);
       this.$due.textContent = this.formatDate(end);
       this.$place.textContent = this.blockLabel(task.blockId);

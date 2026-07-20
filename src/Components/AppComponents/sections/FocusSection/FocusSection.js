@@ -1,4 +1,5 @@
 import { taskInBlockOnDay, todayISO } from '../plannerDates.js';
+import { formatDuration } from '../../../Utils/formatDuration.js';
 
 function toMinutes(hhmm) {
    const [h, m] = String(hhmm ?? '0:0').split(':').map(Number);
@@ -137,7 +138,7 @@ export default class FocusSection extends HTMLElement {
          const meta = document.createElement('span');
          meta.className = 'focus-section__task-meta';
          const slot = task.slotStart && task.slotEnd ? `${task.slotStart}–${task.slotEnd} · ` : '';
-         meta.textContent = `${slot}${task.minutes ?? 0} min`;
+         meta.textContent = `${slot}${formatDuration(task.minutes ?? 0, { short: true })}`;
          info.appendChild(meta);
 
          li.append(checkbox, info);

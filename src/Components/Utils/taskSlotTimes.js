@@ -75,6 +75,50 @@ export function defaultSlotForBlock(block, durationMinutes = 30) {
    };
 }
 
+/** Fin = inicio + duración, recortado al final del bloque. */
+export function slotEndFromStart(slotStart, durationMinutes, block) {
+   if (!slotStart || !block?.start) {
+      return null;
+   }
+   const mins = Math.max(1, Number(durationMinutes) || 30);
+   const nextEnd = addMinutes(slotStart, mins);
+   const blockEnd = block.end ?? block.start;
+   const blockMins = minutesBetween(block.start, blockEnd);
+   const startOffset = minutesBetween(block.start, slotStart);
+   if (startOffset + mins > blockMins) {
+      return blockEnd;
+   }
+   // Si el fin calculado se pasa del bloque en el mismo día (comparación simple)
+   const endMins = timeToMinutes(nextEnd);
+   const blockEndMins = timeToMinutes(blockEnd);
+   const startMins = timeToMinutes(slotStart);
+   if (endMins !== null && blockEndMins !== null && startMins !== null) {
+      if (blockEndMins > startMins && endMins > blockEndMins) {
+         return blockEnd;
+      }
+   }
+   return nextEnd;
+}
+
+/** Inicio = fin − duración, no antes del inicio del bloque. */
+export function slotStartFromEnd(slotEnd, durationMinutes, block) {
+   if (!slotEnd || !block?.start) {
+      return null;
+   }
+   const mins = Math.max(1, Number(durationMinutes) || 30);
+   const nextStart = addMinutes(slotEnd, -mins);
+   const blockStart = block.start;
+   const startMins = timeToMinutes(nextStart);
+   const blockStartMins = timeToMinutes(blockStart);
+   const endMins = timeToMinutes(slotEnd);
+   if (startMins !== null && blockStartMins !== null && endMins !== null) {
+      if (endMins > blockStartMins && startMins < blockStartMins) {
+         return blockStart;
+      }
+   }
+   return nextStart;
+}
+
 export function compareTasksBySlot(a, b) {
    const aSlot = a?.slotStart ?? '99:99';
    const bSlot = b?.slotStart ?? '99:99';

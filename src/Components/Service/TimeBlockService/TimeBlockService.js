@@ -1,4 +1,5 @@
 import { inboxDatesAnchoredToToday, taskCompletionDay } from '../../AppComponents/sections/plannerDates.js';
+import { blockNeedsSlotPicker, defaultSlotForBlock } from '../../Utils/taskSlotTimes.js';
 
 const STORE = 'timeBlocks';
 
@@ -30,6 +31,10 @@ export function addMinutes(time, mins) {
    const nh = Math.floor(wrapped / 60);
    const nm = wrapped % 60;
    return `${String(nh).padStart(2, '0')}:${String(nm).padStart(2, '0')}`;
+}
+
+export function subtractMinutes(time, mins) {
+   return addMinutes(time, -(Number(mins) || 0));
 }
 
 function normalizeBlock(block) {
@@ -104,6 +109,8 @@ export default class TimeBlockService {
    }
 
    usedMinutes(blockId, isoDate) {
+      const block = this.getById(blockId);
+      const blockDur = Number(block?.duration) || 0;
       const tasks = slice.context.getState('lifeControl')?.tasks ?? [];
       return tasks
          .filter(
@@ -112,7 +119,18 @@ export default class TimeBlockService {
                t.completed &&
                taskCompletionDay(t) === isoDate
          )
-         .reduce((sum, t) => sum + (t.minutes ?? 0), 0);
+         .reduce((sum, t) => {
+            const slot = t.slotStart && t.slotEnd
+               ? (() => {
+                    const [sh, sm] = String(t.slotStart).split(':').map(Number);
+                    const [eh, em] = String(t.slotEnd).split(':').map(Number);
+                    let mins = eh * 60 + em - (sh * 60 + sm);
+                    return mins > 0 ? mins : null;
+                 })()
+               : null;
+            const mins = slot ?? Math.min(Number(t.minutes) || 0, blockDur || Number(t.minutes) || 0);
+            return sum + mins;
+         }, 0);
    }
 
    async update(id, { label, start, end, rule }) {
@@ -191,7 +209,14 @@ export default class TimeBlockService {
 
       const taskIds = block.taskIds.includes(taskId) ? block.taskIds : [...block.taskIds, taskId];
       await this.storage.put(STORE, { ...block, taskIds });
-      await this.taskService.update(taskId, { blockId });
+
+      const patch = { blockId };
+      if (blockNeedsSlotPicker(block) && (!task.slotStart || !task.slotEnd)) {
+         const { slotStart, slotEnd } = defaultSlotForBlock(block, task.minutes);
+         patch.slotStart = slotStart;
+         patch.slotEnd = slotEnd;
+      }
+      await this.taskService.update(taskId, patch);
       await this.syncToContext();
       slice.events.emit('time-block:changed', { action: 'assign', blockId, taskId });
       return true;

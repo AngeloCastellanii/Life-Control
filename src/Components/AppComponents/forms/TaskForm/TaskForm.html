@@ -17,8 +17,16 @@
     </select>
   </div>
   <div>
-    <label class="lc-label" for="task-form-minutes">Duración (min)</label>
-    <input class="lc-input" id="task-form-minutes" type="number" min="1" step="1" value="30" required />
+    <label class="lc-label" for="task-form-duration">Duración</label>
+    <p class="lc-hint" data-role="duration-hint">En minutos, horas o días. Si eliges días, la tarea aparece cada día de ese rango hasta completarla.</p>
+    <div class="task-form__duration-row">
+      <input class="lc-input" id="task-form-duration" type="number" min="0.01" step="any" value="30" required />
+      <select class="lc-input" id="task-form-duration-unit" aria-label="Unidad de duración">
+        <option value="minutes" selected>Minutos</option>
+        <option value="hours">Horas</option>
+        <option value="days">Días</option>
+      </select>
+    </div>
   </div>
   <div>
     <label class="lc-label" for="task-form-recurrence">Repetición</label>
@@ -38,13 +46,13 @@
     </div>
     <div>
       <label class="lc-label" for="task-form-due">Fecha tope</label>
-      <p class="lc-hint">Último día en inbox si no está en un bloque.</p>
+      <p class="lc-hint">Último día en inbox si no está en un bloque. Con duración en días se calcula sola.</p>
       <input class="lc-input" id="task-form-due" type="date" />
     </div>
   </div>
   <div>
     <label class="lc-label" for="task-form-block">Bloque de tiempo</label>
-    <p class="lc-hint">Opcional. Si eliges uno, la tarea se asigna al bloque en lugar del inbox.</p>
+    <p class="lc-hint">Opcional. Si eliges uno, la franja se ajusta sola según la duración.</p>
     <select class="lc-input" id="task-form-block">
       <option value="">Inbox (sin bloque)</option>
     </select>
@@ -52,12 +60,12 @@
   <div class="grid gap-4 sm:grid-cols-2" data-role="slot-section" hidden>
     <div>
       <label class="lc-label" for="task-form-slot-start">Hora inicio en bloque</label>
-      <p class="lc-hint" data-role="slot-hint">Dentro del rango del bloque seleccionado.</p>
+      <p class="lc-hint" data-role="slot-hint">Al cambiarla, el fin se calcula con la duración.</p>
       <input class="lc-input" id="task-form-slot-start" type="time" step="60" />
     </div>
     <div>
       <label class="lc-label" for="task-form-slot-end">Hora fin en bloque</label>
-      <p class="lc-hint">Debe ser posterior al inicio.</p>
+      <p class="lc-hint">Al cambiarla, el inicio se calcula con la duración.</p>
       <input class="lc-input" id="task-form-slot-end" type="time" step="60" />
     </div>
   </div>

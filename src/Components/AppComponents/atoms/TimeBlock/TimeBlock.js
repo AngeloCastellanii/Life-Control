@@ -1,4 +1,5 @@
 import { BLOCK_RULE } from '../../sections/lifeControlConstants.js';
+import { formatDuration, formatDurationUsage } from '../../../Utils/formatDuration.js';
 
 const RULE_LABELS = {
    [BLOCK_RULE.FLEXIBLE]: 'FLEXIBLE',
@@ -94,8 +95,8 @@ export default class TimeBlock extends HTMLElement {
       this.$rule.textContent = locked ? '🔒 FIJO' : RULE_LABELS[BLOCK_RULE.FLEXIBLE];
       this.$rule.classList.toggle('time-block__rule--flexible', !locked);
       this.$rule.classList.toggle('time-block__rule--fixed', locked);
-      this.$usage.textContent = `${used} / ${duration} min`;
-      this.$free.textContent = `${remaining}M LIBRES`;
+      this.$usage.textContent = formatDurationUsage(used, duration);
+      this.$free.textContent = `${formatDuration(remaining)} libres`;
       this.$progressBar.style.width = `${percent}%`;
       this.classList.toggle('time-block--overflow', overflow);
       this.classList.toggle('time-block--locked', locked);
