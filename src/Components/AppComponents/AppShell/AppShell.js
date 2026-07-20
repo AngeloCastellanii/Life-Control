@@ -89,24 +89,75 @@ export default class AppShell extends HTMLElement {
       let startX = 0;
       let startY = 0;
       let tracking = false;
+      let previewing = false;
 
       const isInteractive = (target) =>
          Boolean(
             target?.closest?.(
-               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding'
+               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding, .sidebar'
             )
          );
+
+      const currentNavIndex = () => {
+         const current = window.location.pathname.replace(/\/+$/, '') || '/';
+         return NAV_ROUTES.indexOf(current);
+      };
 
       stage.addEventListener(
          'touchstart',
          (event) => {
             if (event.touches.length !== 1 || isInteractive(event.target)) {
                tracking = false;
+               previewing = false;
                return;
             }
             startX = event.touches[0].clientX;
             startY = event.touches[0].clientY;
             tracking = true;
+            previewing = false;
+         },
+         { passive: true }
+      );
+
+      stage.addEventListener(
+         'touchmove',
+         (event) => {
+            if (!tracking || !event.touches?.[0] || this.classList.contains('app-shell--modal-open')) {
+               return;
+            }
+
+            const dx = event.touches[0].clientX - startX;
+            const dy = event.touches[0].clientY - startY;
+            if (Math.abs(dy) > Math.abs(dx) * 1.1) {
+               if (previewing) {
+                  slice.events.emit('nav:swipe-cancel', {});
+                  previewing = false;
+               }
+               return;
+            }
+
+            const index = currentNavIndex();
+            if (index < 0) {
+               return;
+            }
+
+            const direction = dx < 0 ? 1 : -1;
+            const toIndex = index + direction;
+            if (toIndex < 0 || toIndex >= NAV_ROUTES.length) {
+               return;
+            }
+
+            const progress = Math.min(1, Math.abs(dx) / 120);
+            if (progress < 0.08) {
+               return;
+            }
+
+            previewing = true;
+            slice.events.emit('nav:swipe-preview', {
+               fromIndex: index,
+               toIndex,
+               progress
+            });
          },
          { passive: true }
       );
@@ -122,11 +173,28 @@ export default class AppShell extends HTMLElement {
             const dx = event.changedTouches[0].clientX - startX;
             const dy = event.changedTouches[0].clientY - startY;
             if (Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.35) {
+               if (previewing) {
+                  slice.events.emit('nav:swipe-cancel', {});
+               }
+               previewing = false;
                return;
             }
 
+            previewing = false;
             // Deslizar izquierda → vista siguiente; derecha → anterior
             this.navigateBySwipe(dx < 0 ? 1 : -1);
+         },
+         { passive: true }
+      );
+
+      stage.addEventListener(
+         'touchcancel',
+         () => {
+            tracking = false;
+            if (previewing) {
+               slice.events.emit('nav:swipe-cancel', {});
+            }
+            previewing = false;
          },
          { passive: true }
       );
