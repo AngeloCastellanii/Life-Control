@@ -1,5 +1,5 @@
 import { inboxDatesAnchoredToToday, taskCompletionDay } from '../../AppComponents/sections/plannerDates.js';
-import { blockNeedsSlotPicker, defaultSlotForBlock } from '../../Utils/taskSlotTimes.js';
+import { nextStackedSlotForBlock } from '../../Utils/taskSlotTimes.js';
 
 const STORE = 'timeBlocks';
 
@@ -211,8 +211,19 @@ export default class TimeBlockService {
       await this.storage.put(STORE, { ...block, taskIds });
 
       const patch = { blockId };
-      if (blockNeedsSlotPicker(block) && (!task.slotStart || !task.slotEnd)) {
-         const { slotStart, slotEnd } = defaultSlotForBlock(block, task.minutes);
+      const siblings = this.taskService
+         .getAll()
+         .filter((item) => item.blockId === blockId && item.id !== taskId);
+      // Al asignar, apilar detrás de las demás (salvo que ya tenga franja en este mismo bloque).
+      const keepExisting =
+         task.blockId === blockId && task.slotStart && task.slotEnd;
+      if (!keepExisting) {
+         const { slotStart, slotEnd } = nextStackedSlotForBlock(
+            block,
+            task.minutes,
+            siblings,
+            taskId
+         );
          patch.slotStart = slotStart;
          patch.slotEnd = slotEnd;
       }

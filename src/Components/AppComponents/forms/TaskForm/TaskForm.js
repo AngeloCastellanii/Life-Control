@@ -8,7 +8,8 @@ import {
 import { addDays, taskDateRange, todayISO } from '../../sections/plannerDates.js';
 import {
    blockNeedsSlotPicker,
-   defaultSlotForBlock,
+   formatBlockRangeLabel,
+   nextStackedSlotForBlock,
    slotEndFromStart,
    slotStartFromEnd,
    validateTaskSlot
@@ -150,7 +151,7 @@ export default class TaskForm extends HTMLElement {
          }
          const option = document.createElement('option');
          option.value = block.id;
-         option.textContent = block.label;
+         option.textContent = `${block.label} (${formatBlockRangeLabel(block.start, block.end ?? block.start)})`;
          this.$blockSelect.appendChild(option);
       }
 
@@ -166,6 +167,30 @@ export default class TaskForm extends HTMLElement {
       return timeBlockService?.getById?.(blockId) ?? null;
    }
 
+   tasksInSelectedBlock(excludeTaskId = null) {
+      const blockId = this.$blockSelect.value;
+      if (!blockId) {
+         return [];
+      }
+      const taskService = getService('task-service', ['getAll']);
+      return (taskService?.getAll?.() ?? []).filter(
+         (task) => task.blockId === blockId && task.id !== excludeTaskId
+      );
+   }
+
+   stackedSlotForSelectedBlock() {
+      const block = this.getSelectedBlock();
+      if (!block) {
+         return { slotStart: null, slotEnd: null };
+      }
+      return nextStackedSlotForBlock(
+         block,
+         this.getDurationMinutes(),
+         this.tasksInSelectedBlock(this.taskId),
+         this.taskId
+      );
+   }
+
    applySlotConstraints(block) {
       if (!block?.start) {
          return;
@@ -176,7 +201,7 @@ export default class TaskForm extends HTMLElement {
       this.$slotEnd.min = block.start;
       this.$slotEnd.max = blockEnd;
       if (this.$slotHint) {
-         this.$slotHint.textContent = `Dentro de ${block.start} — ${blockEnd}. El fin se ajusta solo a la duración.`;
+         this.$slotHint.textContent = `Dentro de ${formatBlockRangeLabel(block.start, blockEnd)}. Se apilan solas si hay otras tareas.`;
       }
    }
 
@@ -200,7 +225,7 @@ export default class TaskForm extends HTMLElement {
       if (this._loadingTask) {
          return;
       }
-      const { slotStart, slotEnd } = defaultSlotForBlock(block, this.getDurationMinutes());
+      const { slotStart, slotEnd } = this.stackedSlotForSelectedBlock();
       this.$slotStart.value = slotStart ?? '';
       this.$slotEnd.value = slotEnd ?? '';
    }
@@ -231,7 +256,7 @@ export default class TaskForm extends HTMLElement {
          return;
       }
       if (!this.$slotStart.value) {
-         const defaults = defaultSlotForBlock(block, this.getDurationMinutes());
+         const defaults = this.stackedSlotForSelectedBlock();
          this.$slotStart.value = defaults.slotStart ?? '';
          this.$slotEnd.value = defaults.slotEnd ?? '';
          return;
@@ -272,7 +297,7 @@ export default class TaskForm extends HTMLElement {
          return { ok: true, slotStart: null, slotEnd: null, duration: this.getDurationMinutes() };
       }
       if (!this.$slotStart.value || !this.$slotEnd.value) {
-         const defaults = defaultSlotForBlock(block, this.getDurationMinutes());
+         const defaults = this.stackedSlotForSelectedBlock();
          this.$slotStart.value = defaults.slotStart ?? '';
          this.$slotEnd.value = defaults.slotEnd ?? '';
       }
@@ -310,7 +335,7 @@ export default class TaskForm extends HTMLElement {
       this.updateSlotFieldsVisibility();
       const block = this.getSelectedBlock();
       if (block && blockNeedsSlotPicker(block) && !task.slotStart) {
-         const { slotStart, slotEnd } = defaultSlotForBlock(block, task.minutes);
+         const { slotStart, slotEnd } = this.stackedSlotForSelectedBlock();
          this.$slotStart.value = slotStart ?? '';
          this.$slotEnd.value = slotEnd ?? '';
       }

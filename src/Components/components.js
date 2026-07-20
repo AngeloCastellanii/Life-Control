@@ -18,6 +18,7 @@ const components = {
   "FinanceForm": "forms",
   "WalletForm": "forms",
   "PaymentMethodForm": "forms",
+  "PaymentMethodLedgerPanel": "forms",
   "PendingTasksPanel": "forms",
   "TaskDetailPanel": "forms",
   "FinanceDetailPanel": "forms",

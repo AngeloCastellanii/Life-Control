@@ -11,11 +11,31 @@ export function timeToMinutes(time) {
    return h * 60 + m;
 }
 
+/** "14:30" → "2:30 PM" */
+export function formatTime12h(time) {
+   const mins = timeToMinutes(time);
+   if (mins === null) {
+      return time || '';
+   }
+   const hours24 = Math.floor(mins / 60) % 24;
+   const minutes = mins % 60;
+   const period = hours24 >= 12 ? 'PM' : 'AM';
+   const hours12 = hours24 % 12 || 12;
+   return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+}
+
 export function formatTaskSlotLabel(slotStart, slotEnd) {
    if (!slotStart || !slotEnd) {
       return '';
    }
-   return `${slotStart} — ${slotEnd}`;
+   return `${formatTime12h(slotStart)} — ${formatTime12h(slotEnd)}`;
+}
+
+export function formatBlockRangeLabel(blockStart, blockEnd) {
+   if (!blockStart) {
+      return '';
+   }
+   return `${formatTime12h(blockStart)} — ${formatTime12h(blockEnd ?? blockStart)}`;
 }
 
 /** Bloques amplios (varias horas) permiten elegir franja concreta. */
@@ -75,6 +95,58 @@ export function defaultSlotForBlock(block, durationMinutes = 30) {
    };
 }
 
+/**
+ * Coloca la tarea a continuación de las que ya hay en el bloque (corridas).
+ * Ej.: 6:00–6:30 AM, luego 6:30–7:00 AM, luego 7:00–7:30 AM.
+ */
+export function nextStackedSlotForBlock(block, durationMinutes = 30, tasksInBlock = [], excludeTaskId = null) {
+   if (!block?.start) {
+      return { slotStart: null, slotEnd: null };
+   }
+
+   const mins = Math.max(1, Number(durationMinutes) || 30);
+   const blockEnd = block.end ?? block.start;
+   const blockMins = minutesBetween(block.start, blockEnd);
+
+   const others = (Array.isArray(tasksInBlock) ? tasksInBlock : []).filter(
+      (task) =>
+         task &&
+         task.id !== excludeTaskId &&
+         task.slotStart &&
+         task.slotEnd &&
+         timeToMinutes(task.slotEnd) !== null
+   );
+
+   let start = block.start;
+   if (others.length > 0) {
+      others.sort((a, b) => (timeToMinutes(a.slotEnd) ?? 0) - (timeToMinutes(b.slotEnd) ?? 0));
+      const lastEnd = others[others.length - 1].slotEnd;
+      const lastEndMins = timeToMinutes(lastEnd);
+      const blockStartMins = timeToMinutes(block.start);
+      const blockEndMins = timeToMinutes(blockEnd);
+      if (
+         lastEndMins !== null &&
+         blockStartMins !== null &&
+         blockEndMins !== null &&
+         lastEndMins > blockStartMins &&
+         (blockEndMins > blockStartMins ? lastEndMins < blockEndMins : true)
+      ) {
+         start = lastEnd;
+      }
+   }
+
+   const remaining = minutesBetween(start, blockEnd);
+   if (remaining < 1) {
+      return defaultSlotForBlock(block, mins);
+   }
+
+   const useMins = Math.min(mins, remaining, blockMins);
+   return {
+      slotStart: start,
+      slotEnd: addMinutes(start, useMins)
+   };
+}
+
 /** Fin = inicio + duración, recortado al final del bloque. */
 export function slotEndFromStart(slotStart, durationMinutes, block) {
    if (!slotStart || !block?.start) {
@@ -88,7 +160,6 @@ export function slotEndFromStart(slotStart, durationMinutes, block) {
    if (startOffset + mins > blockMins) {
       return blockEnd;
    }
-   // Si el fin calculado se pasa del bloque en el mismo día (comparación simple)
    const endMins = timeToMinutes(nextEnd);
    const blockEndMins = timeToMinutes(blockEnd);
    const startMins = timeToMinutes(slotStart);
@@ -138,7 +209,7 @@ export function validateTaskSlot({ slotStart, slotEnd, block }) {
    if (!isSlotWithinBlock(slotStart, slotEnd, block.start, block.end ?? block.start)) {
       return {
          ok: false,
-         message: `El horario debe estar entre ${block.start} y ${block.end ?? block.start}.`
+         message: `El horario debe estar entre ${formatTime12h(block.start)} y ${formatTime12h(block.end ?? block.start)}.`
       };
    }
    const duration = slotDurationMinutes(slotStart, slotEnd);

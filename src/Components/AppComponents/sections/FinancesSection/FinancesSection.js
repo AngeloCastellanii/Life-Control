@@ -45,6 +45,18 @@ export default class FinancesSection extends HTMLElement {
          this.openMethodForm();
       });
 
+      this.querySelector('[data-role="open-all-ledger"]')?.addEventListener('click', (event) => {
+         event.preventDefault();
+         event.stopPropagation();
+         this.openMethodLedger('all');
+      });
+
+      this.$walletBalance?.addEventListener('click', (event) => {
+         event.preventDefault();
+         event.stopPropagation();
+         this.openMethodLedger('all');
+      });
+
       slice.context.watch(
          'lifeControl',
          this,
@@ -98,6 +110,18 @@ export default class FinancesSection extends HTMLElement {
       });
    }
 
+   openMethodLedger(paymentMethodId = 'all') {
+      const method =
+         paymentMethodId && paymentMethodId !== 'all'
+            ? this.paymentMethodService?.getById?.(paymentMethodId)
+            : null;
+      slice.events.emit('ui:modal:open', {
+         title: method ? `Movimientos · ${method.name}` : 'Movimientos del fondo',
+         form: 'PaymentMethodLedgerPanel',
+         paymentMethodId: paymentMethodId || 'all'
+      });
+   }
+
    openEdit(financeId) {
       slice.events.emit('ui:modal:open', {
          title: 'Editar transacción',
@@ -127,11 +151,31 @@ export default class FinancesSection extends HTMLElement {
 
       for (const method of list) {
          const li = document.createElement('li');
-         li.className = 'finances-section__account';
+         li.className = 'finances-section__account finances-section__account--clickable';
          if (method.isPool) {
             li.classList.add('finances-section__account--general');
          }
          li.style.setProperty('--account-color', method.color || '#6366f1');
+         li.tabIndex = 0;
+         li.setAttribute('role', 'button');
+         li.setAttribute('aria-label', `Ver movimientos de ${method.name}`);
+
+         const openLedger = () => this.openMethodLedger(method.id);
+         li.addEventListener('click', (event) => {
+            if (event.target.closest('button')) {
+               return;
+            }
+            openLedger();
+         });
+         li.addEventListener('keydown', (event) => {
+            if (event.target.closest('button')) {
+               return;
+            }
+            if (event.key === 'Enter' || event.key === ' ') {
+               event.preventDefault();
+               openLedger();
+            }
+         });
 
          const pct = total > 0 ? Math.min(100, (Math.abs(method.balance) / total) * 100) : 0;
 
@@ -151,7 +195,7 @@ export default class FinancesSection extends HTMLElement {
 
          const pctLabel = document.createElement('span');
          pctLabel.className = 'finances-section__account-pct';
-         pctLabel.textContent = `${pct.toFixed(0)}% del total`;
+         pctLabel.textContent = `${pct.toFixed(0)}% del total · ver movimientos`;
 
          amountWrap.append(amount, pctLabel);
          head.append(name, amountWrap);
@@ -170,14 +214,18 @@ export default class FinancesSection extends HTMLElement {
          edit.type = 'button';
          edit.className = 'finances-section__account-edit';
          edit.textContent = 'Editar';
-         edit.addEventListener('click', () => this.openMethodForm(method.id));
+         edit.addEventListener('click', (event) => {
+            event.stopPropagation();
+            this.openMethodForm(method.id);
+         });
          actions.appendChild(edit);
 
          const remove = document.createElement('button');
          remove.type = 'button';
          remove.className = 'finances-section__account-delete';
          remove.textContent = 'Eliminar';
-         remove.addEventListener('click', async () => {
+         remove.addEventListener('click', async (event) => {
+            event.stopPropagation();
             const pool = this.paymentMethodService?.getPool?.();
             const refund =
                !method.isPool && pool

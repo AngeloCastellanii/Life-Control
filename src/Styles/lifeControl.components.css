@@ -1709,8 +1709,147 @@
   }
 
   .finances-section__wallet-balance {
-    @apply shrink-0 text-2xl font-bold tabular-nums sm:text-3xl;
+    @apply shrink-0 cursor-pointer text-2xl font-bold tabular-nums sm:text-3xl;
     color: var(--font-primary-color);
+  }
+
+  .finances-section__wallet-balance:hover {
+    color: var(--primary-color);
+  }
+
+  .finances-section__wallet-actions-btns {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .finances-section__wallet-ledger {
+    @apply cursor-pointer rounded-xl border px-3 py-2.5 text-sm font-semibold;
+    background: transparent;
+    border-color: var(--border-glow, var(--tertiary-background-color));
+    color: var(--font-primary-color);
+  }
+
+  .finances-section__wallet-ledger:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .finances-section__account--clickable {
+    @apply cursor-pointer transition-[transform,box-shadow];
+  }
+
+  .finances-section__account--clickable:hover {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--account-color, var(--primary-color)) 35%, transparent);
+  }
+
+  .payment-method-ledger {
+    @apply flex flex-col gap-4;
+  }
+
+  .payment-method-ledger__head {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .payment-method-ledger__title {
+    @apply m-0 text-lg font-semibold;
+    color: var(--font-primary-color);
+  }
+
+  .payment-method-ledger__subtitle {
+    @apply m-0 mt-1 text-sm;
+    color: var(--font-secondary-color);
+  }
+
+  .payment-method-ledger__balance {
+    @apply shrink-0 text-xl font-bold tabular-nums;
+    color: var(--ledger-color, var(--primary-color));
+  }
+
+  .payment-method-ledger__stats {
+    @apply grid grid-cols-2 gap-2;
+  }
+
+  .payment-method-ledger__stat {
+    @apply flex flex-col gap-1 rounded-xl px-3 py-2.5;
+  }
+
+  .payment-method-ledger__stat--in {
+    background: color-mix(in srgb, var(--success-color) 12%, transparent);
+  }
+
+  .payment-method-ledger__stat--out {
+    background: color-mix(in srgb, var(--danger-color) 12%, transparent);
+  }
+
+  .payment-method-ledger__stat-label {
+    @apply text-[0.65rem] font-semibold uppercase tracking-wide;
+    color: var(--font-secondary-color);
+  }
+
+  .payment-method-ledger__stat-value {
+    @apply text-sm font-bold tabular-nums;
+    color: var(--font-primary-color);
+  }
+
+  .payment-method-ledger__list {
+    @apply m-0 flex max-h-[50vh] list-none flex-col gap-2 overflow-y-auto p-0;
+  }
+
+  .payment-method-ledger__item {
+    @apply flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors;
+    border-color: var(--tertiary-background-color);
+    background: color-mix(in srgb, var(--secondary-background-color) 60%, transparent);
+  }
+
+  .payment-method-ledger__item:hover {
+    border-color: var(--primary-color);
+  }
+
+  .payment-method-ledger__item--pending {
+    opacity: 0.85;
+  }
+
+  .payment-method-ledger__dir {
+    @apply shrink-0 rounded-md px-2 py-1 text-[0.65rem] font-bold uppercase tracking-wide;
+  }
+
+  .payment-method-ledger__item--in .payment-method-ledger__dir {
+    background: color-mix(in srgb, var(--success-color) 18%, transparent);
+    color: var(--success-color);
+  }
+
+  .payment-method-ledger__item--out .payment-method-ledger__dir {
+    background: color-mix(in srgb, var(--danger-color) 18%, transparent);
+    color: var(--danger-color);
+  }
+
+  .payment-method-ledger__body {
+    @apply min-w-0 flex-1;
+  }
+
+  .payment-method-ledger__item-title {
+    @apply block truncate text-sm font-semibold;
+    color: var(--font-primary-color);
+  }
+
+  .payment-method-ledger__item-meta {
+    @apply mt-0.5 block text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  .payment-method-ledger__item-amount {
+    @apply shrink-0 text-sm font-bold tabular-nums;
+  }
+
+  .payment-method-ledger__item--in .payment-method-ledger__item-amount {
+    color: var(--success-color);
+  }
+
+  .payment-method-ledger__item--out .payment-method-ledger__item-amount {
+    color: var(--danger-color);
+  }
+
+  .payment-method-ledger__empty {
+    @apply m-0;
   }
 
   .finances-section__wallet-adjust {

@@ -1,5 +1,6 @@
 import { BLOCK_RULE } from '../../sections/lifeControlConstants.js';
 import { formatDuration, formatDurationUsage } from '../../../Utils/formatDuration.js';
+import { formatBlockRangeLabel } from '../../../Utils/taskSlotTimes.js';
 
 const RULE_LABELS = {
    [BLOCK_RULE.FLEXIBLE]: 'FLEXIBLE',
@@ -91,7 +92,7 @@ export default class TimeBlock extends HTMLElement {
       const locked = rule === BLOCK_RULE.LOCKED;
 
       this.$label.textContent = block.label;
-      this.$time.textContent = `${block.start} — ${end}`;
+      this.$time.textContent = formatBlockRangeLabel(block.start, end);
       this.$rule.textContent = locked ? '🔒 FIJO' : RULE_LABELS[BLOCK_RULE.FLEXIBLE];
       this.$rule.classList.toggle('time-block__rule--flexible', !locked);
       this.$rule.classList.toggle('time-block__rule--fixed', locked);

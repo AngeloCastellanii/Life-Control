@@ -1,5 +1,6 @@
 import { taskInBlockOnDay, todayISO } from '../plannerDates.js';
 import { formatDuration } from '../../../Utils/formatDuration.js';
+import { formatBlockRangeLabel, formatTaskSlotLabel } from '../../../Utils/taskSlotTimes.js';
 
 function toMinutes(hhmm) {
    const [h, m] = String(hhmm ?? '0:0').split(':').map(Number);
@@ -95,7 +96,7 @@ export default class FocusSection extends HTMLElement {
 
       this.$tag.textContent = isNow ? 'Ahora' : 'Próximo bloque';
       this.$label.textContent = block.label;
-      this.$range.textContent = `${block.start} — ${block.end}`;
+      this.$range.textContent = formatBlockRangeLabel(block.start, block.end);
 
       const today = todayISO();
       const blockTasks = tasks
@@ -137,7 +138,8 @@ export default class FocusSection extends HTMLElement {
 
          const meta = document.createElement('span');
          meta.className = 'focus-section__task-meta';
-         const slot = task.slotStart && task.slotEnd ? `${task.slotStart}–${task.slotEnd} · ` : '';
+         const slot =
+            task.slotStart && task.slotEnd ? `${formatTaskSlotLabel(task.slotStart, task.slotEnd)} · ` : '';
          meta.textContent = `${slot}${formatDuration(task.minutes ?? 0, { short: true })}`;
          info.appendChild(meta);
 

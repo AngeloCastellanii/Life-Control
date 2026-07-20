@@ -9,6 +9,7 @@ const MODAL_FORMS = [
    'DomainForm',
    'WalletForm',
    'PaymentMethodForm',
+   'PaymentMethodLedgerPanel',
    'PendingTasksPanel',
    'TaskDetailPanel',
    'FinanceDetailPanel',

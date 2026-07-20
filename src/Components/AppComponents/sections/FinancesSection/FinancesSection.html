@@ -13,7 +13,7 @@
         <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
         <div class="finances-section__fondo-summary-text">
           <h2 class="lc-view-card-label">Fondo total</h2>
-          <p class="lc-view-hint finances-section__fondo-hint">Suma de tus métodos · toca para ver el desglose</p>
+          <p class="lc-view-hint finances-section__fondo-hint">Suma de tus métodos · clic en un método para ver entradas/salidas</p>
         </div>
       </div>
       <span class="finances-section__wallet-balance" data-role="wallet-balance">$0.00</span>
@@ -25,7 +25,10 @@
       </p>
       <div class="finances-section__wallet-actions">
         <span class="finances-section__fondo-label">Desglose</span>
-        <button type="button" class="finances-section__wallet-adjust" data-role="add-method">+ Método</button>
+        <div class="finances-section__wallet-actions-btns">
+          <button type="button" class="finances-section__wallet-ledger" data-role="open-all-ledger">Ver movimientos</button>
+          <button type="button" class="finances-section__wallet-adjust" data-role="add-method">+ Método</button>
+        </div>
       </div>
       <ul class="finances-section__accounts" data-role="accounts-list"></ul>
       <p class="finances-section__accounts-empty lc-empty" data-role="accounts-empty" hidden>
