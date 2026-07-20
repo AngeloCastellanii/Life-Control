@@ -7,21 +7,32 @@
     </div>
   </header>
 
-  <div class="finances-section__wallet lc-card">
-    <div class="lc-view-card-head finances-section__wallet-head">
-      <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
-      <div>
-        <h2 class="lc-view-card-label">Fondo total</h2>
-        <p class="lc-view-hint">Suma de tus métodos. Al cobrar se suma al medio elegido; al pagar se descuenta.</p>
+  <details class="finances-section__wallet lc-card" data-role="fondo-details" open>
+    <summary class="finances-section__fondo-summary">
+      <div class="finances-section__fondo-summary-main">
+        <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
+        <div class="finances-section__fondo-summary-text">
+          <h2 class="lc-view-card-label">Fondo total</h2>
+          <p class="lc-view-hint finances-section__fondo-hint">Suma de tus métodos · toca para ver el desglose</p>
+        </div>
       </div>
-    </div>
-    <div class="finances-section__wallet-actions">
       <span class="finances-section__wallet-balance" data-role="wallet-balance">$0.00</span>
-      <button type="button" class="finances-section__wallet-adjust" data-role="add-method">+ Método</button>
+    </summary>
+
+    <div class="finances-section__fondo-body">
+      <p class="finances-section__fondo-help">
+        Añade solo los métodos que uses. El total es la suma de sus saldos. Opcionalmente marca uno como fondo para repartir.
+      </p>
+      <div class="finances-section__wallet-actions">
+        <span class="finances-section__fondo-label">Desglose</span>
+        <button type="button" class="finances-section__wallet-adjust" data-role="add-method">+ Método</button>
+      </div>
+      <ul class="finances-section__accounts" data-role="accounts-list"></ul>
+      <p class="finances-section__accounts-empty lc-empty" data-role="accounts-empty" hidden>
+        Añade un método con el nombre y saldo que quieras.
+      </p>
     </div>
-    <ul class="finances-section__accounts" data-role="accounts-list"></ul>
-    <p class="finances-section__accounts-empty lc-empty" data-role="accounts-empty" hidden>Añade un método (Zelle, Binance, efectivo…).</p>
-  </div>
+  </details>
 
   <div class="finances-section__balance">
     <div class="finances-section__col finances-section__col--pay lc-card">

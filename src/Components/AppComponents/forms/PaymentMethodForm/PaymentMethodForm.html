@@ -1,13 +1,20 @@
 <form class="flex flex-col gap-4" data-role="form">
   <div>
     <label class="lc-label" for="payment-method-form-name">Nombre</label>
-    <input class="lc-input" id="payment-method-form-name" type="text" placeholder="Zelle, Binance, Efectivo, Bs…" required maxlength="40" />
+    <input class="lc-input" id="payment-method-form-name" type="text" placeholder="Ej. Zelle, Binance, efectivo…" required maxlength="40" />
   </div>
   <div>
-    <label class="lc-label" for="payment-method-form-balance">Saldo actual (USD)</label>
-    <input class="lc-input" id="payment-method-form-balance" type="number" step="0.01" placeholder="0.00" />
-    <p class="lc-hint">Cuánto tienes ahora en este medio de pago.</p>
+    <label class="lc-label" for="payment-method-form-balance" data-role="balance-label">Saldo (USD)</label>
+    <input class="lc-input" id="payment-method-form-balance" type="number" step="0.01" min="0" placeholder="0.00" />
+    <p class="lc-hint" data-role="balance-hint">El total del fondo será la suma de tus métodos.</p>
   </div>
+  <label class="payment-method-form__pool">
+    <input type="checkbox" data-role="pool" />
+    <span>Usar como fondo para repartir (opcional)</span>
+  </label>
+  <p class="lc-hint payment-method-form__pool-hint" data-role="pool-hint">
+    Si lo marcas, al crear otros métodos se puede descontar de aquí primero. No es obligatorio.
+  </p>
   <div>
     <span class="lc-label">Color</span>
     <div class="payment-method-form__colors" data-role="colors"></div>

@@ -1,11 +1,5 @@
 const STORE = 'domains';
 
-const DEFAULT_DOMAINS = [
-   { name: 'General', color: '#6366f1' },
-   { name: 'Personal', color: '#10b981' },
-   { name: 'Trabajo', color: '#f59e0b' }
-];
-
 export default class DomainService {
    async init() {
       this.storage = slice.getComponent('storage-service');
@@ -15,20 +9,7 @@ export default class DomainService {
       if (!this.storage.db) {
          await this.storage.init();
       }
-      await this.seedDefaultDomains();
       await this.syncToContext();
-   }
-
-   async seedDefaultDomains() {
-      const existing = await this.storage.getAll(STORE);
-      const names = new Set(existing.map((domain) => domain.name));
-
-      for (const def of DEFAULT_DOMAINS) {
-         if (names.has(def.name)) {
-            continue;
-         }
-         await this.create({ name: def.name, color: def.color });
-      }
    }
 
    async syncToContext() {
@@ -53,8 +34,7 @@ export default class DomainService {
    }
 
    getDefaultId() {
-      const general = this.getAll().find((domain) => domain.name === 'General');
-      return general?.id ?? this.getAll()[0]?.id ?? null;
+      return this.getAll()[0]?.id ?? null;
    }
 
    async create({ name, color, monthlyBudget = 0 }) {

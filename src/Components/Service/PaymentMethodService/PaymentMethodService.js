@@ -10,8 +10,13 @@ function normalize(method) {
       balance: Number(method.balance) || 0,
       color: method.color || DEFAULT_COLORS[0],
       order: Number.isFinite(method.order) ? method.order : 0,
+      isPool: Boolean(method.isPool),
       createdAt: method.createdAt ?? new Date().toISOString()
    };
+}
+
+function roundMoney(value) {
+   return Math.round((Number(value) || 0) * 100) / 100;
 }
 
 export default class PaymentMethodService {
@@ -23,52 +28,47 @@ export default class PaymentMethodService {
       if (!this.storage.db) {
          await this.storage.init();
       }
-      await this.migrateFromWallet();
+      // No se crean métodos automáticamente: solo los que agregue el usuario.
       await this.syncToContext();
    }
 
-   async migrateFromWallet() {
-      const existing = await this.storage.getAll(STORE);
-      if (existing.length > 0) {
-         return;
-      }
-
-      let walletBalance = 0;
+   async readLegacyWallet() {
       try {
          const meta = await this.storage.getAll('meta');
          const wallet = meta.find((item) => item.id === 'wallet');
-         walletBalance = Number(wallet?.balance) || 0;
+         return Number(wallet?.balance) || 0;
       } catch {
-         /* ignore */
+         return 0;
       }
-
-      await this.storage.put(STORE, normalize({
-         id: crypto.randomUUID(),
-         name: 'General',
-         balance: walletBalance,
-         color: DEFAULT_COLORS[0],
-         order: 0,
-         createdAt: new Date().toISOString()
-      }));
    }
 
    async syncToContext() {
       const paymentMethods = (await this.storage.getAll(STORE)).map(normalize);
-      paymentMethods.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+      paymentMethods.sort((a, b) => {
+         if (a.isPool !== b.isPool) {
+            return a.isPool ? -1 : 1;
+         }
+         return a.order - b.order || a.name.localeCompare(b.name);
+      });
 
-      const walletBalance = paymentMethods.reduce((sum, method) => sum + (Number(method.balance) || 0), 0);
+      let walletBalance = paymentMethods.reduce((sum, method) => sum + (Number(method.balance) || 0), 0);
+
+      // Sin métodos: respetar el saldo legado de meta (no inventar cuentas).
+      if (paymentMethods.length === 0) {
+         walletBalance = await this.readLegacyWallet();
+      } else {
+         try {
+            await this.storage.put('meta', { id: 'wallet', balance: walletBalance });
+         } catch {
+            /* ignore */
+         }
+      }
 
       slice.context.setState('lifeControl', (prev) => ({
          ...(prev ?? {}),
          paymentMethods,
          walletBalance
       }));
-
-      try {
-         await this.storage.put('meta', { id: 'wallet', balance: walletBalance });
-      } catch {
-         /* ignore */
-      }
    }
 
    getAll() {
@@ -82,30 +82,101 @@ export default class PaymentMethodService {
       return this.getAll().find((method) => method.id === id) ?? null;
    }
 
+   getPool() {
+      return this.getAll().find((method) => method.isPool) ?? null;
+   }
+
+   /** @deprecated alias de getPool */
+   getGeneral() {
+      return this.getPool();
+   }
+
    getDefaultId() {
-      return this.getAll()[0]?.id ?? null;
+      return this.getPool()?.id ?? this.getAll()[0]?.id ?? null;
    }
 
    getTotalBalance() {
       return this.getAll().reduce((sum, method) => sum + (Number(method.balance) || 0), 0);
    }
 
-   async create({ name, balance = 0, color }) {
+   getLegacyWalletBalance() {
+      return Number(slice.context.getState('lifeControl')?.walletBalance) || 0;
+   }
+
+   async writeRaw(method) {
+      await this.storage.put(STORE, normalize(method));
+   }
+
+   /**
+    * Si hay un método marcado como fondo (isPool), mueve dinero desde/hacia él.
+    * Si no hay fondo, no hace nada al aumentar (dinero nuevo) o al disminuir (solo baja el método).
+    */
+   async transferFromPool(delta, excludeId = null) {
+      const amount = roundMoney(delta);
+      if (amount === 0) {
+         return { moved: 0 };
+      }
+
+      const pool = this.getPool();
+      if (!pool || (excludeId && pool.id === excludeId)) {
+         return { moved: 0 };
+      }
+
+      if (amount > 0) {
+         const fromPool = roundMoney(Math.min(amount, Math.max(0, pool.balance)));
+         if (fromPool <= 0) {
+            return { moved: 0 };
+         }
+         await this.writeRaw({
+            ...pool,
+            balance: roundMoney(pool.balance - fromPool)
+         });
+         return { moved: fromPool };
+      }
+
+      await this.writeRaw({
+         ...pool,
+         balance: roundMoney(pool.balance - amount)
+      });
+      return { moved: amount };
+   }
+
+   async create({ name, balance = 0, color, isPool = false }) {
       const trimmed = name?.trim();
       if (!trimmed) {
          return null;
       }
 
+      const amount = roundMoney(balance);
+      if (amount < 0) {
+         throw new Error('El saldo no puede ser negativo.');
+      }
+
+      const existing = this.getAll();
+      let asPool = Boolean(isPool);
+
+      // Solo un fondo a la vez.
+      if (asPool) {
+         for (const method of existing.filter((item) => item.isPool)) {
+            await this.writeRaw({ ...method, isPool: false });
+         }
+      }
+
+      if (!asPool) {
+         await this.transferFromPool(amount);
+      }
+
       const method = normalize({
          id: crypto.randomUUID(),
          name: trimmed,
-         balance: Number(balance) || 0,
-         color: color || DEFAULT_COLORS[this.getAll().length % DEFAULT_COLORS.length],
-         order: this.getAll().length,
+         balance: amount,
+         color: color || DEFAULT_COLORS[existing.length % DEFAULT_COLORS.length],
+         order: existing.length,
+         isPool: asPool,
          createdAt: new Date().toISOString()
       });
 
-      await this.storage.put(STORE, method);
+      await this.writeRaw(method);
       await this.syncToContext();
       slice.events.emit('payment-method:changed', { action: 'create', method });
       return method;
@@ -117,19 +188,46 @@ export default class PaymentMethodService {
          return null;
       }
 
+      const name = patch.name !== undefined ? String(patch.name).trim() : existing.name;
+      if (!name) {
+         return null;
+      }
+
+      let isPool = existing.isPool;
+      if (patch.isPool !== undefined) {
+         isPool = Boolean(patch.isPool);
+      }
+
+      if (isPool && !existing.isPool) {
+         for (const method of this.getAll().filter((item) => item.isPool && item.id !== id)) {
+            await this.writeRaw({ ...method, isPool: false });
+         }
+      }
+
+      let balance = existing.balance;
+      if (patch.balance !== undefined) {
+         balance = roundMoney(patch.balance);
+         if (balance < 0) {
+            throw new Error('El saldo no puede ser negativo.');
+         }
+
+         if (!isPool && !existing.isPool) {
+            const delta = roundMoney(balance - existing.balance);
+            await this.transferFromPool(delta, id);
+         }
+      }
+
       const updated = normalize({
          ...existing,
          ...patch,
          id,
-         name: patch.name?.trim() ?? existing.name,
-         balance: patch.balance !== undefined ? Number(patch.balance) || 0 : existing.balance
+         name,
+         balance,
+         isPool,
+         color: patch.color ?? existing.color
       });
 
-      if (!updated.name) {
-         return null;
-      }
-
-      await this.storage.put(STORE, updated);
+      await this.writeRaw(updated);
       await this.syncToContext();
       slice.events.emit('payment-method:changed', { action: 'update', method: updated });
       return updated;
@@ -144,18 +242,27 @@ export default class PaymentMethodService {
       if (!existing) {
          return null;
       }
-      return this.setBalance(id, (Number(existing.balance) || 0) + (Number(delta) || 0));
+      const next = roundMoney((Number(existing.balance) || 0) + (Number(delta) || 0));
+      await this.writeRaw({ ...existing, balance: next });
+      await this.syncToContext();
+      slice.events.emit('payment-method:changed', { action: 'adjust', method: { ...existing, balance: next } });
+      return this.getById(id);
    }
 
    async remove(id) {
-      const methods = this.getAll();
-      if (methods.length <= 1) {
-         throw new Error('Debes conservar al menos un método de pago.');
+      const existing = this.getById(id);
+      if (!existing) {
+         return false;
       }
+
+      const pool = this.getPool();
+      if (!existing.isPool && pool && pool.id !== id) {
+         await this.transferFromPool(-roundMoney(existing.balance), id);
+      }
+
       await this.storage.delete(STORE, id);
       await this.syncToContext();
       slice.events.emit('payment-method:changed', { action: 'delete', id });
       return true;
    }
 }
-

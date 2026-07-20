@@ -39,7 +39,11 @@ export default class FinancesSection extends HTMLElement {
          return;
       }
 
-      this.$addMethod?.addEventListener('click', () => this.openMethodForm());
+      this.$addMethod?.addEventListener('click', (event) => {
+         event.preventDefault();
+         event.stopPropagation();
+         this.openMethodForm();
+      });
 
       slice.context.watch(
          'lifeControl',
@@ -112,12 +116,21 @@ export default class FinancesSection extends HTMLElement {
 
    renderAccounts(methods, total) {
       this.$accountsList.innerHTML = '';
-      const list = Array.isArray(methods) ? methods : [];
+      const list = Array.isArray(methods) ? [...methods] : [];
+      list.sort((a, b) => {
+         if (Boolean(a.isPool) !== Boolean(b.isPool)) {
+            return a.isPool ? -1 : 1;
+         }
+         return (a.order ?? 0) - (b.order ?? 0) || String(a.name).localeCompare(String(b.name));
+      });
       this.$accountsEmpty.hidden = list.length > 0;
 
       for (const method of list) {
          const li = document.createElement('li');
          li.className = 'finances-section__account';
+         if (method.isPool) {
+            li.classList.add('finances-section__account--general');
+         }
          li.style.setProperty('--account-color', method.color || '#6366f1');
 
          const pct = total > 0 ? Math.min(100, (Math.abs(method.balance) / total) * 100) : 0;
@@ -129,11 +142,19 @@ export default class FinancesSection extends HTMLElement {
          name.className = 'finances-section__account-name';
          name.textContent = method.name;
 
+         const amountWrap = document.createElement('div');
+         amountWrap.className = 'finances-section__account-amounts';
+
          const amount = document.createElement('span');
          amount.className = 'finances-section__account-amount';
          amount.textContent = this.formatMoney(method.balance);
 
-         head.append(name, amount);
+         const pctLabel = document.createElement('span');
+         pctLabel.className = 'finances-section__account-pct';
+         pctLabel.textContent = `${pct.toFixed(0)}% del total`;
+
+         amountWrap.append(amount, pctLabel);
+         head.append(name, amountWrap);
 
          const bar = document.createElement('div');
          bar.className = 'finances-section__account-bar';
@@ -150,13 +171,19 @@ export default class FinancesSection extends HTMLElement {
          edit.className = 'finances-section__account-edit';
          edit.textContent = 'Editar';
          edit.addEventListener('click', () => this.openMethodForm(method.id));
+         actions.appendChild(edit);
 
          const remove = document.createElement('button');
          remove.type = 'button';
          remove.className = 'finances-section__account-delete';
          remove.textContent = 'Eliminar';
          remove.addEventListener('click', async () => {
-            if (!confirm(`¿Eliminar el método "${method.name}"?`)) {
+            const pool = this.paymentMethodService?.getPool?.();
+            const refund =
+               !method.isPool && pool
+                  ? ` El saldo volverá a “${pool.name}”.`
+                  : '';
+            if (!confirm(`¿Eliminar “${method.name}”?${refund}`)) {
                return;
             }
             try {
@@ -165,8 +192,8 @@ export default class FinancesSection extends HTMLElement {
                alert(error.message || 'No se pudo eliminar.');
             }
          });
+         actions.appendChild(remove);
 
-         actions.append(edit, remove);
          li.append(head, bar, actions);
          this.$accountsList.appendChild(li);
       }
