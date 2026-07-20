@@ -1,7 +1,7 @@
 :root {
   --font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 
-  /* Slice — verdes vivos, brillo / glass (sin cambiar la identidad de color) */
+  /* Slice — verdes vivos, brillo / glass */
   --slice-bg: #c5d8cc;
   --slice-accent: #3f7359;
   --slice-accent-bright: #4f9470;
@@ -38,28 +38,30 @@
 
   --accent-color: #5aa87a;
 
-  /* Glass + brillo (técnica Obsidian, colores Slice) */
-  --surface-glass: color-mix(in srgb, #f3f6f4 80%, transparent);
+  /* Glass + brillo */
+  --surface-glass: color-mix(in srgb, #f3f6f4 70%, transparent);
   --surface-elevated: var(--slice-surface-muted);
-  --surface-blur: blur(16px);
-  --border-glow: color-mix(in srgb, var(--slice-accent) 38%, var(--slice-border));
+  --surface-blur: blur(18px);
+  --border-glow: color-mix(in srgb, var(--slice-accent) 48%, var(--slice-border));
 
   --app-background: linear-gradient(
     155deg,
-    #b7cec0 0%,
-    #d4dfd8 24%,
-    #e8f0ea 52%,
+    #9fbfad 0%,
+    #b7cec0 18%,
+    #d4dfd8 40%,
+    #e8f0ea 58%,
     #c5d8cc 78%,
-    #a8c4b4 100%
+    #8fb89f 100%
   );
 
-  --box-shadow-primary: 0 10px 36px rgb(63 115 89 / 18%);
-  --box-shadow-secondary: 0 4px 18px rgb(63 115 89 / 12%);
+  --box-shadow-primary: 0 10px 40px rgb(63 115 89 / 28%);
+  --box-shadow-secondary: 0 4px 20px rgb(79 148 112 / 20%);
   --lc-radius-lg: 0.875rem;
   --lc-radius-xl: 1.25rem;
   --lc-shadow:
-    0 2px 8px rgb(63 115 89 / 8%),
-    0 8px 28px rgb(63 115 89 / 14%);
+    0 2px 8px rgb(63 115 89 / 10%),
+    0 8px 32px rgb(63 115 89 / 20%),
+    0 0 36px rgb(79 148 112 / 12%);
 }
 
 /* Superficies con cristal y borde luminoso */
@@ -83,8 +85,8 @@
 }
 
 :root .settings-section__guide-item:hover {
-  background: color-mix(in srgb, var(--slice-accent) 10%, var(--surface-glass));
-  box-shadow: 0 0 20px rgb(63 115 89 / 16%);
+  background: color-mix(in srgb, var(--slice-accent) 12%, var(--surface-glass));
+  box-shadow: 0 0 24px rgb(63 115 89 / 22%);
 }
 
 :root .lc-input,
@@ -108,7 +110,7 @@
 :root .planner-section__nav-btn:hover {
   border-color: var(--slice-accent);
   color: var(--slice-accent);
-  box-shadow: 0 0 14px rgb(63 115 89 / 22%);
+  box-shadow: 0 0 16px rgb(63 115 89 / 28%);
 }
 
 :root .domains-section__delete:hover,
@@ -120,19 +122,30 @@
 :root .sidebar .sidebar__item--active .sidebar__link,
 :root .sidebar .sidebar__link:hover {
   color: var(--slice-accent);
-  background: color-mix(in srgb, var(--slice-accent) 12%, transparent);
+  background: color-mix(in srgb, var(--slice-accent) 14%, transparent);
 }
 
 :root .sidebar .sidebar__item--active .sidebar__link {
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--slice-accent) 40%, transparent),
-    0 0 18px rgb(63 115 89 / 20%);
+    inset 0 0 0 1px color-mix(in srgb, var(--slice-accent) 48%, transparent),
+    0 0 22px rgb(63 115 89 / 28%);
+}
+
+:root .sidebar__logo,
+:root .settings-section__save,
+:root .fab {
+  background: linear-gradient(135deg, #2f5642, #5aa87a) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 8px 28px rgb(63 115 89 / 45%),
+    0 0 28px rgb(79 148 112 / 32%),
+    inset 0 1px 0 rgb(255 255 255 / 28%);
 }
 
 :root .planner-section__view-btn--active {
-  background: var(--slice-accent);
+  background: linear-gradient(135deg, #2f5642, #5aa87a);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgb(63 115 89 / 28%);
+  box-shadow: 0 4px 18px rgb(63 115 89 / 35%);
 }
 
 :root .planner-week__day,
@@ -140,17 +153,17 @@
   background: var(--surface-glass);
   backdrop-filter: var(--surface-blur);
   -webkit-backdrop-filter: var(--surface-blur);
-  border-color: color-mix(in srgb, var(--slice-accent) 30%, var(--slice-border));
-  box-shadow: 0 2px 12px rgb(63 115 89 / 12%);
+  border-color: color-mix(in srgb, var(--slice-accent) 35%, var(--slice-border));
+  box-shadow: 0 2px 14px rgb(63 115 89 / 14%);
 }
 
 :root .planner-week__day--today,
 :root .planner-month__cell--today {
   border-color: var(--slice-accent);
-  background: color-mix(in srgb, var(--slice-accent) 14%, var(--slice-surface));
+  background: color-mix(in srgb, var(--slice-accent) 16%, var(--slice-surface));
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--slice-accent) 35%, transparent),
-    0 4px 18px rgb(63 115 89 / 18%);
+    0 0 0 1px color-mix(in srgb, var(--slice-accent) 40%, transparent),
+    0 4px 20px rgb(63 115 89 / 24%);
 }
 
 :root .planner-week__day-head {
@@ -163,15 +176,8 @@
   border-color: color-mix(in srgb, var(--slice-accent) 22%, var(--slice-border));
 }
 
-:root .fab {
-  box-shadow:
-    0 8px 28px rgb(63 115 89 / 40%),
-    0 0 22px rgb(79 148 112 / 30%),
-    inset 0 1px 0 rgb(255 255 255 / 22%);
-}
-
 :root .lc-view-hero__icon {
   box-shadow:
-    0 6px 20px rgb(63 115 89 / 22%),
-    0 0 14px rgb(79 148 112 / 18%);
+    0 6px 22px rgb(63 115 89 / 28%),
+    0 0 18px rgb(79 148 112 / 24%);
 }

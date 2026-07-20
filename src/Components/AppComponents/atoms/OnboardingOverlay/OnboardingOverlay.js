@@ -1,9 +1,10 @@
 const STORAGE_KEY = 'lc_onboarded';
 
 const THEME_OPTIONS = [
-   { id: 'Light', label: 'Claro', bg: '#eef6ff', fg: '#0f172a', accent: '#3b82f6' },
-   { id: 'Dark', label: 'Oscuro', bg: '#0c0a0b', fg: '#fafafa', accent: '#9f1239' },
-   { id: 'Slice', label: 'Slice', bg: '#c5d8cc', fg: '#171717', accent: '#3f7359' },
+   { id: 'Light', label: 'Claro', bg: '#dbeafe', fg: '#0f172a', accent: '#2563eb' },
+   { id: 'Dark', label: 'Oscuro', bg: '#070b14', fg: '#fafafa', accent: '#3b82f6' },
+   { id: 'DarkRed', label: 'Dark Red', bg: '#0d0609', fg: '#fafafa', accent: '#c41e5a' },
+   { id: 'Slice', label: 'Slice', bg: '#b7cec0', fg: '#171717', accent: '#3f7359' },
    { id: 'Obsidian', label: 'Obsidiana', bg: '#0b0f19', fg: '#e2e8f0', accent: '#22d3ee' }
 ];
 

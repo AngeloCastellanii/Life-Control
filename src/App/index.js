@@ -4,6 +4,16 @@ installFetchCacheBust();
 
 import Slice from '/Slice/Slice.js';
 
+// Forzar tema fresco desde /Themes (sin CSS viejo en memoria/localStorage).
+try {
+   const themeName = localStorage.getItem('sliceTheme') || slice.theme || 'Light';
+   slice.stylesManager?.themeManager?.themeStyles?.delete(themeName);
+   localStorage.removeItem(`sliceTheme-${themeName}`);
+   await slice.setTheme(themeName);
+} catch (error) {
+   console.warn('No se pudo refrescar el tema:', error);
+}
+
 /**
  * Inicializa un servicio de forma tolerante a fallos: si su init() lanza,
  * se registra el error pero NO se aborta el arranque de la app. Así un

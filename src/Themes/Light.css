@@ -5,18 +5,18 @@
   --font-primary-color: #0f172a;
   --font-secondary-color: #64748b;
 
-  --primary-color: #3b82f6;
-  --primary-color-rgb: 59, 130, 246;
-  --primary-background-color: #f1f5f9;
+  --primary-color: #2563eb;
+  --primary-color-rgb: 37, 99, 235;
+  --primary-background-color: #eef6ff;
   --primary-color-contrast: #ffffff;
   --primary-color-shade: #1d4ed8;
 
-  --secondary-color: #60a5fa;
-  --secondary-color-rgb: 96, 165, 250;
+  --secondary-color: #38bdf8;
+  --secondary-color-rgb: 56, 189, 248;
   --secondary-background-color: #ffffff;
   --secondary-color-contrast: #ffffff;
 
-  --tertiary-background-color: #dbe4f0;
+  --tertiary-background-color: #bfdbfe;
 
   --success-color: #10b981;
   --success-contrast: #ffffff;
@@ -30,31 +30,33 @@
   --medium-contrast: #0f172a;
   --disabled-color: #cbd5e1;
 
-  --accent-color: #38bdf8;
+  --accent-color: #0ea5e9;
 
-  /* Glass + brillo (técnica Obsidian, colores Light) */
-  --surface-glass: color-mix(in srgb, #ffffff 78%, transparent);
+  /* Glass + brillo */
+  --surface-glass: color-mix(in srgb, #ffffff 72%, transparent);
   --surface-elevated: #ffffff;
-  --surface-blur: blur(16px);
-  --border-glow: color-mix(in srgb, var(--primary-color) 32%, #e2e8f0);
+  --surface-blur: blur(18px);
+  --border-glow: color-mix(in srgb, var(--primary-color) 42%, #93c5fd);
 
   --app-background: linear-gradient(
     155deg,
-    #eef6ff 0%,
-    #f8fafc 22%,
-    #dbeafe 48%,
-    #e0f2fe 72%,
-    #f0f9ff 100%
+    #dbeafe 0%,
+    #eef6ff 18%,
+    #f0f9ff 40%,
+    #bae6fd 62%,
+    #e0f2fe 82%,
+    #f8fafc 100%
   );
 
-  --box-shadow-primary: 0 10px 36px rgb(59 130 246 / 18%);
-  --box-shadow-secondary: 0 4px 18px rgb(56 189 248 / 14%);
+  --box-shadow-primary: 0 10px 40px rgb(37 99 235 / 26%);
+  --box-shadow-secondary: 0 4px 20px rgb(14 165 233 / 22%);
 
   --lc-radius-lg: 1rem;
   --lc-radius-xl: 1.5rem;
   --lc-shadow:
-    0 1px 2px rgb(15 23 42 / 4%),
-    0 8px 28px rgb(59 130 246 / 12%);
+    0 1px 2px rgb(15 23 42 / 5%),
+    0 8px 32px rgb(37 99 235 / 18%),
+    0 0 36px rgb(56 189 248 / 12%);
 }
 
 /* Cards y paneles: cristal + borde luminoso */
@@ -66,7 +68,10 @@
 :root .finances-section__wallet,
 :root .finances-section__col,
 :root .shopping-section__col,
-:root .shopping-section__detail {
+:root .shopping-section__detail,
+:root .domains-section__item,
+:root .dashboard-section__due-item,
+:root .settings-section__guide-item {
   background: var(--surface-glass);
   backdrop-filter: var(--surface-blur);
   -webkit-backdrop-filter: var(--surface-blur);
@@ -75,33 +80,44 @@
 }
 
 :root .sidebar__item--active .sidebar__link {
-  background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 18%, transparent);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 35%, transparent),
-    0 0 18px rgb(59 130 246 / 18%);
+    inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 42%, transparent),
+    0 0 22px rgb(37 99 235 / 28%);
 }
 
 :root .sidebar__link:hover {
-  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
+  background: color-mix(in srgb, var(--accent-color) 16%, transparent);
 }
 
+:root .sidebar__logo,
+:root .settings-section__save,
 :root .fab {
+  background: linear-gradient(135deg, #1d4ed8, #38bdf8) !important;
+  color: #ffffff !important;
   box-shadow:
-    0 8px 28px rgb(59 130 246 / 42%),
-    0 0 24px rgb(56 189 248 / 35%),
-    inset 0 1px 0 rgb(255 255 255 / 28%);
+    0 8px 28px rgb(37 99 235 / 45%),
+    0 0 28px rgb(56 189 248 / 35%),
+    inset 0 1px 0 rgb(255 255 255 / 35%);
 }
 
 :root .lc-view-hero__icon {
   box-shadow:
-    0 6px 20px rgb(59 130 246 / 22%),
-    0 0 16px rgb(56 189 248 / 20%);
+    0 6px 22px rgb(37 99 235 / 30%),
+    0 0 18px rgb(56 189 248 / 28%);
 }
 
 :root .planner-week__day--today,
 :root .planner-month__cell--today {
   border-color: var(--primary-color);
-  background: color-mix(in srgb, var(--primary-color) 10%, #ffffff);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 25%, transparent),
-    0 4px 16px rgb(59 130 246 / 16%);
+  background: color-mix(in srgb, var(--primary-color) 12%, #ffffff);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--primary-color) 30%, transparent),
+    0 4px 18px rgb(37 99 235 / 22%);
+}
+
+:root .planner-section__view-btn--active {
+  background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+  color: #ffffff;
+  box-shadow: 0 4px 18px rgb(37 99 235 / 35%);
 }

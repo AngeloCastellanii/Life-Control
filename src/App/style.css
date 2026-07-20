@@ -6,6 +6,7 @@
 
 body {
   margin: 0;
-  background: var(--primary-background-color);
+  background: var(--app-background, var(--primary-background-color));
+  background-attachment: fixed;
   color: var(--font-primary-color);
 }
