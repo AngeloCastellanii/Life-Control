@@ -11,7 +11,7 @@ export function timeToMinutes(time) {
    return h * 60 + m;
 }
 
-/** "14:30" → "2:30 PM" */
+/** "14:30" → "2:30 PM" (espacio no separable para que no parta en dos líneas) */
 export function formatTime12h(time) {
    const mins = timeToMinutes(time);
    if (mins === null) {
@@ -21,21 +21,21 @@ export function formatTime12h(time) {
    const minutes = mins % 60;
    const period = hours24 >= 12 ? 'PM' : 'AM';
    const hours12 = hours24 % 12 || 12;
-   return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+   return `${hours12}:${String(minutes).padStart(2, '0')}\u00A0${period}`;
 }
 
 export function formatTaskSlotLabel(slotStart, slotEnd) {
    if (!slotStart || !slotEnd) {
       return '';
    }
-   return `${formatTime12h(slotStart)} — ${formatTime12h(slotEnd)}`;
+   return `${formatTime12h(slotStart)}\u00A0—\u00A0${formatTime12h(slotEnd)}`;
 }
 
 export function formatBlockRangeLabel(blockStart, blockEnd) {
    if (!blockStart) {
       return '';
    }
-   return `${formatTime12h(blockStart)} — ${formatTime12h(blockEnd ?? blockStart)}`;
+   return `${formatTime12h(blockStart)}\u00A0—\u00A0${formatTime12h(blockEnd ?? blockStart)}`;
 }
 
 /** Bloques amplios (varias horas) permiten elegir franja concreta. */
@@ -49,37 +49,49 @@ export function blockNeedsSlotPicker(block) {
    return mins > 60 || startHour !== endHour;
 }
 
-/** Comprueba que el tramo cae dentro del bloque (soporta bloques que cruzan medianoche). */
+/** Comprueba que el tramo cae dentro del bloque (soporta bloques y franjas que cruzan medianoche). */
 export function isSlotWithinBlock(slotStart, slotEnd, blockStart, blockEnd) {
    const s = timeToMinutes(slotStart);
-   const e = timeToMinutes(slotEnd);
+   let e = timeToMinutes(slotEnd);
    let b0 = timeToMinutes(blockStart);
    let b1 = timeToMinutes(blockEnd);
    if (s === null || e === null || b0 === null || b1 === null) {
       return false;
    }
-   if (e <= s) {
-      return false;
-   }
+
+   // Bloque overnight (ej. 19:00 → 02:30)
    if (b1 <= b0) {
       b1 += 24 * 60;
    }
-   let slotStartNorm = s;
-   let slotEndNorm = e;
-   if (slotStartNorm < b0 && b1 > 24 * 60) {
-      slotStartNorm += 24 * 60;
-      slotEndNorm += 24 * 60;
+
+   // Franja overnight (ej. 21:00 → 02:30)
+   if (e <= s) {
+      e += 24 * 60;
    }
-   return slotStartNorm >= b0 && slotEndNorm <= b1;
+
+   let sn = s;
+   let en = e;
+
+   // Si el bloque cruza medianoche y la franja cae en la madrugada (antes del inicio del bloque)
+   if (b1 > 24 * 60 && sn < b0) {
+      sn += 24 * 60;
+      en += 24 * 60;
+   }
+
+   return sn >= b0 && en <= b1 && en > sn;
 }
 
 export function slotDurationMinutes(slotStart, slotEnd) {
    const s = timeToMinutes(slotStart);
-   const e = timeToMinutes(slotEnd);
-   if (s === null || e === null || e <= s) {
+   let e = timeToMinutes(slotEnd);
+   if (s === null || e === null) {
       return null;
    }
-   return e - s;
+   if (e <= s) {
+      e += 24 * 60;
+   }
+   const duration = e - s;
+   return duration > 0 ? duration : null;
 }
 
 export function defaultSlotForBlock(block, durationMinutes = 30) {
@@ -119,17 +131,29 @@ export function nextStackedSlotForBlock(block, durationMinutes = 30, tasksInBloc
 
    let start = block.start;
    if (others.length > 0) {
-      others.sort((a, b) => (timeToMinutes(a.slotEnd) ?? 0) - (timeToMinutes(b.slotEnd) ?? 0));
-      const lastEnd = others[others.length - 1].slotEnd;
-      const lastEndMins = timeToMinutes(lastEnd);
       const blockStartMins = timeToMinutes(block.start);
+      const sortKey = (slotEnd) => {
+         const endMins = timeToMinutes(slotEnd);
+         if (endMins === null || blockStartMins === null) {
+            return 0;
+         }
+         // En bloques overnight, 2:30 AM va después de 11:00 PM
+         return endMins < blockStartMins ? endMins + 24 * 60 : endMins;
+      };
+      others.sort((a, b) => sortKey(a.slotEnd) - sortKey(b.slotEnd));
+      const lastEnd = others[others.length - 1].slotEnd;
+      const lastEndKey = sortKey(lastEnd);
       const blockEndMins = timeToMinutes(blockEnd);
+      const blockEndKey =
+         blockEndMins !== null && blockStartMins !== null && blockEndMins <= blockStartMins
+            ? blockEndMins + 24 * 60
+            : blockEndMins;
       if (
-         lastEndMins !== null &&
+         lastEndKey !== null &&
          blockStartMins !== null &&
-         blockEndMins !== null &&
-         lastEndMins > blockStartMins &&
-         (blockEndMins > blockStartMins ? lastEndMins < blockEndMins : true)
+         blockEndKey !== null &&
+         lastEndKey > blockStartMins &&
+         lastEndKey < blockEndKey
       ) {
          start = lastEnd;
       }

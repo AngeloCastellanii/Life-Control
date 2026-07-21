@@ -10,10 +10,13 @@ import {
    blockNeedsSlotPicker,
    formatBlockRangeLabel,
    nextStackedSlotForBlock,
+   slotDurationMinutes,
    slotEndFromStart,
    slotStartFromEnd,
+   timeToMinutes,
    validateTaskSlot
 } from '../../../Utils/taskSlotTimes.js';
+import { minutesBetween } from '../../../Service/TimeBlockService/TimeBlockService.js';
 import {
    durationToMinutes,
    minutesToDurationParts
@@ -88,6 +91,24 @@ export default class TaskForm extends HTMLElement {
 
    getDurationMinutes() {
       return durationToMinutes(this.$durationInput.value, this.$durationUnit.value);
+   }
+
+   /**
+    * Minutos usados solo para la franja del bloque.
+    * Si la duración es en días, no se intenta meter días enteros en un solo bloque.
+    */
+   getSlotWorkMinutes(block = this.getSelectedBlock()) {
+      if (this.$durationUnit.value === 'days') {
+         const blockMins = block
+            ? minutesBetween(block.start, block.end ?? block.start)
+            : 60;
+         const currentSlot = slotDurationMinutes(this.$slotStart?.value, this.$slotEnd?.value);
+         if (currentSlot && currentSlot > 0) {
+            return Math.min(currentSlot, blockMins);
+         }
+         return Math.min(60, Math.max(15, blockMins));
+      }
+      return this.getDurationMinutes();
    }
 
    setDurationFromMinutes(minutes) {
@@ -185,7 +206,7 @@ export default class TaskForm extends HTMLElement {
       }
       return nextStackedSlotForBlock(
          block,
-         this.getDurationMinutes(),
+         this.getSlotWorkMinutes(block),
          this.tasksInSelectedBlock(this.taskId),
          this.taskId
       );
@@ -196,12 +217,28 @@ export default class TaskForm extends HTMLElement {
          return;
       }
       const blockEnd = block.end ?? block.start;
-      this.$slotStart.min = block.start;
-      this.$slotStart.max = blockEnd;
-      this.$slotEnd.min = block.start;
-      this.$slotEnd.max = blockEnd;
+      const startMins = timeToMinutes(block.start);
+      const endMins = timeToMinutes(blockEnd);
+      const overnight = startMins !== null && endMins !== null && endMins <= startMins;
+
+      // min/max nativos rompen bloques que cruzan medianoche (ej. 7:00 PM → 2:30 AM)
+      for (const input of [this.$slotStart, this.$slotEnd]) {
+         if (!input) {
+            continue;
+         }
+         if (overnight) {
+            input.removeAttribute('min');
+            input.removeAttribute('max');
+         } else {
+            input.min = block.start;
+            input.max = blockEnd;
+         }
+      }
+
       if (this.$slotHint) {
-         this.$slotHint.textContent = `Dentro de ${formatBlockRangeLabel(block.start, blockEnd)}. Se apilan solas si hay otras tareas.`;
+         this.$slotHint.textContent = overnight
+            ? `Dentro de ${formatBlockRangeLabel(block.start, blockEnd)} (cruza medianoche). Se apilan solas si hay otras tareas.`
+            : `Dentro de ${formatBlockRangeLabel(block.start, blockEnd)}. Se apilan solas si hay otras tareas.`;
       }
    }
 
@@ -234,7 +271,37 @@ export default class TaskForm extends HTMLElement {
       if (this.$durationUnit.value === 'days') {
          this.applyDaysSpanToDates();
       }
+      // Recalcular franja con minutos de sesión (no días enteros)
       this.syncSlotEndFromDuration();
+      this.ensureValidSlotOrRestack();
+   }
+
+   /** Si la franja quedó inválida (p. ej. al pasar a días), vuelve a apilar. */
+   ensureValidSlotOrRestack() {
+      if (this.$slotSection.hidden || this._loadingTask) {
+         return;
+      }
+      const block = this.getSelectedBlock();
+      if (!block || !blockNeedsSlotPicker(block)) {
+         return;
+      }
+      if (!this.$slotStart.value || !this.$slotEnd.value) {
+         const defaults = this.stackedSlotForSelectedBlock();
+         this.$slotStart.value = defaults.slotStart ?? '';
+         this.$slotEnd.value = defaults.slotEnd ?? '';
+         return;
+      }
+      const check = validateTaskSlot({
+         slotStart: this.$slotStart.value,
+         slotEnd: this.$slotEnd.value,
+         block
+      });
+      if (check.ok) {
+         return;
+      }
+      const defaults = this.stackedSlotForSelectedBlock();
+      this.$slotStart.value = defaults.slotStart ?? '';
+      this.$slotEnd.value = defaults.slotEnd ?? '';
    }
 
    /** Con duración en días: rango desde → tope = N días (aparece cada día hasta completar). */
@@ -262,7 +329,7 @@ export default class TaskForm extends HTMLElement {
          return;
       }
       this._syncingSlot = true;
-      const end = slotEndFromStart(this.$slotStart.value, this.getDurationMinutes(), block);
+      const end = slotEndFromStart(this.$slotStart.value, this.getSlotWorkMinutes(block), block);
       if (end) {
          this.$slotEnd.value = end;
       }
@@ -285,7 +352,7 @@ export default class TaskForm extends HTMLElement {
          return;
       }
       this._syncingSlot = true;
-      const start = slotStartFromEnd(this.$slotEnd.value, this.getDurationMinutes(), block);
+      const start = slotStartFromEnd(this.$slotEnd.value, this.getSlotWorkMinutes(block), block);
       if (start) {
          this.$slotStart.value = start;
       }
@@ -293,8 +360,9 @@ export default class TaskForm extends HTMLElement {
    }
 
    resolveSlotForSubmit(block) {
+      const storedMinutes = this.getDurationMinutes();
       if (!block || !blockNeedsSlotPicker(block)) {
-         return { ok: true, slotStart: null, slotEnd: null, duration: this.getDurationMinutes() };
+         return { ok: true, slotStart: null, slotEnd: null, duration: storedMinutes };
       }
       if (!this.$slotStart.value || !this.$slotEnd.value) {
          const defaults = this.stackedSlotForSelectedBlock();
@@ -307,7 +375,8 @@ export default class TaskForm extends HTMLElement {
          block
       });
       if (result.ok) {
-         return { ...result, duration: this.getDurationMinutes() };
+         // En días: guardamos la duración total en días; la franja es solo la sesión del día.
+         return { ...result, duration: storedMinutes };
       }
       return result;
    }
