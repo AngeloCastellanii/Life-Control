@@ -8,14 +8,26 @@
   </header>
 
   <div class="payment-method-ledger__stats">
-    <div class="payment-method-ledger__stat payment-method-ledger__stat--in">
+    <button
+      type="button"
+      class="payment-method-ledger__stat payment-method-ledger__stat--in"
+      data-role="filter-in"
+      aria-pressed="false"
+      title="Clic: solo entradas · Doble clic: ver ambos"
+    >
       <span class="payment-method-ledger__stat-label">Entradas</span>
       <span class="payment-method-ledger__stat-value" data-role="total-in">$0.00</span>
-    </div>
-    <div class="payment-method-ledger__stat payment-method-ledger__stat--out">
+    </button>
+    <button
+      type="button"
+      class="payment-method-ledger__stat payment-method-ledger__stat--out"
+      data-role="filter-out"
+      aria-pressed="false"
+      title="Clic: solo salidas · Doble clic: ver ambos"
+    >
       <span class="payment-method-ledger__stat-label">Salidas</span>
       <span class="payment-method-ledger__stat-value" data-role="total-out">$0.00</span>
-    </div>
+    </button>
   </div>
 
   <ul class="payment-method-ledger__list" data-role="list"></ul>

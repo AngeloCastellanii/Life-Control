@@ -1840,7 +1840,7 @@
   }
 
   .payment-method-ledger__stat {
-    @apply flex flex-col gap-1 rounded-xl px-3 py-2.5;
+    @apply flex cursor-pointer flex-col gap-1 rounded-xl border border-transparent px-3 py-2.5 text-left transition-[background,box-shadow,border-color];
   }
 
   .payment-method-ledger__stat--in {
@@ -1849,6 +1849,18 @@
 
   .payment-method-ledger__stat--out {
     background: color-mix(in srgb, var(--danger-color) 12%, transparent);
+  }
+
+  .payment-method-ledger__stat--in.payment-method-ledger__stat--active {
+    border-color: color-mix(in srgb, var(--success-color) 55%, transparent);
+    background: color-mix(in srgb, var(--success-color) 22%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--success-color) 35%, transparent);
+  }
+
+  .payment-method-ledger__stat--out.payment-method-ledger__stat--active {
+    border-color: color-mix(in srgb, var(--danger-color) 55%, transparent);
+    background: color-mix(in srgb, var(--danger-color) 22%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger-color) 35%, transparent);
   }
 
   .payment-method-ledger__stat-label {
