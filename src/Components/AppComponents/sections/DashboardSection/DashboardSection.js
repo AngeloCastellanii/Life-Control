@@ -405,7 +405,11 @@ export default class DashboardSection extends HTMLElement {
          const meta = document.createElement('span');
          meta.className = 'dashboard-section__due-meta';
          const countdown = this.shoppingCountdownLabel(item, status);
-         meta.textContent = `${FREQUENCY_LABELS[item.frequency] ?? ''} · ${countdown}`;
+         const priceBit =
+            item.price != null && Number(item.price) > 0
+               ? ` · $${Number(item.price).toFixed(2)}`
+               : '';
+         meta.textContent = `${FREQUENCY_LABELS[item.frequency] ?? ''} · ${countdown}${priceBit}`;
 
          li.appendChild(name);
          li.appendChild(meta);

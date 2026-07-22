@@ -144,7 +144,7 @@ export default class FinanceService {
       return settled ? -amount : amount;
    }
 
-   async create({ description, amount, type, dueDate = null, domainId = null, accountId = null }) {
+   async create({ description, amount, type, dueDate = null, domainId = null, accountId = null, shoppingItemId = null }) {
       const trimmed = description?.trim();
       const value = Number(amount);
       if (!trimmed || !Number.isFinite(value) || value <= 0) {
@@ -159,6 +159,7 @@ export default class FinanceService {
          dueDate: dueDate || null,
          domainId: domainId || null,
          accountId: this.resolveAccountId(accountId),
+         shoppingItemId: shoppingItemId || null,
          settled: false,
          createdAt: new Date().toISOString()
       };

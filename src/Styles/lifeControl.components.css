@@ -2296,9 +2296,18 @@
     color: var(--primary-color);
   }
 
+  .shopping-section__item-meta {
+    @apply mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5;
+  }
+
   .shopping-section__item-due {
-    @apply mt-0.5 block text-[0.68rem] leading-tight;
+    @apply text-[0.68rem] leading-tight;
     color: var(--font-secondary-color);
+  }
+
+  .shopping-section__item-price {
+    @apply text-[0.68rem] font-semibold tabular-nums leading-tight;
+    color: var(--font-primary-color);
   }
 
   .shopping-section__item-due--overdue,
@@ -2495,6 +2504,17 @@
 
   .shopping-form__hint {
     @apply m-0 mt-1 text-xs leading-relaxed text-lc-muted;
+  }
+
+  .shopping-form__price-row {
+    @apply grid gap-3;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 420px) {
+    .shopping-form__price-row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
   }
 
   /* Planner */

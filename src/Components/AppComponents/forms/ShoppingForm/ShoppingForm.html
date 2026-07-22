@@ -12,6 +12,26 @@
     <label class="lc-label" for="shopping-form-name">Artículo</label>
     <input class="lc-input" id="shopping-form-name" type="text" placeholder="Leche, detergente…" required />
   </div>
+  <div class="shopping-form__price-row">
+    <div>
+      <label class="lc-label" for="shopping-form-price">Precio (USD)</label>
+      <input
+        class="lc-input"
+        id="shopping-form-price"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="0.00"
+      />
+      <p class="shopping-form__hint">Al marcar como comprado se registra un egreso en Finanzas.</p>
+    </div>
+    <div>
+      <label class="lc-label" for="shopping-form-account">Método de pago</label>
+      <select class="lc-input" id="shopping-form-account">
+        <option value="">Método por defecto</option>
+      </select>
+    </div>
+  </div>
   <div>
     <label class="lc-label" for="shopping-form-last-done">Última vez (opcional)</label>
     <input class="lc-input" id="shopping-form-last-done" type="date" />

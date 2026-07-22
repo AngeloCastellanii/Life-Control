@@ -163,6 +163,9 @@ export default class ShoppingSection extends HTMLElement {
       this.$detailName.textContent = item.name;
 
       const parts = [status.label];
+      if (item.price != null && Number(item.price) > 0) {
+         parts.push(`$${Number(item.price).toFixed(2)}`);
+      }
       if (item.lastDoneAt) {
          parts.push(`Última vez: ${formatShortDate(item.lastDoneAt)}`);
       }
@@ -223,13 +226,24 @@ export default class ShoppingSection extends HTMLElement {
          nameBtn.title = item.name;
          nameBtn.addEventListener('click', () => this.showDetail(item));
 
+         const meta = document.createElement('div');
+         meta.className = 'shopping-section__item-meta';
+
          const due = document.createElement('span');
          const status = getDueStatus(item);
          due.className = `shopping-section__item-due shopping-section__item-due--${status.state}`;
          due.textContent = status.label;
+         meta.appendChild(due);
+
+         if (item.price != null && Number(item.price) > 0) {
+            const price = document.createElement('span');
+            price.className = 'shopping-section__item-price';
+            price.textContent = `$${Number(item.price).toFixed(2)}`;
+            meta.appendChild(price);
+         }
 
          body.appendChild(nameBtn);
-         body.appendChild(due);
+         body.appendChild(meta);
 
          row.appendChild(check);
          row.appendChild(body);

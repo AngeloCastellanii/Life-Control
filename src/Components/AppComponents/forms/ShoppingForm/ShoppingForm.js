@@ -11,6 +11,17 @@ import {
    showFormError
 } from '../formHelpers.js';
 
+function parsePrice(raw) {
+   if (raw === '' || raw == null) {
+      return null;
+   }
+   const value = Number(raw);
+   if (!Number.isFinite(value) || value < 0) {
+      return null;
+   }
+   return Math.round(value * 100) / 100;
+}
+
 export default class ShoppingForm extends HTMLElement {
    static props = {
       shoppingId: { type: 'string', default: null }
@@ -23,6 +34,8 @@ export default class ShoppingForm extends HTMLElement {
       this.$actions = this.querySelector('[data-role="actions"]');
       this.$frequencySelect = this.querySelector('#shopping-form-frequency');
       this.$nameInput = this.querySelector('#shopping-form-name');
+      this.$priceInput = this.querySelector('#shopping-form-price');
+      this.$accountSelect = this.querySelector('#shopping-form-account');
       this.$lastDoneInput = this.querySelector('#shopping-form-last-done');
       this.$nextDueInput = this.querySelector('#shopping-form-next-due');
       this.$nextHint = this.querySelector('[data-role="next-hint"]');
@@ -73,12 +86,36 @@ export default class ShoppingForm extends HTMLElement {
       this._formBound = true;
    }
 
+   populateAccounts(selectedId = null) {
+      if (!this.$accountSelect) {
+         return;
+      }
+      const pm = getService('payment-method-service', ['getAll']);
+      const methods = pm?.getAll?.() ?? [];
+      this.$accountSelect.innerHTML = '';
+      const empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = methods.length ? 'Método por defecto' : 'Sin métodos (usa el fondo)';
+      this.$accountSelect.appendChild(empty);
+      for (const method of methods) {
+         const option = document.createElement('option');
+         option.value = method.id;
+         option.textContent = method.name;
+         this.$accountSelect.appendChild(option);
+      }
+      if (selectedId && methods.some((m) => m.id === selectedId)) {
+         this.$accountSelect.value = selectedId;
+      }
+   }
+
    populate() {
       hideFormError(this.$error);
+      this.populateAccounts();
       if (this.shoppingId) {
          this.loadItem(this.shoppingId);
          return;
       }
+      this.$priceInput.value = '';
       this.$nextDueInput.value = todayISO();
    }
 
@@ -108,6 +145,9 @@ export default class ShoppingForm extends HTMLElement {
 
       this.$nameInput.value = item.name;
       this.$frequencySelect.value = item.frequency ?? SHOPPING_FREQUENCY.WEEKLY;
+      this.$priceInput.value =
+         item.price != null && Number(item.price) > 0 ? String(item.price) : '';
+      this.populateAccounts(item.accountId ?? null);
       this.$lastDoneInput.value = item.lastDoneAt ?? '';
       const frequency = item.frequency ?? SHOPPING_FREQUENCY.WEEKLY;
       const nextDue =
@@ -135,9 +175,17 @@ export default class ShoppingForm extends HTMLElement {
          return;
       }
 
+      const price = parsePrice(this.$priceInput.value);
+      if (this.$priceInput.value !== '' && (price === null || price < 0)) {
+         showFormError(this.$error, 'Ingresa un precio válido (0 o más).');
+         return;
+      }
+
       const payload = {
          frequency: this.$frequencySelect.value,
          name,
+         price: price && price > 0 ? price : null,
+         accountId: this.$accountSelect.value || null,
          lastDoneAt: this.$lastDoneInput.value || null,
          nextDueAt: this.$nextDueInput.value || null
       };

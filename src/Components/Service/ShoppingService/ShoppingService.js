@@ -1,3 +1,5 @@
+import { FINANCE_TYPE } from '../FinanceService/FinanceService.js';
+
 const STORE = 'shopping';
 
 export const SHOPPING_FREQUENCY = {
@@ -127,13 +129,25 @@ export function buildItemDates({ lastDoneAt, nextDueAt, frequency }) {
    return { lastDoneAt: last, nextDueAt: next, checked };
 }
 
+function normalizePrice(value) {
+   const n = Number(value);
+   if (!Number.isFinite(n) || n <= 0) {
+      return null;
+   }
+   return Math.round(n * 100) / 100;
+}
+
 function normalizeItem(item) {
    const today = todayISO();
    const freq = FREQUENCY_ORDER[item.frequency] !== undefined ? item.frequency : SHOPPING_FREQUENCY.WEEKLY;
    const normalized = {
       ...item,
       nextDueAt: item.nextDueAt ?? today,
-      lastDoneAt: item.lastDoneAt ?? null
+      lastDoneAt: item.lastDoneAt ?? null,
+      price: normalizePrice(item.price),
+      accountId: item.accountId || null,
+      lastFinanceId: item.lastFinanceId || null,
+      lastFinanceAt: item.lastFinanceAt || null
    };
 
    if (normalized.lastDoneAt && normalized.nextDueAt <= normalized.lastDoneAt) {
@@ -272,7 +286,7 @@ export default class ShoppingService {
       return updated;
    }
 
-   async create({ name, frequency, lastDoneAt, nextDueAt }) {
+   async create({ name, frequency, lastDoneAt, nextDueAt, price = null, accountId = null }) {
       const trimmed = name?.trim();
       if (!trimmed) {
          return null;
@@ -285,15 +299,57 @@ export default class ShoppingService {
          id: crypto.randomUUID(),
          name: trimmed,
          frequency: freq,
+         price: normalizePrice(price),
+         accountId: accountId || null,
          checked: dates.checked,
          lastDoneAt: dates.lastDoneAt,
-         nextDueAt: dates.nextDueAt
+         nextDueAt: dates.nextDueAt,
+         lastFinanceId: null,
+         lastFinanceAt: null
       };
 
       await this.storage.put(STORE, item);
       await this.syncToContext();
       slice.events.emit('shopping:changed', { action: 'create', item });
       return item;
+   }
+
+   async syncPurchaseToFinance(item) {
+      const price = normalizePrice(item.price);
+      if (!price) {
+         return { financeId: item.lastFinanceId ?? null, financeAt: item.lastFinanceAt ?? null };
+      }
+
+      const today = todayISO();
+      // Evita duplicar el mismo egreso si se marca/desmarca el mismo día
+      if (item.lastFinanceId && item.lastFinanceAt === today) {
+         return { financeId: item.lastFinanceId, financeAt: item.lastFinanceAt };
+      }
+
+      const financeService = slice.getComponent('finance-service');
+      if (!financeService?.create) {
+         return { financeId: item.lastFinanceId ?? null, financeAt: item.lastFinanceAt ?? null };
+      }
+
+      const finance = await financeService.create({
+         description: `Compra: ${item.name}`,
+         amount: price,
+         type: FINANCE_TYPE.PAY,
+         dueDate: today,
+         accountId: item.accountId || null,
+         shoppingItemId: item.id
+      });
+
+      if (!finance) {
+         return { financeId: item.lastFinanceId ?? null, financeAt: item.lastFinanceAt ?? null };
+      }
+
+      // Al marcar comprado = dinero ya gastado → se aplica al saldo del método
+      if (typeof financeService.toggleSettled === 'function') {
+         await financeService.toggleSettled(finance.id, true);
+      }
+
+      return { financeId: finance.id, financeAt: today };
    }
 
    async toggleChecked(id, checked) {
@@ -306,12 +362,15 @@ export default class ShoppingService {
       let updated;
 
       if (checked) {
+         const { financeId, financeAt } = await this.syncPurchaseToFinance(existing);
          updated = {
             ...existing,
             checked: true,
             lastDoneAt: today,
             nextDueAt: addPeriod(today, existing.frequency),
-            lastReminderDate: null
+            lastReminderDate: null,
+            lastFinanceId: financeId,
+            lastFinanceAt: financeAt
          };
       } else {
          updated = {
@@ -328,7 +387,7 @@ export default class ShoppingService {
       return updated;
    }
 
-   async update(id, { name, frequency, lastDoneAt, nextDueAt }) {
+   async update(id, { name, frequency, lastDoneAt, nextDueAt, price, accountId }) {
       const existing = this.getById(id);
       if (!existing) {
          return null;
@@ -357,6 +416,8 @@ export default class ShoppingService {
          ...existing,
          name: trimmed,
          frequency: freq,
+         price: price !== undefined ? normalizePrice(price) : existing.price,
+         accountId: accountId !== undefined ? accountId || null : existing.accountId,
          lastDoneAt: dates.lastDoneAt,
          nextDueAt: dates.nextDueAt,
          checked: dates.checked
