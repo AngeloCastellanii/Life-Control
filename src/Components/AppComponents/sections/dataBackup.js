@@ -100,22 +100,29 @@ export async function hasStoredData(storage) {
 }
 
 export async function importAppData(storage, data) {
-   if (!storage?.db) {
-      await storage.init();
-   }
+   await storage.init();
 
    if (!isBackupPayload(data)) {
       throw new Error('Respaldo inválido.');
    }
 
    for (const storeName of STORE_NAMES) {
-      await storage.clearStore(storeName);
-      const items = data.stores[storeName] ?? [];
-      for (const item of items) {
-         if (!item || typeof item !== 'object' || item.id == null) {
-            continue;
+      const items = (data.stores[storeName] ?? []).filter(
+         (item) => item && typeof item === 'object' && item.id != null
+      );
+
+      // Una sola transacción por store evita "database connection is closing"
+      if (typeof storage.replaceStore === 'function') {
+         await storage.replaceStore(storeName, items);
+      } else {
+         await storage.clearStore(storeName);
+         if (typeof storage.putAll === 'function') {
+            await storage.putAll(storeName, items);
+         } else {
+            for (const item of items) {
+               await storage.put(storeName, item);
+            }
          }
-         await storage.put(storeName, item);
       }
    }
 
