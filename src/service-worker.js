@@ -2,7 +2,7 @@
 // Estrategia: network-first para TODO el mismo origen (HTML y assets),
 // con caché de respaldo solo cuando no hay red. Evita servir JS/CSS viejos
 // tras un despliegue (causa de pantallas en blanco por código desincronizado).
-const CACHE = 'life-control-v2';
+const CACHE = 'life-control-v3';
 const APP_SHELL = '/App/index.html';
 const PRECACHE = [
    '/App/index.html',

@@ -20,6 +20,12 @@ export default class ThemeSelector extends HTMLElement {
          if (!THEMES.includes(next)) {
             return;
          }
+         // Persistir el nombre aunque Slice falle al cachear el CSS.
+         try {
+            localStorage.setItem('sliceTheme', next);
+         } catch {
+            /* ignore quota */
+         }
          await slice.setTheme(next);
          slice.events.emit('theme:changed', { theme: next });
       });

@@ -142,6 +142,7 @@ export default class OnboardingOverlay extends HTMLElement {
 
    async selectTheme(themeId) {
       try {
+         localStorage.setItem('sliceTheme', themeId);
          await slice.setTheme(themeId);
          slice.events.emit('theme:changed', { theme: themeId });
       } catch {

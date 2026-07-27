@@ -106,20 +106,23 @@ export async function importAppData(storage, data) {
       throw new Error('Respaldo inválido.');
    }
 
+   const stores = {};
    for (const storeName of STORE_NAMES) {
-      const items = (data.stores[storeName] ?? []).filter(
+      stores[storeName] = (data.stores[storeName] ?? []).filter(
          (item) => item && typeof item === 'object' && item.id != null
       );
+   }
 
-      // Una sola transacción por store evita "database connection is closing"
-      if (typeof storage.replaceStore === 'function') {
-         await storage.replaceStore(storeName, items);
-      } else {
-         await storage.clearStore(storeName);
-         if (typeof storage.putAll === 'function') {
-            await storage.putAll(storeName, items);
+   // Una sola transacción (o por store) evita "database connection is closing" en PWA/móvil.
+   if (typeof storage.replaceAllStores === 'function') {
+      await storage.replaceAllStores(stores);
+   } else {
+      for (const storeName of STORE_NAMES) {
+         if (typeof storage.replaceStore === 'function') {
+            await storage.replaceStore(storeName, stores[storeName]);
          } else {
-            for (const item of items) {
+            await storage.clearStore(storeName);
+            for (const item of stores[storeName]) {
                await storage.put(storeName, item);
             }
          }

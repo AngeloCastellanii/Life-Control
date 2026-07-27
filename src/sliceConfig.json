@@ -27,7 +27,7 @@
    "themeManager": {
       "enabled": true,
       "defaultTheme": "Light",
-      "saveThemeLocally": false,
+      "saveThemeLocally": true,
       "useBrowserTheme": false
    },
    "logger": {
