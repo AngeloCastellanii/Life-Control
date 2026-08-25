@@ -16,7 +16,8 @@ import {
    taskShowsOnCalendarDay,
    todayISO
 } from '../plannerDates.js';
-import { compareTasksBySlot } from '../../../Utils/taskSlotTimes.js';
+import { compareTasksBySlot, isBlockPast } from '../../../Utils/taskSlotTimes.js';
+import { getHidePastBlocks } from '../plannerPrefs.js';
 
 export default class PlannerSection extends HTMLElement {
    static props = {
@@ -125,6 +126,14 @@ export default class PlannerSection extends HTMLElement {
       );
 
       this.renderAll();
+
+      this._clockTimer = setInterval(() => {
+         if (this._viewMode === 'day' && this._cursorDate === todayISO() && getHidePastBlocks()) {
+            this.renderBlocks();
+         }
+      }, 60 * 1000);
+
+      slice.events.subscribe('planner:prefs-changed', () => this.renderAll(), { component: this });
    }
 
    _bindServices() {
@@ -391,8 +400,16 @@ export default class PlannerSection extends HTMLElement {
       this._destroyByPrefix('task-card-block-');
       this.$blocks.innerHTML = '';
 
-      const blocks = this.timeBlockService.getAll();
+      const allBlocks = this.timeBlockService.getAll();
+      const hidePast = getHidePastBlocks() && this._cursorDate === todayISO();
+      const blocks = hidePast ? allBlocks.filter((block) => !isBlockPast(block)) : allBlocks;
       this.$blocksEmpty.hidden = blocks.length > 0;
+      if (this.$blocksEmpty && hidePast && allBlocks.length > 0 && blocks.length === 0) {
+         this.$blocksEmpty.textContent = 'Los bloques de hoy ya pasaron. Puedes mostrarlos en Perfil.';
+         this.$blocksEmpty.hidden = false;
+      } else if (this.$blocksEmpty) {
+         this.$blocksEmpty.textContent = 'Sin bloques. Configura uno arriba.';
+      }
 
       for (const block of blocks) {
          const usedMinutes = this.timeBlockService.usedMinutes(block.id, this._cursorDate);

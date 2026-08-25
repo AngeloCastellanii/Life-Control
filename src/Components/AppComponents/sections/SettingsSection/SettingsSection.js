@@ -13,6 +13,7 @@ import {
    requestNotificationPermission
 } from '../notifications.js';
 import { CURRENCIES, getPreferredCurrency, setPreferredCurrency } from '../currency.js';
+import { getHidePastBlocks, setHidePastBlocks } from '../plannerPrefs.js';
 
 export default class SettingsSection extends HTMLElement {
    static props = {
@@ -41,6 +42,7 @@ export default class SettingsSection extends HTMLElement {
       this.$addDomain = this.querySelector('[data-role="add-domain"]');
       this.$backupStatus = this.querySelector('[data-role="backup-status"]');
       this.$themeMount = this.querySelector('[data-role="theme-mount"]');
+      this.$hidePastBlocks = this.querySelector('[data-role="hide-past-blocks"]');
       slice.controller.setComponentProps(this, props);
    }
 
@@ -60,6 +62,7 @@ export default class SettingsSection extends HTMLElement {
       this.$enableNotifications.addEventListener('click', () => this.enableNotifications());
       this.syncNotificationState();
       this.setupCurrency();
+      this.setupPlannerPrefs();
       this.setupDomains();
       this.$nameInput.addEventListener('input', () => this.updateAvatar());
       this.$nameInput.addEventListener('keydown', (event) => {
@@ -85,6 +88,10 @@ export default class SettingsSection extends HTMLElement {
          themeSelector.syncSelect();
       }
       this.syncForm(slice.context.getState('lifeControl')?.profile ?? { displayName: '' });
+      this.syncNotificationState();
+      if (this.$hidePastBlocks) {
+         this.$hidePastBlocks.checked = getHidePastBlocks();
+      }
    }
 
    syncForm(profile) {
@@ -138,6 +145,17 @@ export default class SettingsSection extends HTMLElement {
       this.$backupStatus.textContent = message;
       this.$backupStatus.hidden = false;
       this.$backupStatus.classList.toggle('settings-section__status--error', isError);
+   }
+
+   setupPlannerPrefs() {
+      if (!this.$hidePastBlocks) {
+         return;
+      }
+      this.$hidePastBlocks.checked = getHidePastBlocks();
+      this.$hidePastBlocks.addEventListener('change', () => {
+         setHidePastBlocks(this.$hidePastBlocks.checked);
+         slice.events.emit('planner:prefs-changed', { hidePastBlocks: this.$hidePastBlocks.checked });
+      });
    }
 
    setupCurrency() {
@@ -273,7 +291,7 @@ export default class SettingsSection extends HTMLElement {
 
       if (result === 'granted') {
          slice.getComponent('reminder-service')?.check?.();
-         this.showNotifStatus('Notificaciones activadas. Te avisaremos de tus recordatorios.');
+         this.showNotifStatus('Notificaciones activadas. Te avisaremos de pendientes a su hora, también en segundo plano.');
       } else if (result === 'denied') {
          this.showNotifStatus('Permiso denegado. Actívalo desde los ajustes del navegador.', true);
       } else if (result === 'unsupported') {

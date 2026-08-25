@@ -103,54 +103,26 @@
     </div>
   </div>
 
-  <div class="lc-view-grid-3">
-    <div class="lc-card">
-      <div class="lc-view-card-head">
-        <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-            <path d="M12 9v4M12 17h.01" stroke-linecap="round" />
-            <path d="M10.3 4.3 3.6 17a2 2 0 0 0 1.7 3h13.4a2 2 0 0 0 1.7-3l-6.7-12.7a2 2 0 0 0-3.4 0z" stroke-linejoin="round" />
-          </svg>
-        </span>
-        <div>
-          <h2 class="lc-view-card-label">Prioridad</h2>
-          <p class="lc-view-hint">Tareas urgentes.</p>
-        </div>
+  <div class="lc-card dashboard-section__tasks">
+    <div class="lc-view-card-head">
+      <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <path d="M12 9v4M12 17h.01" stroke-linecap="round" />
+          <path d="M10.3 4.3 3.6 17a2 2 0 0 0 1.7 3h13.4a2 2 0 0 0 1.7-3l-6.7-12.7a2 2 0 0 0-3.4 0z" stroke-linejoin="round" />
+        </svg>
+      </span>
+      <div>
+        <h2 class="lc-view-card-label">Tareas</h2>
+        <p class="lc-view-hint">Una sola lista, filtrada por urgencia, bloque o dominio.</p>
       </div>
-      <ul class="dashboard-section__urgent-list" data-role="priority-list"></ul>
-      <p class="lc-empty" data-role="priority-empty" hidden>Sin tareas urgentes.</p>
     </div>
-    <div class="lc-card">
-      <div class="lc-view-card-head">
-        <span class="lc-view-card-icon lc-view-card-icon--blue" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-            <rect x="4" y="5" width="16" height="15" rx="2" />
-            <path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round" />
-          </svg>
-        </span>
-        <div>
-          <h2 class="lc-view-card-label">En bloques</h2>
-          <p class="lc-view-hint">Tareas asignadas a bloques.</p>
-        </div>
-      </div>
-      <ul class="dashboard-section__recent-list" data-role="recent-list"></ul>
-      <p class="lc-empty" data-role="recent-empty" hidden>Sin tareas en bloques.</p>
+    <div class="dashboard-section__filters" role="tablist" aria-label="Filtro de tareas">
+      <button type="button" class="dashboard-section__filter" data-filter="all" role="tab">Todas</button>
+      <button type="button" class="dashboard-section__filter" data-filter="urgent" role="tab">Urgentes</button>
+      <button type="button" class="dashboard-section__filter" data-filter="blocks" role="tab">En bloques</button>
+      <button type="button" class="dashboard-section__filter" data-filter="domain" role="tab">Por dominio</button>
     </div>
-    <div class="lc-card">
-      <div class="lc-view-card-head">
-        <span class="lc-view-card-icon lc-view-card-icon--purple" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 3v2M12 19v2M3 12h2M19 12h2" stroke-linecap="round" />
-          </svg>
-        </span>
-        <div>
-          <h2 class="lc-view-card-label">Por dominio</h2>
-          <p class="lc-view-hint">Pendientes por área de vida.</p>
-        </div>
-      </div>
-      <ul class="dashboard-section__domain-list" data-role="domain-summary-list"></ul>
-      <p class="lc-empty" data-role="domain-summary-empty" hidden>Sin dominios configurados.</p>
-    </div>
+    <ul class="dashboard-section__urgent-list" data-role="task-list"></ul>
+    <p class="lc-empty" data-role="task-empty" hidden>Sin tareas en este filtro.</p>
   </div>
 </section>

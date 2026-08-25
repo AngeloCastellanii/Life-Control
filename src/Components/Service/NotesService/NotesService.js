@@ -1,4 +1,5 @@
 import { getNoteColors } from '../../AppComponents/sections/noteColors.js';
+import { parseListText } from '../../AppComponents/sections/parseListText.js';
 
 const STORE = 'notes';
 
@@ -139,6 +140,38 @@ export default class NotesService {
       await this.syncToContext();
       slice.events.emit('note:changed', { action: 'update', note: updated });
       return updated;
+   }
+
+   async appendContent(id, rawText) {
+      const existing = this.getById(id);
+      if (!existing) {
+         return null;
+      }
+
+      const text = String(rawText ?? '').trim();
+      if (!text) {
+         return null;
+      }
+
+      if (existing.type === 'list') {
+         const items = parseListText(text);
+         if (items.length === 0) {
+            return null;
+         }
+         const checklist = [
+            ...existing.checklist,
+            ...items.map((item) => ({
+               id: crypto.randomUUID(),
+               text: item.text,
+               done: Boolean(item.done)
+            }))
+         ];
+         return this.update(id, { checklist });
+      }
+
+      const previous = existing.body ?? '';
+      const body = previous.trim() ? `${previous.replace(/\s+$/, '')}\n${text}` : text;
+      return this.update(id, { body });
    }
 
    async togglePinned(id) {

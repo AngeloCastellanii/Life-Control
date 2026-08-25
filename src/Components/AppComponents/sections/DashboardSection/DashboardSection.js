@@ -3,6 +3,11 @@ import { getDueStatus } from '../shoppingDue.js';
 import { formatDayLong, taskShowsOnCalendarDay, daysUntil, todayISO, taskDateRange } from '../plannerDates.js';
 import { domainForTask } from '../domainLookup.js';
 import { greetingForName } from '../profileGreeting.js';
+import {
+   DASHBOARD_TASK_FILTERS,
+   getDashboardTaskFilter,
+   setDashboardTaskFilter
+} from '../plannerPrefs.js';
 
 const FREQUENCY_LABELS = {
    daily: 'Diaria',
@@ -37,14 +42,12 @@ export default class DashboardSection extends HTMLElement {
       this.$shoppingDueEmpty = this.querySelector('[data-role="shopping-due-empty"]');
       this.$netLiquidity = this.querySelector('[data-role="net-liquidity"]');
       this.$netBs = this.querySelector('[data-role="net-bs"]');
-      this.$priorityList = this.querySelector('[data-role="priority-list"]');
-      this.$priorityEmpty = this.querySelector('[data-role="priority-empty"]');
-      this.$recentList = this.querySelector('[data-role="recent-list"]');
-      this.$recentEmpty = this.querySelector('[data-role="recent-empty"]');
-      this.$domainSummaryList = this.querySelector('[data-role="domain-summary-list"]');
-      this.$domainSummaryEmpty = this.querySelector('[data-role="domain-summary-empty"]');
+      this.$taskList = this.querySelector('[data-role="task-list"]');
+      this.$taskEmpty = this.querySelector('[data-role="task-empty"]');
+      this.$taskFilters = this.querySelectorAll('[data-filter]');
       this.$todayList = this.querySelector('[data-role="today-list"]');
       this.$todayEmpty = this.querySelector('[data-role="today-empty"]');
+      this._taskFilter = getDashboardTaskFilter();
       this._capacityRing = null;
       slice.controller.setComponentProps(this, props);
    }
@@ -67,6 +70,11 @@ export default class DashboardSection extends HTMLElement {
          event.stopPropagation();
          this.exchangeRateService?.fetchRate();
       });
+
+      for (const button of this.$taskFilters) {
+         button.addEventListener('click', () => this.setTaskFilter(button.dataset.filter));
+      }
+      this.syncFilterButtons();
 
       this.$rateCard?.addEventListener('click', () => this.openExchangeCalculator());
       this.$rateCard?.addEventListener('keydown', (event) => {
@@ -151,7 +159,7 @@ export default class DashboardSection extends HTMLElement {
 
    openExchangeCalculator() {
       const exchangeRate = slice.context.getState('lifeControl')?.exchangeRate ?? {};
-      if (exchangeRate.status !== 'success' || !exchangeRate.rate) {
+      if (!exchangeRate.rate) {
          return;
       }
       slice.events.emit('ui:modal:open', {
@@ -184,8 +192,24 @@ export default class DashboardSection extends HTMLElement {
       this.renderShoppingDue();
       this.renderIncomingLiquidity(finances, exchangeRate);
       this.renderDueToday(tasks, finances);
-      this.renderLists(pending, tasks);
-      this.renderDomainSummary(domains ?? this.domainService?.getAll?.() ?? [], tasks);
+      this.renderTaskView(pending, domains ?? this.domainService?.getAll?.() ?? [], tasks);
+   }
+
+   setTaskFilter(filter) {
+      this._taskFilter = setDashboardTaskFilter(filter);
+      this.syncFilterButtons();
+      const state = slice.context.getState('lifeControl') ?? {};
+      const tasks = state.tasks ?? this.taskService?.getAll?.() ?? [];
+      const pending = tasks.filter((task) => !task.completed);
+      this.renderTaskView(pending, state.domains ?? this.domainService?.getAll?.() ?? [], tasks);
+   }
+
+   syncFilterButtons() {
+      for (const button of this.$taskFilters) {
+         const active = button.dataset.filter === this._taskFilter;
+         button.classList.toggle('dashboard-section__filter--active', active);
+         button.setAttribute('aria-selected', active ? 'true' : 'false');
+      }
    }
 
    renderDueToday(tasks, finances) {
@@ -293,12 +317,40 @@ export default class DashboardSection extends HTMLElement {
       return badge;
    }
 
+   renderTaskView(pending, domains, tasks) {
+      if (!this.$taskList) {
+         return;
+      }
+      this.syncFilterButtons();
+
+      if (this._taskFilter === DASHBOARD_TASK_FILTERS.DOMAIN) {
+         this.renderDomainSummary(domains, tasks);
+         return;
+      }
+
+      let rows = Array.isArray(pending) ? pending : [];
+      if (this._taskFilter === DASHBOARD_TASK_FILTERS.URGENT) {
+         rows = rows.filter((task) => task.urgency === 'high');
+      } else if (this._taskFilter === DASHBOARD_TASK_FILTERS.BLOCKS) {
+         rows = rows.filter((task) => task.blockId);
+      }
+
+      this.fillList(this.$taskList, rows.slice(0, 8), this._taskFilter !== DASHBOARD_TASK_FILTERS.BLOCKS);
+      this.$taskEmpty.hidden = rows.length > 0;
+      const emptyCopy = {
+         [DASHBOARD_TASK_FILTERS.ALL]: 'Sin tareas pendientes.',
+         [DASHBOARD_TASK_FILTERS.URGENT]: 'Sin tareas urgentes.',
+         [DASHBOARD_TASK_FILTERS.BLOCKS]: 'Sin tareas en bloques.'
+      };
+      this.$taskEmpty.textContent = emptyCopy[this._taskFilter] ?? 'Sin tareas en este filtro.';
+   }
+
    renderDomainSummary(domains, tasks) {
       const list = Array.isArray(domains) ? domains : [];
       const pending = (Array.isArray(tasks) ? tasks : []).filter((task) => !task.completed);
-
-      this.$domainSummaryList.innerHTML = '';
-      this.$domainSummaryEmpty.hidden = list.length > 0;
+      this.$taskList.innerHTML = '';
+      this.$taskEmpty.hidden = list.length > 0;
+      this.$taskEmpty.textContent = 'Sin dominios configurados.';
 
       for (const domain of list) {
          const count = pending.filter((task) => task.domainId === domain.id).length;
@@ -321,17 +373,24 @@ export default class DashboardSection extends HTMLElement {
          countEl.textContent = `${count} pendiente${count === 1 ? '' : 's'}`;
          item.appendChild(countEl);
 
-         this.$domainSummaryList.appendChild(item);
+         this.$taskList.appendChild(item);
       }
    }
 
    renderRate(exchangeRate) {
       const status = exchangeRate?.status ?? 'idle';
-      const canCalculate = status === 'success' && exchangeRate.rate;
+      const canCalculate = Boolean(exchangeRate?.rate);
 
       if (this.$rateCard) {
-         this.$rateCard.classList.toggle('dashboard-section__rate-card--clickable', !!canCalculate);
+         this.$rateCard.classList.toggle('dashboard-section__rate-card--clickable', canCalculate);
          this.$rateCard.setAttribute('aria-disabled', canCalculate ? 'false' : 'true');
+      }
+
+      if (exchangeRate?.rate) {
+         const stale = Boolean(exchangeRate.stale) && status !== 'loading';
+         this.$rate.textContent = `1 USD = ${Number(exchangeRate.rate).toFixed(2)} ${exchangeRate.target}${stale ? ' · sin conexión' : ''}`;
+         this.$rateRetry.hidden = !stale && status !== 'error';
+         return;
       }
 
       if (status === 'loading') {
@@ -343,12 +402,6 @@ export default class DashboardSection extends HTMLElement {
       if (status === 'error') {
          this.$rate.textContent = 'Error';
          this.$rateRetry.hidden = false;
-         return;
-      }
-
-      if (status === 'success' && exchangeRate.rate) {
-         this.$rate.textContent = `1 USD = ${exchangeRate.rate.toFixed(2)} ${exchangeRate.target}`;
-         this.$rateRetry.hidden = true;
          return;
       }
 
@@ -376,7 +429,7 @@ export default class DashboardSection extends HTMLElement {
 
       this.$netLiquidity.textContent = `${this.formatMoney(incoming)} USD`;
 
-      const rate = exchangeRate?.status === 'success' ? exchangeRate.rate : null;
+      const rate = exchangeRate?.rate ?? null;
       if (rate) {
          this.$netBs.hidden = false;
          this.$netBs.textContent = `• Bs. ${(incoming * rate).toFixed(2)}`;
@@ -417,17 +470,6 @@ export default class DashboardSection extends HTMLElement {
       }
    }
 
-   renderLists(tasks) {
-      const urgent = tasks.filter((task) => task.urgency === 'high').slice(0, 5);
-      const inBlocks = tasks.filter((task) => task.blockId && !task.completed).slice(0, 5);
-
-      this.fillList(this.$priorityList, urgent, true);
-      this.$priorityEmpty.hidden = urgent.length > 0;
-
-      this.fillList(this.$recentList, inBlocks, false);
-      this.$recentEmpty.hidden = inBlocks.length > 0;
-   }
-
    fillList(listEl, tasks, withFlag) {
       listEl.innerHTML = '';
       for (const task of tasks) {
@@ -436,7 +478,7 @@ export default class DashboardSection extends HTMLElement {
 
          if (withFlag) {
             const flag = document.createElement('span');
-            flag.className = `dashboard-section__flag dashboard-section__flag--${task.urgency || 'high'}`;
+            flag.className = `dashboard-section__flag dashboard-section__flag--${task.urgency || 'medium'}`;
             const title = document.createElement('span');
             title.textContent = task.title;
             item.append(flag, this.createDomainBadge(task.domainId), title);

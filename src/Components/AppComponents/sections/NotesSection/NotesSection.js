@@ -78,6 +78,131 @@ export default class NotesSection extends HTMLElement {
       });
    }
 
+   closeAppend() {
+      if (this.$appendDialog?.open) {
+         this.$appendDialog.close();
+      }
+      this.$appendDialog?.remove();
+      this.$appendDialog = null;
+   }
+
+   openAppend(noteId) {
+      const note = this.notesService.getById(noteId);
+      if (!note) {
+         return;
+      }
+
+      this.closeAppend();
+
+      const isList = note.type === 'list';
+      const dialog = document.createElement('dialog');
+      dialog.className = 'notes-section__append-dialog';
+      dialog.setAttribute('aria-labelledby', 'notes-append-title');
+      dialog.setAttribute('aria-describedby', 'notes-append-hint');
+
+      const title = document.createElement('h2');
+      title.id = 'notes-append-title';
+      title.className = 'notes-section__append-title';
+      title.textContent = isList ? 'Añadir ítem' : 'Añadir a la nota';
+
+      const hint = document.createElement('p');
+      hint.id = 'notes-append-hint';
+      hint.className = 'notes-section__append-hint';
+      hint.textContent = isList
+         ? 'Escribe un ítem. Varias líneas se añaden como ítems separados.'
+         : 'Escribe solo lo nuevo. Se anexará al final de la nota.';
+
+      const form = document.createElement('form');
+      form.className = 'notes-section__append-form';
+      form.method = 'dialog';
+
+      const label = document.createElement('label');
+      label.className = 'lc-label';
+      label.setAttribute('for', 'notes-append-input');
+      label.textContent = isList ? 'Nuevo ítem' : 'Texto a añadir';
+
+      const input = document.createElement('textarea');
+      input.id = 'notes-append-input';
+      input.className = 'lc-input notes-section__append-input';
+      input.rows = 3;
+      input.required = true;
+      input.setAttribute('aria-required', 'true');
+      input.placeholder = isList ? 'Leche\nPan' : 'Lo que quieras recordar…';
+
+      const error = document.createElement('p');
+      error.className = 'notes-section__append-error';
+      error.hidden = true;
+      error.setAttribute('role', 'alert');
+
+      const actions = document.createElement('div');
+      actions.className = 'notes-section__append-actions';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button';
+      cancelBtn.className = 'lc-btn-outline';
+      cancelBtn.textContent = 'Cancelar';
+      cancelBtn.addEventListener('click', () => this.closeAppend());
+
+      const submitBtn = document.createElement('button');
+      submitBtn.type = 'submit';
+      submitBtn.className = 'notes-section__append-submit';
+      submitBtn.textContent = 'Añadir';
+
+      actions.append(cancelBtn, submitBtn);
+      form.append(label, input, error, actions);
+
+      const onKeyDown = (event) => {
+         if (event.key === 'Escape') {
+            event.preventDefault();
+            this.closeAppend();
+         }
+         if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            form.requestSubmit();
+         }
+      };
+
+      form.addEventListener('submit', async (event) => {
+         event.preventDefault();
+         const value = input.value.trim();
+         if (!value) {
+            error.hidden = false;
+            error.textContent = 'Escribe algo para añadir.';
+            input.focus();
+            return;
+         }
+
+         submitBtn.disabled = true;
+         const saved = await this.notesService.appendContent(note.id, value);
+         if (!saved) {
+            submitBtn.disabled = false;
+            error.hidden = false;
+            error.textContent = 'No se pudo añadir.';
+            input.focus();
+            return;
+         }
+
+         this.closeAppend();
+      });
+
+      dialog.append(title, hint, form);
+      dialog.addEventListener('keydown', onKeyDown);
+      dialog.addEventListener('cancel', (event) => {
+         event.preventDefault();
+         this.closeAppend();
+      });
+      dialog.addEventListener('click', (event) => {
+         if (event.target === dialog) {
+            this.closeAppend();
+         }
+      });
+
+      this.$appendDialog = dialog;
+      this.appendChild(dialog);
+      dialog.showModal();
+      input.focus();
+   }
+
    renderList() {
       const notes = this.notesService.getAll();
       this.$list.innerHTML = '';
@@ -164,6 +289,16 @@ export default class NotesSection extends HTMLElement {
          const actions = document.createElement('div');
          actions.className = 'notes-section__actions';
 
+         const addBtn = document.createElement('button');
+         addBtn.type = 'button';
+         addBtn.className = 'notes-section__add';
+         addBtn.textContent = 'Agregar';
+         addBtn.setAttribute(
+            'aria-label',
+            note.type === 'list' ? `Añadir ítem a ${note.title}` : `Añadir contenido a ${note.title}`
+         );
+         addBtn.addEventListener('click', () => this.openAppend(note.id));
+
          const editBtn = document.createElement('button');
          editBtn.type = 'button';
          editBtn.className = 'notes-section__edit';
@@ -180,7 +315,7 @@ export default class NotesSection extends HTMLElement {
             }
          });
 
-         actions.append(editBtn, deleteBtn);
+         actions.append(addBtn, editBtn, deleteBtn);
          card.appendChild(actions);
 
          this.$list.appendChild(card);

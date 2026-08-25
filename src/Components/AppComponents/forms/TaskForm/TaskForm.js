@@ -6,9 +6,11 @@ import {
    showFormError
 } from '../formHelpers.js';
 import { addDays, taskDateRange, todayISO } from '../../sections/plannerDates.js';
+import { getHidePastBlocks } from '../../sections/plannerPrefs.js';
 import {
    blockNeedsSlotPicker,
    formatBlockRangeLabel,
+   isBlockPast,
    nextStackedSlotForBlock,
    slotDurationMinutes,
    slotEndFromStart,
@@ -168,6 +170,9 @@ export default class TaskForm extends HTMLElement {
 
       for (const block of blocks) {
          if (timeBlockService?.acceptsTasks?.(block) === false) {
+            continue;
+         }
+         if (getHidePastBlocks() && isBlockPast(block)) {
             continue;
          }
          const option = document.createElement('option');

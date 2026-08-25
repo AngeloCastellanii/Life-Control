@@ -117,6 +117,25 @@
       <p class="settings-section__status" data-role="backup-status" hidden></p>
     </div>
 
+    <div class="lc-card settings-section__card settings-section__card--planner">
+      <div class="settings-section__card-head">
+        <span class="settings-section__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="settings-section__card-label">Planificador</h2>
+          <p class="settings-section__hint">Opciones de la vista de bloques de tiempo.</p>
+        </div>
+      </div>
+      <label class="settings-section__check" for="settings-hide-past-blocks">
+        <input id="settings-hide-past-blocks" type="checkbox" data-role="hide-past-blocks" />
+        <span>Ocultar bloques de horario que ya pasaron</span>
+      </label>
+    </div>
+
     <div class="lc-card settings-section__card settings-section__card--notifications md:col-span-2">
       <div class="settings-section__card-head">
         <span class="settings-section__card-icon" aria-hidden="true">
@@ -127,7 +146,7 @@
         </span>
         <div>
           <h2 class="settings-section__card-label">Recordatorios</h2>
-          <p class="settings-section__hint">Activa las notificaciones para recibir avisos de tus notas con recordatorio.</p>
+          <p class="settings-section__hint">Avisos persistentes a la hora de cada actividad, también con la app en segundo plano.</p>
         </div>
       </div>
       <button type="button" class="settings-section__save settings-section__notif-btn" data-role="enable-notifications">

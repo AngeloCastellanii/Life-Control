@@ -89,15 +89,46 @@ if (!slice.router._started) {
    }
 }
 
-// Service Worker (offline). Evitamos localhost para no interferir con desarrollo.
+function collectCacheableUrls() {
+   const urls = new Set();
+   for (const el of document.querySelectorAll('script[src], link[href], img[src]')) {
+      const url = el.src || el.href;
+      if (url && url.startsWith(window.location.origin)) {
+         urls.add(url);
+      }
+   }
+   try {
+      for (const entry of performance.getEntriesByType('resource')) {
+         if (entry.name && entry.name.startsWith(window.location.origin)) {
+            urls.add(entry.name);
+         }
+      }
+   } catch {
+      /* ignore */
+   }
+   return [...urls];
+}
+
 if ('serviceWorker' in navigator) {
-   const host = window.location.hostname;
-   const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
-   if (!isLocal) {
-      window.addEventListener('load', () => {
-         navigator.serviceWorker.register('/service-worker.js').catch((error) => {
+   window.addEventListener('load', () => {
+      navigator.serviceWorker
+         .register('/service-worker.js')
+         .then(async (registration) => {
+            await navigator.serviceWorker.ready;
+            const worker = registration.active;
+            worker?.postMessage({ type: 'CACHE_URLS', urls: collectCacheableUrls() });
+            window.setTimeout(() => {
+               worker?.postMessage({ type: 'CACHE_URLS', urls: collectCacheableUrls() });
+            }, 2500);
+         })
+         .catch((error) => {
             console.warn('No se pudo registrar el Service Worker:', error);
          });
-      });
-   }
+   });
+
+   navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data?.type === 'NAVIGATE' && event.data.route) {
+         slice.router?.navigate?.(event.data.route);
+      }
+   });
 }
