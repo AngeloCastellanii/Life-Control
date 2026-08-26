@@ -114,7 +114,7 @@ function collectCacheableUrls() {
 if ('serviceWorker' in navigator) {
    window.addEventListener('load', () => {
       navigator.serviceWorker
-         .register('/service-worker.js')
+         .register('/service-worker.js', { updateViaCache: 'none' })
          .then(async (registration) => {
             await navigator.serviceWorker.ready;
             const worker = registration.active;

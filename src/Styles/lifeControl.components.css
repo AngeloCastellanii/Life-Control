@@ -2640,9 +2640,13 @@
     color: var(--success-color);
   }
 
-  /* Dashboard: Vence hoy */
+  /* Dashboard: Finanzas y Compras separadas */
+  .dashboard-section__money-grid {
+    @apply mb-4 grid gap-4 sm:grid-cols-2;
+  }
+
   .dashboard-section__today {
-    @apply mb-4;
+    @apply mb-0;
   }
 
   .dashboard-section__today-list {
@@ -3367,20 +3371,36 @@
     color: var(--primary-color);
   }
 
-  .lc-notice-root {
-    @apply pointer-events-none fixed bottom-20 right-4 z-400 flex flex-col items-end gap-2;
+  .lc-float-dock {
+    @apply pointer-events-none fixed z-400 flex flex-col items-end gap-2;
+    right: 16px;
+    bottom: 80px;
+    user-select: none;
+  }
+
+  .lc-notice-root,
+  .lc-focus-root {
+    @apply pointer-events-none relative flex flex-col-reverse items-end gap-2;
   }
 
   .lc-notice-toggle,
-  .lc-notice-panel {
+  .lc-notice-panel,
+  .lc-focus-toggle,
+  .lc-focus-panel {
     @apply pointer-events-auto;
   }
 
   .lc-notice-toggle {
-    @apply flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold shadow-lg;
+    @apply flex cursor-grab items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold shadow-lg;
     background: var(--secondary-background-color);
     border-color: var(--tertiary-background-color);
     color: var(--font-primary-color);
+    touch-action: none;
+  }
+
+  .lc-notice-toggle:active,
+  .lc-focus-toggle:active {
+    cursor: grabbing;
   }
 
   .lc-notice-toggle [data-role="badge"] {
@@ -3433,24 +3453,16 @@
     color: var(--font-secondary-color);
   }
 
-  .lc-focus-root {
-    @apply pointer-events-none fixed bottom-20 left-4 z-400 flex flex-col items-start gap-2;
-  }
-
   slice-focus-overlay {
     display: contents;
   }
 
-  .lc-focus-toggle,
-  .lc-focus-panel {
-    @apply pointer-events-auto;
-  }
-
   .lc-focus-toggle {
-    @apply rounded-full border px-3 py-2 text-sm font-semibold shadow-lg;
+    @apply cursor-grab rounded-full border px-3 py-2 text-sm font-semibold shadow-lg;
     background: var(--secondary-background-color);
     border-color: var(--tertiary-background-color);
     color: var(--font-primary-color);
+    touch-action: none;
   }
 
   .lc-focus-toggle--on {
@@ -3464,6 +3476,38 @@
     border-color: var(--tertiary-background-color);
     max-height: min(70vh, 28rem);
     overflow: auto;
+  }
+
+  html.lc-focus-mode .lc-focus-panel {
+    position: fixed;
+    left: 50%;
+    top: 48%;
+    z-index: 500;
+    max-height: min(70vh, 32rem);
+    transform: translate(-50%, -50%);
+  }
+
+  html.lc-focus-mode::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 350;
+    pointer-events: none;
+    background: rgb(8 12 10 / 42%);
+  }
+
+  html.lc-focus-mode .app-shell__sidebar,
+  html.lc-focus-mode .app-shell__stage,
+  html.lc-focus-mode .fab,
+  html.lc-focus-mode .modal-shell,
+  html.lc-focus-mode .onboarding {
+    pointer-events: none;
+    user-select: none;
+    filter: grayscale(0.35) brightness(0.72);
+  }
+
+  html.lc-focus-mode .lc-float-dock {
+    z-index: 500;
   }
 
   .lc-focus-panel__head {
@@ -3513,6 +3557,34 @@
   .lc-focus-task__meta {
     @apply block text-xs;
     color: var(--font-secondary-color);
+  }
+
+  .dashboard-section__vision {
+    @apply mb-4;
+  }
+
+  .dashboard-section__vision .lc-view-hero {
+    display: none;
+  }
+
+  .dashboard-section__vision .vision-section {
+    @apply mt-2;
+  }
+
+  .dashboard-section__vision .vision-section__grid {
+    @apply gap-3 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .dashboard-section__vision .vision-section__media {
+    aspect-ratio: 4 / 3;
+  }
+
+  .dashboard-section__vision .vision-section__body {
+    @apply gap-1.5 p-3;
+  }
+
+  .dashboard-section__vision .vision-section__title {
+    @apply text-sm;
   }
 
   .dashboard-section__stats-summary {

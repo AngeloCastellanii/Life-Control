@@ -1,6 +1,7 @@
 import { preloadModalForms } from '../forms/preloadForms.js';
 import { shouldShowOnboarding } from '../atoms/OnboardingOverlay/OnboardingOverlay.js';
 import { getNavItems, getNavPaths } from '../sections/navViews.js';
+import { mountInDock } from '../sections/floatDock.js';
 
 export default class AppShell extends HTMLElement {
    constructor(props) {
@@ -47,7 +48,7 @@ export default class AppShell extends HTMLElement {
       this.appendChild(fab);
 
       const focusOverlay = await slice.build('FocusOverlay', { sliceId: 'focus-overlay' });
-      this.appendChild(focusOverlay);
+      mountInDock(focusOverlay, 'prepend');
 
       this.setupSwipeNavigation();
       slice.events.subscribe('nav:items-changed', () => this.refreshNav(), { component: this });
@@ -93,7 +94,7 @@ export default class AppShell extends HTMLElement {
       const isInteractive = (target) =>
          Boolean(
             target?.closest?.(
-               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding, .sidebar, .lc-notice-root, .lc-focus-root'
+               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding, .sidebar, .lc-notice-root, .lc-focus-root, .lc-float-dock'
             )
          );
 

@@ -1,21 +1,21 @@
 <div class="lc-focus-root" data-role="root">
-  <button type="button" class="lc-focus-toggle" data-role="toggle" aria-expanded="false" aria-controls="lc-focus-panel">
+  <button type="button" class="lc-focus-toggle" data-role="toggle" aria-pressed="false" aria-expanded="false" aria-controls="lc-focus-panel" aria-label="Activar modo enfoque">
     Enfoque
   </button>
   <div class="lc-focus-panel" id="lc-focus-panel" data-role="panel" hidden>
     <div class="lc-focus-panel__head">
       <div>
-        <strong>Enfoque</strong>
+        <strong>Modo enfoque</strong>
         <span class="lc-focus-panel__clock" data-role="clock">—</span>
       </div>
-      <button type="button" class="lc-focus-panel__close" data-role="close" aria-label="Salir de enfoque">Salir</button>
+      <button type="button" class="lc-focus-panel__close" data-role="close" aria-label="Salir del modo enfoque">Salir</button>
     </div>
     <p class="lc-focus-panel__block">
       <span data-role="block-tag">Ahora</span>
       <strong data-role="block-label">Sin bloque</strong>
       <span data-role="block-range"></span>
     </p>
-    <p class="lc-focus-panel__hint">Elige qué harás en este bloque.</p>
+    <p class="lc-focus-panel__hint">Elige qué harás ahora. El resto de la app queda en pausa.</p>
     <ul class="lc-focus-panel__tasks" data-role="tasks"></ul>
     <p class="lc-empty" data-role="empty" hidden>Sin tareas en este bloque.</p>
   </div>

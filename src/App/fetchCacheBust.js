@@ -2,7 +2,6 @@ import { STYLE_VERSION } from './styleVersion.js';
 
 const STYLE_PATH = /\/Styles\/[^/?]+\.css(\?.*)?$/i;
 const THEME_PATH = /\/Themes\/[^/?]+\.css(\?.*)?$/i;
-const BUNDLE_PATH = /\/bundles\/[^/?]+\.js(\?.*)?$/i;
 const THEME_NAMES = ['Light', 'Dark', 'DarkRed', 'Slice', 'Obsidian'];
 const LC_STYLE_V_KEY = 'lc_style_v';
 
@@ -40,12 +39,7 @@ export function installFetchCacheBust() {
          const parsed = new URL(rawUrl, window.location.origin);
          parsed.searchParams.set('v', getStyleCacheKey());
          url = parsed.toString();
-         options.cache = 'no-store';
          return nativeFetch(url, options);
-      }
-
-      if (BUNDLE_PATH.test(rawUrl)) {
-         options.cache = 'no-store';
       }
 
       return nativeFetch(input, options);

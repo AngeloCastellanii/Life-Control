@@ -1,6 +1,7 @@
 import { taskInBlockOnDay, todayISO } from '../../sections/plannerDates.js';
 import { formatDuration } from '../../../Utils/formatDuration.js';
 import { formatBlockRangeLabel, formatTaskSlotLabel } from '../../../Utils/taskSlotTimes.js';
+import { enableDockDrag, mountInDock } from '../../sections/floatDock.js';
 
 function toMinutes(hhmm) {
    const [h, m] = String(hhmm ?? '0:0').split(':').map(Number);
@@ -55,8 +56,23 @@ export default class FocusOverlay extends HTMLElement {
 
    init() {
       this.taskService = slice.getComponent('task-service');
-      this.$toggle.addEventListener('click', () => this.setOpen(!this._open));
+      mountInDock(this, 'prepend');
+      enableDockDrag(this.$toggle);
+
+      this.$toggle.addEventListener('click', () => {
+         if (this.$toggle._dockDidDrag) {
+            this.$toggle._dockDidDrag = false;
+            return;
+         }
+         this.setOpen(!this._open);
+      });
       this.$close.addEventListener('click', () => this.setOpen(false));
+      this._onKey = (event) => {
+         if (event.key === 'Escape' && this._open) {
+            this.setOpen(false);
+         }
+      };
+      document.addEventListener('keydown', this._onKey);
       slice.events.subscribe('ui:focus:open', () => this.setOpen(true), { component: this });
       slice.events.subscribe('ui:focus:close', () => this.setOpen(false), { component: this });
       slice.context.watch(
@@ -73,17 +89,26 @@ export default class FocusOverlay extends HTMLElement {
 
    disconnectedCallback() {
       this.stopTimer();
+      document.removeEventListener('keydown', this._onKey);
+      document.documentElement.classList.remove('lc-focus-mode');
    }
 
    setOpen(open) {
       this._open = Boolean(open);
+      document.documentElement.classList.toggle('lc-focus-mode', this._open);
       this.$panel.hidden = !this._open;
+      this.$toggle.setAttribute('aria-pressed', this._open ? 'true' : 'false');
       this.$toggle.setAttribute('aria-expanded', this._open ? 'true' : 'false');
+      this.$toggle.setAttribute(
+         'aria-label',
+         this._open ? 'Salir del modo enfoque' : 'Activar modo enfoque'
+      );
       this.$toggle.classList.toggle('lc-focus-toggle--on', this._open);
       if (this._open) {
          this._selected = new Set();
          this.render({ seedSelection: true });
          this.startTimer();
+         this.$close?.focus?.();
       } else {
          this.stopTimer();
       }

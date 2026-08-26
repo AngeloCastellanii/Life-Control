@@ -58,22 +58,53 @@
     <p class="lc-empty" data-role="task-empty" hidden>Sin pendientes.</p>
   </div>
 
-  <div class="lc-card dashboard-section__today">
+  <div class="dashboard-section__money-grid">
+    <div class="lc-card dashboard-section__today">
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="lc-view-card-label">Finanzas</h2>
+        </div>
+      </div>
+      <ul class="dashboard-section__today-list" data-role="finance-list"></ul>
+      <p class="lc-empty" data-role="finance-empty" hidden>Sin pagos pendientes.</p>
+    </div>
+    <div class="lc-card dashboard-section__today">
+      <div class="lc-view-card-head">
+        <span class="lc-view-card-icon lc-view-card-icon--primary" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="9" cy="20" r="1" />
+            <circle cx="18" cy="20" r="1" />
+            <path d="M2 3h2l2.4 12.4a2 2 0 0 0 2 1.6h9.2a2 2 0 0 0 2-1.6L22 7H6" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="lc-view-card-label">Compras</h2>
+        </div>
+      </div>
+      <ul class="dashboard-section__today-list" data-role="shopping-list"></ul>
+      <p class="lc-empty" data-role="shopping-empty" hidden>Sin compras pendientes.</p>
+    </div>
+  </div>
+
+  <section class="dashboard-section__vision" data-role="vision-wrap" aria-labelledby="dashboard-vision-title">
     <div class="lc-view-card-head">
-      <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
+      <span class="lc-view-card-icon lc-view-card-icon--purple" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-          <circle cx="9" cy="20" r="1" />
-          <circle cx="18" cy="20" r="1" />
-          <path d="M2 3h2l2.4 12.4a2 2 0 0 0 2 1.6h9.2a2 2 0 0 0 2-1.6L22 7H6" />
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+          <circle cx="12" cy="12" r="3" />
         </svg>
       </span>
       <div>
-        <h2 class="lc-view-card-label">Compras y finanzas</h2>
+        <h2 class="lc-view-card-label" id="dashboard-vision-title">Vision Board</h2>
       </div>
     </div>
-    <ul class="dashboard-section__today-list" data-role="money-list"></ul>
-    <p class="lc-empty" data-role="money-empty" hidden>Nada vence hoy.</p>
-  </div>
+    <div data-role="vision-board"></div>
+  </section>
 
   <details class="lc-card dashboard-section__stats" id="dashboard-stats" data-role="stats-card">
     <summary class="dashboard-section__stats-summary">

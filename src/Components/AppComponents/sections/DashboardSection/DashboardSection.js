@@ -7,6 +7,7 @@ import {
    setDashboardTaskFilter
 } from '../plannerPrefs.js';
 import { budgetRows, computeStats, fillBudgetList, money } from '../statsSummary.js';
+import { getDueStatus } from '../shoppingDue.js';
 
 export default class DashboardSection extends HTMLElement {
    static props = {
@@ -30,8 +31,12 @@ export default class DashboardSection extends HTMLElement {
       this.$taskList = this.querySelector('[data-role="task-list"]');
       this.$taskEmpty = this.querySelector('[data-role="task-empty"]');
       this.$taskFilters = this.querySelectorAll('[data-filter]');
-      this.$moneyList = this.querySelector('[data-role="money-list"]');
-      this.$moneyEmpty = this.querySelector('[data-role="money-empty"]');
+      this.$financeList = this.querySelector('[data-role="finance-list"]');
+      this.$financeEmpty = this.querySelector('[data-role="finance-empty"]');
+      this.$shoppingList = this.querySelector('[data-role="shopping-list"]');
+      this.$shoppingEmpty = this.querySelector('[data-role="shopping-empty"]');
+      this.$visionBoard = this.querySelector('[data-role="vision-board"]');
+      this._visionBoard = null;
       this.$doneTotal = this.querySelector('[data-role="done-total"]');
       this.$doneWeek = this.querySelector('[data-role="done-week"]');
       this.$pendingTotal = this.querySelector('[data-role="pending-total"]');
@@ -59,6 +64,13 @@ export default class DashboardSection extends HTMLElement {
          percent: 0
       });
       this.$capacityMount.appendChild(this._capacityRing);
+
+      if (this.$visionBoard && !this._visionBoard) {
+         this._visionBoard = await slice.build('VisionSection', {
+            sliceId: 'dashboard-vision-board'
+         });
+         this.$visionBoard.appendChild(this._visionBoard);
+      }
 
       this.$rateRetry.addEventListener('click', (event) => {
          event.stopPropagation();
@@ -179,48 +191,63 @@ export default class DashboardSection extends HTMLElement {
    }
 
    renderMoneyDue(finances, shopping) {
-      if (!this.$moneyList) {
-         return;
-      }
-      const today = todayISO();
-      const rows = [];
+      this.renderDueList(this.$financeList, this.$financeEmpty, this.financeDueRows(finances));
+      this.renderDueList(this.$shoppingList, this.$shoppingEmpty, this.shoppingDueRows(shopping));
+   }
 
+   financeDueRows(finances) {
+      const today = todayISO();
       const dueFinances =
          typeof this.financeService?.getDueOnDate === 'function'
             ? this.financeService.getDueOnDate(today)
             : (Array.isArray(finances) ? finances : []).filter(
                  (item) => !item.settled && item.dueDate && item.dueDate <= today
               );
-      for (const item of dueFinances) {
-         rows.push({
-            kind: item.type === 'receive' ? 'Cobro' : 'Pago',
-            label: `${item.description} · ${money(item.amount)}`,
-            route: '/finances',
-            overdue: item.dueDate < today
-         });
-      }
+      return dueFinances.map((item) => ({
+         kind: item.type === 'receive' ? 'Cobro' : 'Pago',
+         label: `${item.description} · ${money(item.amount)}`,
+         route: '/finances',
+         overdue: item.dueDate < today,
+         state: item.dueDate < today ? 'Vencido' : 'Hoy'
+      }));
+   }
 
+   shoppingDueRows(shopping) {
+      const today = todayISO();
       const dueShopping =
          typeof this.shoppingService?.getDueItems === 'function'
-            ? this.shoppingService.getDueItems({ withinDays: 0 })
+            ? this.shoppingService.getDueItems()
             : Array.isArray(shopping)
               ? shopping
               : [];
-      for (const item of dueShopping) {
-         rows.push({
-            kind: 'Compra',
-            label: item.name,
-            route: '/shopping',
-            overdue: (item.nextDueAt ?? today) < today
-         });
+      return dueShopping
+         .map((item) => {
+            const status = getDueStatus(item);
+            if (status.state === 'done') {
+               return null;
+            }
+            return {
+               kind: 'Compra',
+               label: item.name,
+               route: '/shopping',
+               overdue: status.state === 'overdue' || (item.nextDueAt ?? today) < today,
+               state: status.label
+            };
+         })
+         .filter(Boolean);
+   }
+
+   renderDueList(listEl, emptyEl, rows) {
+      if (!listEl) {
+         return;
       }
-
-      rows.sort((a, b) => Number(b.overdue) - Number(a.overdue));
-      this.$moneyList.innerHTML = '';
-      this.$moneyEmpty.hidden = rows.length > 0;
-
-      for (const row of rows.slice(0, 8)) {
-         this.$moneyList.appendChild(this.createDueRow(row));
+      const ordered = [...rows].sort((a, b) => Number(b.overdue) - Number(a.overdue));
+      listEl.innerHTML = '';
+      if (emptyEl) {
+         emptyEl.hidden = ordered.length > 0;
+      }
+      for (const row of ordered.slice(0, 8)) {
+         listEl.appendChild(this.createDueRow(row));
       }
    }
 
@@ -243,7 +270,7 @@ export default class DashboardSection extends HTMLElement {
 
       const state = document.createElement('span');
       state.className = 'dashboard-section__today-state';
-      state.textContent = row.overdue ? 'Vencido' : 'Hoy';
+      state.textContent = row.state ?? (row.overdue ? 'Vencido' : 'Hoy');
 
       li.append(kind, label, state);
       const go = () => slice.router?.navigate?.(row.route);

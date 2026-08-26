@@ -1,25 +1,62 @@
 // Life Control — Service Worker (offline PWA + notificaciones)
-const CACHE = 'life-control-v5';
+const CACHE = 'life-control-v6';
 const PLAN_CACHE = 'life-control-plan-v1';
 const APP_SHELL = '/App/index.html';
 const PLAN_URL = '/__lc-reminder-plan';
 const PRECACHE = [
+   '/',
+   '/index.html',
    '/App/index.html',
    '/App/index.js',
+   '/App/style.css',
+   '/App/fetchCacheBust.js',
+   '/App/styleVersion.js',
    '/manifest.json',
    '/routes.js',
    '/sliceConfig.json',
+   '/Slice/Slice.js',
+   '/Styles/tailwind.css',
+   '/Styles/sliceStyles.css',
+   '/Styles/lifeControlBase.css',
+   '/Themes/Light.css',
    '/images/icon-192.png',
    '/images/icon-512.png',
-   '/images/icon.svg'
+   '/images/icon.svg',
+   '/images/apple-touch-icon.png'
 ];
+
+const OFFLINE_HTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#3f7359">
+  <title>Life Control</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; min-height: 100vh; display: grid; place-items: center; background: #d4dfd8; color: #1f2a24; }
+    main { max-width: 22rem; padding: 1.5rem; text-align: center; }
+    h1 { font-size: 1.25rem; margin: 0 0 .5rem; }
+    p { margin: 0; line-height: 1.45; }
+    button { margin-top: 1rem; border: 0; border-radius: 999px; padding: .6rem 1.1rem; background: #3f7359; color: #fff; font: inherit; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Life Control</h1>
+    <p>Sin conexión. Abre la app al menos una vez con internet para usarla offline.</p>
+    <button type="button" onclick="location.reload()">Reintentar</button>
+  </main>
+</body>
+</html>`;
 
 self.addEventListener('install', (event) => {
    event.waitUntil(
-      caches
-         .open(CACHE)
-         .then((cache) => cache.addAll(PRECACHE).catch(() => undefined))
-         .then(() => self.skipWaiting())
+      (async () => {
+         const cache = await caches.open(CACHE);
+         await Promise.all(PRECACHE.map((url) => cacheUrl(cache, url)));
+         await mirrorHtmlShell(cache);
+         await self.skipWaiting();
+      })()
    );
 });
 
@@ -36,51 +73,153 @@ self.addEventListener('activate', (event) => {
    );
 });
 
+function pathnameOf(requestOrUrl) {
+   try {
+      const url = new URL(typeof requestOrUrl === 'string' ? requestOrUrl : requestOrUrl.url, self.location.origin);
+      return url.pathname || '/';
+   } catch {
+      return '/';
+   }
+}
+
 function isHtmlRequest(request) {
    return request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html');
 }
 
-async function putInCache(cacheName, request, response) {
-   if (!response || response.status !== 200) {
+function stripNoStore(response) {
+   const headers = new Headers(response.headers);
+   headers.delete('Pragma');
+   headers.set('Cache-Control', 'max-age=86400');
+   return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+   });
+}
+
+function offlineHtmlFallback() {
+   return new Response(OFFLINE_HTML, {
+      status: 200,
+      headers: {
+         'Content-Type': 'text/html; charset=utf-8',
+         'Cache-Control': 'no-cache'
+      }
+   });
+}
+
+async function cacheUrl(cache, url) {
+   try {
+      const response = await fetch(url, { cache: 'reload' });
+      if (!response || !response.ok) {
+         return;
+      }
+      const path = pathnameOf(url);
+      const stored = path.endsWith('.html') || path === '/' ? stripNoStore(response) : response;
+      await cache.put(path, stored);
+   } catch {
+      /* un archivo que falte no debe tumbar el precache entero */
+   }
+}
+
+async function mirrorHtmlShell(cache) {
+   const shell =
+      (await cache.match('/')) ||
+      (await cache.match(APP_SHELL)) ||
+      (await cache.match('/index.html'));
+   if (!shell) {
+      return;
+   }
+   await cache.put('/', shell.clone());
+   await cache.put('/index.html', shell.clone());
+   await cache.put(APP_SHELL, shell.clone());
+}
+
+async function storeHtmlShell(response) {
+   if (!response || !response.ok) {
       return;
    }
    try {
-      const cache = await caches.open(cacheName);
-      await cache.put(request, response.clone());
+      const cache = await caches.open(CACHE);
+      const stored = stripNoStore(response.clone());
+      await cache.put('/', stored.clone());
+      await cache.put('/index.html', stored.clone());
+      await cache.put(APP_SHELL, stored.clone());
+   } catch {
+      /* ignore quota */
+   }
+}
+
+async function putInCache(request, response) {
+   if (!response || response.status !== 200) {
+      return;
+   }
+   if (response.type !== 'basic' && response.type !== 'cors') {
+      return;
+   }
+   try {
+      const cache = await caches.open(CACHE);
+      const path = pathnameOf(request);
+      const stored = isHtmlRequest(request) ? stripNoStore(response.clone()) : response.clone();
+      await cache.put(path, stored);
    } catch {
       /* ignore quota / opaque */
    }
 }
 
-async function matchCached(request, cacheName = CACHE) {
-   const cache = await caches.open(cacheName);
-   const exact = await cache.match(request);
-   if (exact) {
-      return exact;
+async function matchCached(requestOrUrl) {
+   const cache = await caches.open(CACHE);
+   const path = typeof requestOrUrl === 'string' ? pathnameOf(requestOrUrl) : pathnameOf(requestOrUrl);
+   const byPath = await cache.match(path);
+   if (byPath) {
+      return byPath;
    }
-   return cache.match(request, { ignoreSearch: true, ignoreMethod: true });
+   if (typeof requestOrUrl !== 'string') {
+      const exact = await cache.match(requestOrUrl);
+      if (exact) {
+         return exact;
+      }
+      return cache.match(requestOrUrl, { ignoreSearch: true, ignoreMethod: true });
+   }
+   return cache.match(path, { ignoreSearch: true, ignoreMethod: true });
 }
 
-async function networkFirst(request, cacheName = CACHE) {
+async function handleNavigation(request) {
+   try {
+      const response = await fetch(request);
+      if (response && response.ok) {
+         await storeHtmlShell(response);
+         return response;
+      }
+   } catch {
+      /* offline / conexión interrumpida */
+   }
+
+   return (
+      (await matchCached('/')) ||
+      (await matchCached(APP_SHELL)) ||
+      (await matchCached('/index.html')) ||
+      offlineHtmlFallback()
+   );
+}
+
+async function networkFirst(request) {
    try {
       const response = await fetch(request);
       if (response && response.status === 200 && (response.type === 'basic' || response.type === 'cors')) {
-         await putInCache(cacheName, isHtmlRequest(request) ? APP_SHELL : request, response);
+         await putInCache(request, response);
       }
-      return response;
-   } catch (error) {
-      const cached = await matchCached(isHtmlRequest(request) ? APP_SHELL : request, cacheName);
-      if (cached) {
-         return cached;
+      if (response) {
+         return response;
       }
-      if (isHtmlRequest(request)) {
-         const shell = await matchCached(APP_SHELL, cacheName);
-         if (shell) {
-            return shell;
-         }
-      }
-      throw error;
+   } catch {
+      /* offline */
    }
+
+   const cached = await matchCached(request);
+   if (cached) {
+      return cached;
+   }
+   return new Response('', { status: 503, statusText: 'Offline' });
 }
 
 self.addEventListener('fetch', (event) => {
@@ -98,7 +237,12 @@ self.addEventListener('fetch', (event) => {
       return;
    }
 
-   event.respondWith(networkFirst(request, CACHE));
+   if (isHtmlRequest(request)) {
+      event.respondWith(handleNavigation(request));
+      return;
+   }
+
+   event.respondWith(networkFirst(request));
 });
 
 async function readReminderPlan() {
@@ -178,13 +322,15 @@ self.addEventListener('message', (event) => {
 
    if (data.type === 'CACHE_URLS' && Array.isArray(data.urls)) {
       event.waitUntil(
-         caches.open(CACHE).then((cache) =>
-            Promise.all(
+         (async () => {
+            const cache = await caches.open(CACHE);
+            await Promise.all(
                data.urls
                   .filter((url) => typeof url === 'string' && url.startsWith(self.location.origin))
-                  .map((url) => cache.add(url).catch(() => undefined))
-            )
-         )
+                  .map((url) => cacheUrl(cache, url))
+            );
+            await mirrorHtmlShell(cache);
+         })()
       );
    }
 

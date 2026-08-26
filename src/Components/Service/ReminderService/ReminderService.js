@@ -7,6 +7,7 @@ import {
    showOsNotification,
    unreadNotificationCount
 } from '../../AppComponents/sections/notifications.js';
+import { enableDockDrag, mountInDock } from '../../AppComponents/sections/floatDock.js';
 import { getDueStatus } from '../../AppComponents/sections/shoppingDue.js';
 import { todayISO } from '../../AppComponents/sections/plannerDates.js';
 import { isHabitDueOn } from '../HabitsService/HabitsService.js';
@@ -45,6 +46,7 @@ function digestBody(items) {
 function ensureInboxUi() {
    let root = document.querySelector('.lc-notice-root');
    if (root) {
+      mountInDock(root, 'append');
       return root;
    }
 
@@ -64,7 +66,7 @@ function ensureInboxUi() {
          <p class="lc-notice-panel__empty" data-role="empty" hidden>No hay avisos.</p>
       </div>
    `;
-   document.body.appendChild(root);
+   mountInDock(root, 'append');
 
    const toggle = root.querySelector('[data-role="toggle"]');
    const panel = root.querySelector('[data-role="panel"]');
@@ -73,8 +75,15 @@ function ensureInboxUi() {
       panel.hidden = !open;
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
    };
-   toggle.addEventListener('click', () => setOpen(panel.hidden));
+   toggle.addEventListener('click', () => {
+      if (toggle._dockDidDrag) {
+         toggle._dockDidDrag = false;
+         return;
+      }
+      setOpen(panel.hidden);
+   });
    close.addEventListener('click', () => setOpen(false));
+   enableDockDrag(toggle);
    return root;
 }
 
@@ -88,6 +97,10 @@ function renderInboxUi() {
    const badge = root.querySelector('[data-role="badge"]');
 
    toggle.hidden = items.length === 0;
+   root.hidden = items.length === 0;
+   if (items.length === 0) {
+      root.querySelector('[data-role="panel"]').hidden = true;
+   }
    badge.textContent = String(unread || items.length);
    list.innerHTML = '';
    empty.hidden = items.length > 0;

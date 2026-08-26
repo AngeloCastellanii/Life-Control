@@ -21,7 +21,7 @@ const STEPS = [
    },
    {
       title: 'Dashboard',
-      text: 'Tareas primero (Todas, Vence hoy, Urgentes…). Abajo compras y finanzas, y estadísticas plegables.'
+      text: 'Tareas primero (Todas, Vence hoy, Urgentes…). Abajo finanzas y compras por separado, el Vision Board y estadísticas plegables.'
    },
    {
       title: 'Planificador',

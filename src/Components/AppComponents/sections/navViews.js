@@ -1,4 +1,5 @@
-const STORAGE_KEY = 'lc_nav_views_v1';
+const STORAGE_KEY = 'lc_nav_views_v2';
+const LEGACY_KEY = 'lc_nav_views_v1';
 
 export const NAV_CATALOG = [
    { id: 'dashboard', path: '/', text: 'Dashboard', locked: 'start' },
@@ -12,6 +13,7 @@ export const NAV_CATALOG = [
 ];
 
 const DEFAULT_ORDER = NAV_CATALOG.map((item) => item.id);
+const DEFAULT_HIDDEN = ['vision'];
 
 function catalogById() {
    return Object.fromEntries(NAV_CATALOG.map((item) => [item.id, item]));
@@ -23,13 +25,36 @@ function readPrefs() {
       if (parsed && Array.isArray(parsed.order)) {
          return {
             order: parsed.order.filter((id) => catalogById()[id]),
-            hidden: Array.isArray(parsed.hidden) ? parsed.hidden.filter((id) => catalogById()[id]) : []
+            hidden: Array.isArray(parsed.hidden)
+               ? parsed.hidden.filter((id) => catalogById()[id])
+               : [...DEFAULT_HIDDEN]
          };
       }
    } catch {
       /* ignore */
    }
-   return { order: [...DEFAULT_ORDER], hidden: [] };
+
+   try {
+      const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || 'null');
+      if (legacy && Array.isArray(legacy.order)) {
+         const hidden = Array.isArray(legacy.hidden)
+            ? legacy.hidden.filter((id) => catalogById()[id])
+            : [];
+         if (!hidden.includes('vision')) {
+            hidden.push('vision');
+         }
+         const migrated = {
+            order: legacy.order.filter((id) => catalogById()[id]),
+            hidden
+         };
+         writePrefs(migrated);
+         return migrated;
+      }
+   } catch {
+      /* ignore */
+   }
+
+   return { order: [...DEFAULT_ORDER], hidden: [...DEFAULT_HIDDEN] };
 }
 
 function writePrefs(prefs) {
