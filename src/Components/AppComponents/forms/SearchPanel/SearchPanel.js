@@ -14,9 +14,9 @@ const VIEWS = [
    { kind: 'Vista', text: 'Finanzas', sub: 'Pagos y cobros', route: '/finances', aliases: ['dinero', 'pagos', 'cobros'] },
    { kind: 'Vista', text: 'Compras', sub: 'Lista de compras', route: '/shopping', aliases: ['shopping', 'super'] },
    { kind: 'Vista', text: 'Notas', sub: 'Notas y recordatorios', route: '/notes', aliases: ['nota', 'lista'] },
-   { kind: 'Vista', text: 'Hábitos', sub: 'Racha diaria', route: '/habits', aliases: ['habito', 'habitos', 'racha'] },
-   { kind: 'Vista', text: 'Enfoque', sub: 'Bloque actual', route: '/focus', aliases: ['focus', 'concentracion'] },
-   { kind: 'Vista', text: 'Estadísticas', sub: 'Progreso y presupuestos', route: '/stats', aliases: ['stats', 'estadisticas'] },
+   { kind: 'Vista', text: 'Hábitos', sub: 'Racha y calendario', route: '/habits', aliases: ['habito', 'habitos', 'racha'] },
+   { kind: 'Vista', text: 'Enfoque', sub: 'Flotante del bloque actual', route: '/', aliases: ['focus', 'concentracion'], openFocus: true },
+   { kind: 'Vista', text: 'Estadísticas', sub: 'En el dashboard', route: '/', aliases: ['stats', 'estadisticas'], hash: 'dashboard-stats' },
    { kind: 'Vista', text: 'Vision Board', sub: 'Metas visuales', route: '/vision', aliases: ['vision', 'metas', 'sueños'] },
    { kind: 'Vista', text: 'Perfil', sub: 'Ajustes y dominios', route: '/settings', aliases: ['settings', 'ajustes', 'configuracion'] }
 ];
@@ -161,8 +161,18 @@ export default class SearchPanel extends HTMLElement {
 
          li.append(kind, text);
          const go = () => {
+            if (match.openFocus) {
+               slice.events.emit('ui:focus:open');
+               closeModal();
+               return;
+            }
             slice.router?.navigate?.(match.route);
             closeModal();
+            if (match.hash) {
+               requestAnimationFrame(() => {
+                  document.getElementById(match.hash)?.scrollIntoView({ behavior: 'smooth' });
+               });
+            }
          };
          li.addEventListener('click', go);
          li.addEventListener('keydown', (event) => {

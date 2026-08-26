@@ -98,7 +98,7 @@ export async function showOsNotification({ title, body, tag, route }) {
       body,
       tag: tag || 'lc-pending-digest',
       renotify: true,
-      requireInteraction: true,
+      vibrate: [120, 40, 120],
       icon: '/images/icon-192.png',
       badge: '/images/icon-192.png',
       data: { route: route || '/' }

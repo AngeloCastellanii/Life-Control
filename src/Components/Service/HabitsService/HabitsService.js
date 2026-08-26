@@ -1,7 +1,8 @@
-import { addDays, todayISO } from '../../AppComponents/sections/plannerDates.js';
+import { addDays, parseISO, startOfWeek, todayISO } from '../../AppComponents/sections/plannerDates.js';
 
 const STORE = 'habits';
 const KEEP_DAYS = 400;
+const COLORS = ['#3f7359', '#2563eb', '#c41e5a', '#d97706', '#7c3aed', '#0891b2'];
 
 function nowISO() {
    return new Date().toISOString();
@@ -22,32 +23,39 @@ function normalizeDates(dates) {
    return [...unique].sort();
 }
 
-function normalizeHabit(habit) {
+function normalizeWeekdays(days) {
+   if (!Array.isArray(days) || days.length === 0) {
+      return [1, 2, 3, 4, 5];
+   }
+   return [...new Set(days.map((day) => Number(day)).filter((day) => day >= 0 && day <= 6))].sort();
+}
+
+export function normalizeHabit(habit) {
+   const frequency = ['daily', 'weekdays', 'custom', 'weekly'].includes(habit?.frequency)
+      ? habit.frequency
+      : 'daily';
    return {
       id: habit.id,
       name: (habit.name ?? '').trim(),
+      notes: (habit.notes ?? '').trim(),
+      color: habit.color || COLORS[0],
+      frequency,
+      weekdays: normalizeWeekdays(habit.weekdays),
+      weeklyTarget: Math.min(7, Math.max(1, Number(habit.weeklyTarget) || 4)),
+      remindAt: /^\d{2}:\d{2}$/.test(habit.remindAt ?? '') ? habit.remindAt : '',
+      paused: Boolean(habit.paused),
       doneDates: normalizeDates(habit.doneDates),
+      skippedDates: normalizeDates(habit.skippedDates),
       createdAt: habit.createdAt ?? nowISO(),
       updatedAt: habit.updatedAt ?? habit.createdAt ?? nowISO()
    };
 }
 
 function compareHabits(a, b) {
+   if (Boolean(a.paused) !== Boolean(b.paused)) {
+      return a.paused ? 1 : -1;
+   }
    return (a.createdAt ?? '').localeCompare(b.createdAt ?? '');
-}
-
-export function habitStreak(doneDates, today = todayISO()) {
-   const set = new Set(doneDates ?? []);
-   let day = set.has(today) ? today : addDays(today, -1);
-   if (!set.has(day)) {
-      return 0;
-   }
-   let count = 0;
-   while (set.has(day)) {
-      count += 1;
-      day = addDays(day, -1);
-   }
-   return count;
 }
 
 export function lastDays(count = 7, today = todayISO()) {
@@ -56,6 +64,97 @@ export function lastDays(count = 7, today = todayISO()) {
       days.push(addDays(today, -offset));
    }
    return days;
+}
+
+export function isHabitDueOn(habit, iso) {
+   if (habit.paused) {
+      return false;
+   }
+   const weekday = parseISO(iso).getDay();
+   if (habit.frequency === 'weekdays') {
+      return weekday >= 1 && weekday <= 5;
+   }
+   if (habit.frequency === 'custom') {
+      return (habit.weekdays ?? []).includes(weekday);
+   }
+   return true;
+}
+
+export function weekProgress(habit, today = todayISO()) {
+   const start = startOfWeek(today);
+   const days = lastDays(7, addDays(start, 6));
+   const done = new Set(habit.doneDates);
+   const doneCount = days.filter((day) => day >= start && day <= today && done.has(day)).length;
+   if (habit.frequency === 'weekly') {
+      return { done: doneCount, target: habit.weeklyTarget || 4 };
+   }
+   const dueDays = days.filter((day) => day >= start && day <= addDays(start, 6) && isHabitDueOn(habit, day));
+   return { done: doneCount, target: Math.max(1, dueDays.length) };
+}
+
+export function habitStreak(habit, today = todayISO()) {
+   const done = new Set(habit.doneDates ?? []);
+   const skipped = new Set(habit.skippedDates ?? []);
+   let day = today;
+   let count = 0;
+   for (let i = 0; i < KEEP_DAYS; i += 1) {
+      if (!isHabitDueOn({ ...habit, paused: false }, day)) {
+         day = addDays(day, -1);
+         continue;
+      }
+      if (done.has(day)) {
+         count += 1;
+         day = addDays(day, -1);
+         continue;
+      }
+      if (skipped.has(day) || day === today) {
+         day = addDays(day, -1);
+         continue;
+      }
+      break;
+   }
+   return count;
+}
+
+export function bestStreak(habit) {
+   const done = new Set(habit.doneDates ?? []);
+   const skipped = new Set(habit.skippedDates ?? []);
+   if (done.size === 0) {
+      return 0;
+   }
+   const today = todayISO();
+   let best = 0;
+   let current = 0;
+   for (let offset = KEEP_DAYS; offset >= 0; offset -= 1) {
+      const day = addDays(today, -offset);
+      if (!isHabitDueOn({ ...habit, paused: false }, day)) {
+         continue;
+      }
+      if (done.has(day)) {
+         current += 1;
+         best = Math.max(best, current);
+      } else if (skipped.has(day)) {
+         continue;
+      } else {
+         current = 0;
+      }
+   }
+   return best;
+}
+
+export function monthGrid(today = todayISO()) {
+   const first = `${today.slice(0, 7)}-01`;
+   const start = parseISO(first);
+   const startPad = start.getDay();
+   const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+   const cells = [];
+   for (let i = 0; i < startPad; i += 1) {
+      cells.push(null);
+   }
+   for (let day = 1; day <= daysInMonth; day += 1) {
+      cells.push(`${today.slice(0, 7)}-${String(day).padStart(2, '0')}`);
+   }
+   return cells;
 }
 
 export default class HabitsService {
@@ -87,18 +186,18 @@ export default class HabitsService {
       return this.getAll().find((habit) => habit.id === id) ?? null;
    }
 
-   async create({ name }) {
-      const trimmed = name?.trim();
-      if (!trimmed) {
-         return null;
-      }
+   async create(payload) {
       const habit = normalizeHabit({
          id: crypto.randomUUID(),
-         name: trimmed,
+         ...payload,
          doneDates: [],
+         skippedDates: [],
          createdAt: nowISO(),
          updatedAt: nowISO()
       });
+      if (!habit.name) {
+         return null;
+      }
       await this.storage.put(STORE, habit);
       await this.syncToContext();
       slice.events.emit('habit:changed', { action: 'create', habit });
@@ -134,13 +233,32 @@ export default class HabitsService {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
          return null;
       }
-      const set = new Set(existing.doneDates);
-      if (set.has(day)) {
-         set.delete(day);
+      const done = new Set(existing.doneDates);
+      const skipped = new Set(existing.skippedDates);
+      if (done.has(day)) {
+         done.delete(day);
       } else {
-         set.add(day);
+         done.add(day);
+         skipped.delete(day);
       }
-      return this.update(id, { doneDates: [...set] });
+      return this.update(id, { doneDates: [...done], skippedDates: [...skipped] });
+   }
+
+   async skipDate(id, iso = todayISO()) {
+      const existing = this.getById(id);
+      if (!existing) {
+         return null;
+      }
+      const day = String(iso).slice(0, 10);
+      const done = new Set(existing.doneDates);
+      const skipped = new Set(existing.skippedDates);
+      if (skipped.has(day)) {
+         skipped.delete(day);
+      } else {
+         skipped.add(day);
+         done.delete(day);
+      }
+      return this.update(id, { doneDates: [...done], skippedDates: [...skipped] });
    }
 
    async remove(id) {

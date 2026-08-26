@@ -6,6 +6,7 @@ import {
    getDashboardTaskFilter,
    setDashboardTaskFilter
 } from '../plannerPrefs.js';
+import { budgetRows, computeStats, fillBudgetList, money } from '../statsSummary.js';
 
 export default class DashboardSection extends HTMLElement {
    static props = {
@@ -29,8 +30,17 @@ export default class DashboardSection extends HTMLElement {
       this.$taskList = this.querySelector('[data-role="task-list"]');
       this.$taskEmpty = this.querySelector('[data-role="task-empty"]');
       this.$taskFilters = this.querySelectorAll('[data-filter]');
-      this.$todayList = this.querySelector('[data-role="today-list"]');
-      this.$todayEmpty = this.querySelector('[data-role="today-empty"]');
+      this.$moneyList = this.querySelector('[data-role="money-list"]');
+      this.$moneyEmpty = this.querySelector('[data-role="money-empty"]');
+      this.$doneTotal = this.querySelector('[data-role="done-total"]');
+      this.$doneWeek = this.querySelector('[data-role="done-week"]');
+      this.$pendingTotal = this.querySelector('[data-role="pending-total"]');
+      this.$pendingBreakdown = this.querySelector('[data-role="pending-breakdown"]');
+      this.$settledMonth = this.querySelector('[data-role="settled-month"]');
+      this.$notesTotal = this.querySelector('[data-role="notes-total"]');
+      this.$remindersTotal = this.querySelector('[data-role="reminders-total"]');
+      this.$budgetList = this.querySelector('[data-role="budget-list"]');
+      this.$budgetEmpty = this.querySelector('[data-role="budget-empty"]');
       this._taskFilter = getDashboardTaskFilter();
       this._capacityRing = null;
       slice.controller.setComponentProps(this, props);
@@ -84,16 +94,7 @@ export default class DashboardSection extends HTMLElement {
          })
       );
 
-      const state = slice.context.getState('lifeControl') ?? {};
-      this.refresh({
-         tasks: this.taskService?.getAll() ?? [],
-         timeBlocks: this.timeBlockService?.getAll() ?? [],
-         domains: this.domainService?.getAll() ?? [],
-         profile: state.profile ?? { displayName: '' },
-         exchangeRate: state.exchangeRate ?? {},
-         finances: this.financeService?.getAll() ?? [],
-         shopping: this.shoppingService?.getAll() ?? []
-      });
+      this.refreshFromState();
    }
 
    async update() {
@@ -103,7 +104,10 @@ export default class DashboardSection extends HTMLElement {
       this.financeService = slice.getComponent('finance-service');
       this.shoppingService = slice.getComponent('shopping-service');
       this.domainService = slice.getComponent('domain-service');
+      this.refreshFromState();
+   }
 
+   refreshFromState() {
       const state = slice.context.getState('lifeControl') ?? {};
       this.refresh({
          tasks: state.tasks ?? this.taskService?.getAll?.() ?? [],
@@ -112,12 +116,9 @@ export default class DashboardSection extends HTMLElement {
          profile: state.profile ?? { displayName: '' },
          exchangeRate: state.exchangeRate ?? {},
          finances: state.finances ?? this.financeService?.getAll?.() ?? [],
-         shopping: state.shopping ?? this.shoppingService?.getAll?.() ?? []
+         shopping: state.shopping ?? this.shoppingService?.getAll?.() ?? [],
+         notes: state.notes ?? slice.getComponent('notes-service')?.getAll?.() ?? []
       });
-   }
-
-   formatMoney(value) {
-      return `$${(Number(value) || 0).toFixed(2)}`;
    }
 
    openExchangeCalculator() {
@@ -131,7 +132,7 @@ export default class DashboardSection extends HTMLElement {
       });
    }
 
-   refresh({ tasks, timeBlocks, domains, profile, exchangeRate, finances }) {
+   refresh({ tasks, timeBlocks, domains, profile, exchangeRate, finances, shopping, notes }) {
       const today = todayISO();
       this.$greetingTitle.textContent = greetingForName(profile?.displayName ?? '');
       this.$dateSubtitle.textContent = formatDayLong(today);
@@ -150,8 +151,9 @@ export default class DashboardSection extends HTMLElement {
       this.$blocksCount.textContent = String(timeBlocks.length);
 
       this.renderRate(exchangeRate);
-      this.renderDueToday(tasks, finances);
-      this.renderTaskView(pending, domains ?? this.domainService?.getAll?.() ?? [], tasks);
+      this.renderMoneyDue(finances, shopping);
+      this.renderStats({ tasks, finances, domains, notes });
+      this.renderTaskView(pending, domains ?? [], tasks);
    }
 
    setTaskFilter(filter) {
@@ -171,22 +173,17 @@ export default class DashboardSection extends HTMLElement {
       }
    }
 
-   renderDueToday(tasks, finances) {
-      if (!this.$todayList) {
+   isDueToday(task, today) {
+      const { end } = taskDateRange(task);
+      return Boolean(end && end <= today);
+   }
+
+   renderMoneyDue(finances, shopping) {
+      if (!this.$moneyList) {
          return;
       }
       const today = todayISO();
       const rows = [];
-
-      for (const task of Array.isArray(tasks) ? tasks : []) {
-         if (task.completed) {
-            continue;
-         }
-         const { end } = taskDateRange(task);
-         if (end && end <= today) {
-            rows.push({ kind: 'Tarea', label: task.title, route: '/planner', overdue: end < today });
-         }
-      }
 
       const dueFinances =
          typeof this.financeService?.getDueOnDate === 'function'
@@ -197,7 +194,7 @@ export default class DashboardSection extends HTMLElement {
       for (const item of dueFinances) {
          rows.push({
             kind: item.type === 'receive' ? 'Cobro' : 'Pago',
-            label: `${item.description} · ${this.formatMoney(item.amount)}`,
+            label: `${item.description} · ${money(item.amount)}`,
             route: '/finances',
             overdue: item.dueDate < today
          });
@@ -206,7 +203,9 @@ export default class DashboardSection extends HTMLElement {
       const dueShopping =
          typeof this.shoppingService?.getDueItems === 'function'
             ? this.shoppingService.getDueItems({ withinDays: 0 })
-            : [];
+            : Array.isArray(shopping)
+              ? shopping
+              : [];
       for (const item of dueShopping) {
          rows.push({
             kind: 'Compra',
@@ -216,55 +215,72 @@ export default class DashboardSection extends HTMLElement {
          });
       }
 
-      const notesService = slice.getComponent('notes-service');
-      const notes = notesService?.getAll?.() ?? [];
-      for (const note of notes) {
-         if (note.archived || !note.remindAt) {
-            continue;
-         }
-         const day = note.remindAt.slice(0, 10);
-         if (day <= today) {
-            rows.push({ kind: 'Nota', label: note.title, route: '/notes', overdue: day < today });
-         }
-      }
-
       rows.sort((a, b) => Number(b.overdue) - Number(a.overdue));
+      this.$moneyList.innerHTML = '';
+      this.$moneyEmpty.hidden = rows.length > 0;
 
-      this.$todayList.innerHTML = '';
-      this.$todayEmpty.hidden = rows.length > 0;
-
-      for (const row of rows.slice(0, 10)) {
-         const li = document.createElement('li');
-         li.className = 'dashboard-section__today-item';
-         if (row.overdue) {
-            li.classList.add('dashboard-section__today-item--overdue');
-         }
-         li.setAttribute('role', 'button');
-         li.tabIndex = 0;
-
-         const kind = document.createElement('span');
-         kind.className = 'dashboard-section__today-kind';
-         kind.textContent = row.kind;
-
-         const label = document.createElement('span');
-         label.className = 'dashboard-section__today-label';
-         label.textContent = row.label;
-
-         const state = document.createElement('span');
-         state.className = 'dashboard-section__today-state';
-         state.textContent = row.overdue ? 'Vencido' : 'Hoy';
-
-         li.append(kind, label, state);
-         const go = () => slice.router?.navigate?.(row.route);
-         li.addEventListener('click', go);
-         li.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-               event.preventDefault();
-               go();
-            }
-         });
-         this.$todayList.appendChild(li);
+      for (const row of rows.slice(0, 8)) {
+         this.$moneyList.appendChild(this.createDueRow(row));
       }
+   }
+
+   createDueRow(row) {
+      const li = document.createElement('li');
+      li.className = 'dashboard-section__today-item';
+      if (row.overdue) {
+         li.classList.add('dashboard-section__today-item--overdue');
+      }
+      li.setAttribute('role', 'button');
+      li.tabIndex = 0;
+
+      const kind = document.createElement('span');
+      kind.className = 'dashboard-section__today-kind';
+      kind.textContent = row.kind;
+
+      const label = document.createElement('span');
+      label.className = 'dashboard-section__today-label';
+      label.textContent = row.label;
+
+      const state = document.createElement('span');
+      state.className = 'dashboard-section__today-state';
+      state.textContent = row.overdue ? 'Vencido' : 'Hoy';
+
+      li.append(kind, label, state);
+      const go = () => slice.router?.navigate?.(row.route);
+      li.addEventListener('click', go);
+      li.addEventListener('keydown', (event) => {
+         if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            go();
+         }
+      });
+      return li;
+   }
+
+   renderStats({ tasks, finances, domains, notes }) {
+      const stats = computeStats({ tasks, finances, domains, notes });
+      if (this.$doneTotal) {
+         this.$doneTotal.textContent = String(stats.doneTotal);
+      }
+      if (this.$doneWeek) {
+         this.$doneWeek.textContent = `${stats.doneWeek} esta semana`;
+      }
+      if (this.$pendingTotal) {
+         this.$pendingTotal.textContent = String(stats.pendingTotal);
+      }
+      if (this.$pendingBreakdown) {
+         this.$pendingBreakdown.textContent = `${stats.high} alta · ${stats.medium} media · ${stats.low} baja`;
+      }
+      if (this.$settledMonth) {
+         this.$settledMonth.textContent = money(stats.settledMonth);
+      }
+      if (this.$notesTotal) {
+         this.$notesTotal.textContent = String(stats.notesTotal);
+      }
+      if (this.$remindersTotal) {
+         this.$remindersTotal.textContent = `${stats.remindersTotal} con recordatorio`;
+      }
+      fillBudgetList(this.$budgetList, this.$budgetEmpty, budgetRows(domains, finances, stats.month));
    }
 
    createDomainBadge(domainId) {
@@ -287,17 +303,21 @@ export default class DashboardSection extends HTMLElement {
          return;
       }
 
+      const today = todayISO();
       let rows = Array.isArray(pending) ? pending : [];
       if (this._taskFilter === DASHBOARD_TASK_FILTERS.URGENT) {
          rows = rows.filter((task) => task.urgency === 'high');
       } else if (this._taskFilter === DASHBOARD_TASK_FILTERS.BLOCKS) {
          rows = rows.filter((task) => task.blockId);
+      } else if (this._taskFilter === DASHBOARD_TASK_FILTERS.DUE) {
+         rows = rows.filter((task) => this.isDueToday(task, today));
       }
 
-      this.fillList(this.$taskList, rows.slice(0, 6), this._taskFilter !== DASHBOARD_TASK_FILTERS.BLOCKS);
+      this.fillList(this.$taskList, rows.slice(0, 8), this._taskFilter !== DASHBOARD_TASK_FILTERS.BLOCKS);
       this.$taskEmpty.hidden = rows.length > 0;
       const emptyCopy = {
          [DASHBOARD_TASK_FILTERS.ALL]: 'Sin pendientes.',
+         [DASHBOARD_TASK_FILTERS.DUE]: 'Nada vence hoy.',
          [DASHBOARD_TASK_FILTERS.URGENT]: 'Sin urgentes.',
          [DASHBOARD_TASK_FILTERS.BLOCKS]: 'Sin tareas en bloques.'
       };
@@ -318,12 +338,10 @@ export default class DashboardSection extends HTMLElement {
 
          const meta = document.createElement('div');
          meta.className = 'dashboard-section__domain-meta';
-
          const badge = document.createElement('span');
          badge.className = 'lc-domain-badge';
          badge.style.setProperty('--domain-color', domain.color);
          badge.textContent = domain.name;
-
          meta.appendChild(badge);
          item.appendChild(meta);
 
@@ -331,7 +349,6 @@ export default class DashboardSection extends HTMLElement {
          countEl.className = 'dashboard-section__domain-count';
          countEl.textContent = `${count} pendiente${count === 1 ? '' : 's'}`;
          item.appendChild(countEl);
-
          this.$taskList.appendChild(item);
       }
    }
@@ -386,6 +403,17 @@ export default class DashboardSection extends HTMLElement {
             title.textContent = task.title;
             item.appendChild(title);
          }
+
+         item.setAttribute('role', 'button');
+         item.tabIndex = 0;
+         const go = () => slice.router?.navigate?.('/planner');
+         item.addEventListener('click', go);
+         item.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+               event.preventDefault();
+               go();
+            }
+         });
 
          listEl.appendChild(item);
       }

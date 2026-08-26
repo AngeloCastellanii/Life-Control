@@ -1,0 +1,4 @@
+/* Focus overlay styles live in lifeControl.components.css */
+:host {
+  display: contents;
+}

@@ -10,6 +10,7 @@ const components = {
   "TimeBlock": "atoms",
   "Fab": "atoms",
   "OnboardingOverlay": "atoms",
+  "FocusOverlay": "atoms",
   "BlockForm": "forms",
   "Sidebar": "shell",
   "ModalShell": "shell",

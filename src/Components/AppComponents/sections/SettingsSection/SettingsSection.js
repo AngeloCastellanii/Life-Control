@@ -14,6 +14,12 @@ import {
 } from '../notifications.js';
 import { CURRENCIES, getPreferredCurrency, setPreferredCurrency } from '../currency.js';
 import { getHidePastBlocks, setHidePastBlocks } from '../plannerPrefs.js';
+import {
+   getNavPrefs,
+   moveNavView,
+   NAV_CATALOG,
+   toggleNavViewHidden
+} from '../navViews.js';
 
 export default class SettingsSection extends HTMLElement {
    static props = {
@@ -43,6 +49,10 @@ export default class SettingsSection extends HTMLElement {
       this.$backupStatus = this.querySelector('[data-role="backup-status"]');
       this.$themeMount = this.querySelector('[data-role="theme-mount"]');
       this.$hidePastBlocks = this.querySelector('[data-role="hide-past-blocks"]');
+      this.$navList = this.querySelector('[data-role="nav-list"]');
+      this.$guide = this.querySelector('[data-role="guide"]');
+      this.$guideViews = this.querySelector('[data-role="guide-views"]');
+      this.$guideFeatures = this.querySelector('[data-role="guide-features"]');
       slice.controller.setComponentProps(this, props);
    }
 
@@ -63,6 +73,8 @@ export default class SettingsSection extends HTMLElement {
       this.syncNotificationState();
       this.setupCurrency();
       this.setupPlannerPrefs();
+      this.setupNavOrder();
+      this.setupGuide();
       this.setupDomains();
       this.$nameInput.addEventListener('input', () => this.updateAvatar());
       this.$nameInput.addEventListener('keydown', (event) => {
@@ -156,6 +168,94 @@ export default class SettingsSection extends HTMLElement {
          setHidePastBlocks(this.$hidePastBlocks.checked);
          slice.events.emit('planner:prefs-changed', { hidePastBlocks: this.$hidePastBlocks.checked });
       });
+   }
+
+   setupNavOrder() {
+      this.renderNavOrder();
+   }
+
+   renderNavOrder() {
+      if (!this.$navList) {
+         return;
+      }
+      const prefs = getNavPrefs();
+      const hidden = new Set(prefs.hidden);
+      this.$navList.innerHTML = '';
+      for (const id of prefs.order) {
+         const item = NAV_CATALOG.find((entry) => entry.id === id);
+         if (!item) {
+            continue;
+         }
+         const li = document.createElement('li');
+         li.className = 'settings-section__nav-item';
+         if (hidden.has(id)) {
+            li.classList.add('settings-section__nav-item--hidden');
+         }
+
+         const name = document.createElement('span');
+         name.textContent = item.text;
+
+         const actions = document.createElement('div');
+         actions.className = 'settings-section__nav-actions';
+
+         const up = document.createElement('button');
+         up.type = 'button';
+         up.className = 'settings-section__nav-btn';
+         up.textContent = '↑';
+         up.disabled = Boolean(item.locked);
+         up.addEventListener('click', () => {
+            moveNavView(id, -1);
+            this.renderNavOrder();
+         });
+
+         const down = document.createElement('button');
+         down.type = 'button';
+         down.className = 'settings-section__nav-btn';
+         down.textContent = '↓';
+         down.disabled = Boolean(item.locked);
+         down.addEventListener('click', () => {
+            moveNavView(id, 1);
+            this.renderNavOrder();
+         });
+
+         const hide = document.createElement('button');
+         hide.type = 'button';
+         hide.className = 'settings-section__nav-btn';
+         hide.textContent = item.locked ? 'Fijo' : hidden.has(id) ? 'Mostrar' : 'Ocultar';
+         hide.disabled = Boolean(item.locked);
+         hide.addEventListener('click', () => {
+            toggleNavViewHidden(id);
+            this.renderNavOrder();
+         });
+
+         actions.append(up, down, hide);
+         li.append(name, actions);
+         this.$navList.appendChild(li);
+      }
+   }
+
+   setupGuide() {
+      const bind = (el, key, defaultOpen) => {
+         if (!el) {
+            return;
+         }
+         try {
+            const stored = localStorage.getItem(key);
+            el.open = stored == null ? defaultOpen : stored === '1';
+         } catch {
+            el.open = defaultOpen;
+         }
+         el.addEventListener('toggle', () => {
+            try {
+               localStorage.setItem(key, el.open ? '1' : '0');
+            } catch {
+               /* ignore */
+            }
+         });
+      };
+      bind(this.$guide, 'lc_guide_open', false);
+      bind(this.$guideViews, 'lc_guide_views', false);
+      bind(this.$guideFeatures, 'lc_guide_features', false);
    }
 
    setupCurrency() {
@@ -291,7 +391,7 @@ export default class SettingsSection extends HTMLElement {
 
       if (result === 'granted') {
          slice.getComponent('reminder-service')?.check?.();
-         this.showNotifStatus('Notificaciones activadas. Te avisaremos de pendientes a su hora, también en segundo plano.');
+         this.showNotifStatus('Listo. Instala la app en el teléfono (Añadir a inicio) para que los avisos salgan en la barra del sistema.');
       } else if (result === 'denied') {
          this.showNotifStatus('Permiso denegado. Actívalo desde los ajustes del navegador.', true);
       } else if (result === 'unsupported') {

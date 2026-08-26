@@ -1,5 +1,5 @@
 // Life Control — Service Worker (offline PWA + notificaciones)
-const CACHE = 'life-control-v4';
+const CACHE = 'life-control-v5';
 const PLAN_CACHE = 'life-control-plan-v1';
 const APP_SHELL = '/App/index.html';
 const PLAN_URL = '/__lc-reminder-plan';
@@ -145,16 +145,18 @@ async function flushDueReminders() {
       return;
    }
 
-   const title = due.length === 1 ? 'Life Control' : 'Life Control · pendientes';
-   await self.registration.showNotification(title, {
-      body: due.length === 1 ? due[0].body || digestBody(due) : digestBody(due),
-      tag: 'lc-pending-digest',
-      renotify: true,
-      requireInteraction: true,
-      icon: '/images/icon-192.png',
-      badge: '/images/icon-192.png',
-      data: { route: due[0]?.route || '/', ids: due.map((item) => item.id) }
-   });
+   for (const item of due) {
+      await self.registration.showNotification(item.title || 'Life Control', {
+         body: item.body || digestBody([item]),
+         tag: item.tag || item.id || 'lc-pending',
+         renotify: true,
+         requireInteraction: true,
+         vibrate: [120, 40, 120],
+         icon: '/images/icon-192.png',
+         badge: '/images/icon-192.png',
+         data: { route: item.route || '/', ids: [item.id] }
+      });
+   }
 
    const shownIds = new Set(due.map((item) => item.id));
    await writeReminderPlan({
@@ -200,7 +202,7 @@ self.addEventListener('message', (event) => {
             body: data.body || '',
             tag: data.tag || 'lc-pending-digest',
             renotify: Boolean(data.renotify),
-            requireInteraction: true,
+            vibrate: [120, 40, 120],
             icon: '/images/icon-192.png',
             badge: '/images/icon-192.png',
             data: { route: data.route || '/' }

@@ -1393,9 +1393,102 @@
     background: var(--primary-color);
   }
 
+  .habits-section__text {
+    @apply min-w-0 flex-1;
+  }
+
   .habits-section__name {
-    @apply min-w-0 flex-1 truncate text-sm font-semibold;
+    @apply min-w-0 truncate text-sm font-semibold;
     color: var(--font-primary-color);
+  }
+
+  .habits-section__meta,
+  .habits-section__notes {
+    @apply m-0 block text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  .habits-section__notes {
+    @apply mt-0.5;
+  }
+
+  .habits-section__item--paused {
+    opacity: 0.6;
+  }
+
+  .habits-section__summary {
+    @apply px-3 py-2 text-sm font-medium;
+  }
+
+  .habits-section__day--skip {
+    border-style: dashed;
+    color: var(--font-secondary-color);
+  }
+
+  .habits-section__day--off {
+    opacity: 0.35;
+  }
+
+  .habits-section__month-grid {
+    @apply grid grid-cols-7 gap-1;
+  }
+
+  .habits-section__month-head,
+  .habits-section__month-cell {
+    @apply flex h-7 items-center justify-center rounded text-[0.65rem];
+  }
+
+  .habits-section__month-head {
+    color: var(--font-secondary-color);
+  }
+
+  .habits-section__month-cell {
+    border: 1px solid var(--tertiary-background-color);
+    background: transparent;
+    color: var(--font-primary-color);
+  }
+
+  .habits-section__month-cell--empty {
+    border-color: transparent;
+  }
+
+  .habits-section__month-cell--on {
+    background: color-mix(in srgb, var(--habit-color, var(--primary-color)) 28%, transparent);
+    border-color: var(--habit-color, var(--primary-color));
+  }
+
+  .habits-section__month-cell--skip {
+    border-style: dashed;
+  }
+
+  .habits-section__month-cell--today {
+    box-shadow: 0 0 0 1px var(--habit-color, var(--primary-color));
+  }
+
+  .habit-form__days,
+  .habit-form__colors {
+    @apply mt-1 flex flex-wrap gap-2;
+  }
+
+  .habit-form__day {
+    @apply h-8 w-8 cursor-pointer rounded-md border text-sm font-semibold;
+    border-color: var(--tertiary-background-color);
+    background: transparent;
+    color: var(--font-primary-color);
+  }
+
+  .habit-form__day--on {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+    color: var(--primary-color);
+  }
+
+  .habit-form__color {
+    @apply h-7 w-7 cursor-pointer rounded-full border-2 border-transparent;
+  }
+
+  .habit-form__color--on {
+    border-color: var(--font-primary-color);
   }
 
   .habits-section__streak {
@@ -3338,5 +3431,141 @@
   .lc-notice-panel__empty {
     @apply m-0 text-sm;
     color: var(--font-secondary-color);
+  }
+
+  .lc-focus-root {
+    @apply pointer-events-none fixed bottom-20 left-4 z-400 flex flex-col items-start gap-2;
+  }
+
+  slice-focus-overlay {
+    display: contents;
+  }
+
+  .lc-focus-toggle,
+  .lc-focus-panel {
+    @apply pointer-events-auto;
+  }
+
+  .lc-focus-toggle {
+    @apply rounded-full border px-3 py-2 text-sm font-semibold shadow-lg;
+    background: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .lc-focus-toggle--on {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .lc-focus-panel {
+    @apply w-[min(22rem,calc(100vw-2rem))] rounded-2xl border p-3 shadow-lg;
+    background: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    max-height: min(70vh, 28rem);
+    overflow: auto;
+  }
+
+  .lc-focus-panel__head {
+    @apply mb-2 flex items-start justify-between gap-2;
+  }
+
+  .lc-focus-panel__clock,
+  .lc-focus-panel__hint {
+    @apply m-0 block text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  .lc-focus-panel__close {
+    @apply cursor-pointer border-0 bg-transparent text-sm font-semibold;
+    color: var(--primary-color);
+  }
+
+  .lc-focus-panel__block {
+    @apply m-0 mb-2 flex flex-col gap-0.5 text-sm;
+  }
+
+  .lc-focus-panel__tasks {
+    @apply m-0 flex list-none flex-col gap-1.5 p-0;
+  }
+
+  .lc-focus-task {
+    @apply flex items-start gap-2 rounded-xl px-2 py-1.5;
+    background: color-mix(in srgb, var(--primary-color) 6%, transparent);
+  }
+
+  .lc-focus-task--picked {
+    outline: 1px solid color-mix(in srgb, var(--primary-color) 40%, transparent);
+  }
+
+  .lc-focus-task--done {
+    opacity: 0.55;
+  }
+
+  .lc-focus-task__info {
+    @apply min-w-0 flex-1;
+  }
+
+  .lc-focus-task__title {
+    @apply block text-sm font-medium;
+  }
+
+  .lc-focus-task__meta {
+    @apply block text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  .dashboard-section__stats-summary {
+    @apply flex cursor-pointer list-none items-center gap-2 px-3 py-3;
+  }
+
+  .dashboard-section__stats-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .dashboard-section__stats-body {
+    @apply px-3 pb-3;
+  }
+
+  .dashboard-section__stats-grid {
+    @apply mb-3;
+  }
+
+  .settings-section__nav-list {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+
+  .settings-section__nav-item {
+    @apply flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-sm;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .settings-section__nav-item--hidden {
+    opacity: 0.5;
+  }
+
+  .settings-section__nav-actions {
+    @apply flex gap-1;
+  }
+
+  .settings-section__nav-btn {
+    @apply cursor-pointer rounded-lg border px-2 py-1 text-xs;
+    border-color: var(--tertiary-background-color);
+    background: transparent;
+    color: var(--font-primary-color);
+  }
+
+  .settings-section__guide-head,
+  .settings-section__guide-block > summary {
+    @apply cursor-pointer list-none;
+  }
+
+  .settings-section__guide-head::-webkit-details-marker,
+  .settings-section__guide-block > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .settings-section__guide-block {
+    @apply mt-3;
   }
 }

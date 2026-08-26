@@ -9,6 +9,7 @@ import {
 } from '../../AppComponents/sections/notifications.js';
 import { getDueStatus } from '../../AppComponents/sections/shoppingDue.js';
 import { todayISO } from '../../AppComponents/sections/plannerDates.js';
+import { isHabitDueOn } from '../HabitsService/HabitsService.js';
 
 const CHECK_INTERVAL_MS = 30 * 1000;
 const JUST_DUE_MS = 2 * 60 * 1000;
@@ -133,6 +134,7 @@ export default class ReminderService {
       this.notesService = slice.getComponent('notes-service');
       this.taskService = slice.getComponent('task-service');
       this.shoppingService = slice.getComponent('shopping-service');
+      this.habitsService = slice.getComponent('habits-service');
       this._timer = null;
       this._wakeLock = null;
       this._timeouts = new Map();
@@ -162,6 +164,7 @@ export default class ReminderService {
       slice.events.subscribe('note:changed', () => this.syncPlan());
       slice.events.subscribe('task:changed', () => this.syncPlan());
       slice.events.subscribe('shopping:changed', () => this.syncPlan());
+      slice.events.subscribe('habit:changed', () => this.syncPlan());
 
       this.start();
       await this.requestWakeLock();
@@ -297,6 +300,24 @@ export default class ReminderService {
          });
       }
 
+      const habits = this.habitsService?.getAll?.() ?? [];
+      for (const habit of habits) {
+         if (!habit.remindAt || habit.paused || !isHabitDueOn(habit, today) || habit.doneDates.includes(today)) {
+            continue;
+         }
+         const at = atDateTime(today, habit.remindAt);
+         items.push({
+            id: `habit-${habit.id}-${today}`,
+            at,
+            title: habit.name || 'Hábito',
+            body: `Oye, toca ${habit.name || 'tu hábito'} ahora.`,
+            tag: `lc-habit-${habit.id}-${today}`,
+            route: '/habits',
+            kind: 'habit',
+            refId: habit.id
+         });
+      }
+
       return items.sort((a, b) => a.at - b.at);
    }
 
@@ -402,12 +423,14 @@ export default class ReminderService {
       renderInboxUi();
 
       if (!skipOsDump) {
-         await showOsNotification({
-            title: unique.length === 1 ? 'Life Control' : 'Life Control · pendientes',
-            body: digestBody(unique),
-            tag: 'lc-pending-digest',
-            route: unique[0].route
-         });
+         for (const item of unique) {
+            await showOsNotification({
+               title: item.title || 'Life Control',
+               body: item.body || digestBody([item]),
+               tag: item.tag || item.id,
+               route: item.route || '/'
+            });
+         }
       }
 
       for (const item of unique) {

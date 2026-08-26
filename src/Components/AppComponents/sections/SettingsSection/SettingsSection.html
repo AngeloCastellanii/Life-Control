@@ -136,6 +136,21 @@
       </label>
     </div>
 
+    <div class="lc-card settings-section__card settings-section__card--nav md:col-span-2">
+      <div class="settings-section__card-head">
+        <span class="settings-section__card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M4 7h16M4 12h10M4 17h14" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <h2 class="settings-section__card-label">Orden de vistas</h2>
+          <p class="settings-section__hint">Arrastra el orden con subir/bajar. Oculta las que no uses (Dashboard y Perfil se quedan).</p>
+        </div>
+      </div>
+      <ul class="settings-section__nav-list" data-role="nav-list"></ul>
+    </div>
+
     <div class="lc-card settings-section__card settings-section__card--notifications md:col-span-2">
       <div class="settings-section__card-head">
         <span class="settings-section__card-icon" aria-hidden="true">
@@ -146,7 +161,7 @@
         </span>
         <div>
           <h2 class="settings-section__card-label">Recordatorios</h2>
-          <p class="settings-section__hint">Avisos persistentes a la hora de cada actividad, también con la app en segundo plano.</p>
+          <p class="settings-section__hint">En el teléfono: instala la app (Añadir a inicio) y activa el permiso. Los avisos salen en la barra del sistema, no solo dentro de la app.</p>
         </div>
       </div>
       <button type="button" class="settings-section__save settings-section__notif-btn" data-role="enable-notifications">
@@ -172,8 +187,8 @@
     </div>
   </div>
 
-  <div class="lc-card settings-section__guide">
-    <div class="settings-section__guide-head">
+  <details class="lc-card settings-section__guide" data-role="guide">
+    <summary class="settings-section__guide-head">
       <span class="settings-section__card-icon settings-section__card-icon--guide" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
           <path d="M4 6h16M4 12h10M4 18h14" stroke-linecap="round" />
@@ -181,10 +196,11 @@
       </span>
       <div>
         <h2 class="settings-section__card-label">Guía rápida</h2>
-        <p class="settings-section__hint">Qué hace cada vista y cómo usarla.</p>
+        <p class="settings-section__hint">Toca para expandir o plegar.</p>
       </div>
-    </div>
-    <p class="settings-section__guide-group">Vistas</p>
+    </summary>
+    <details class="settings-section__guide-block" data-role="guide-views">
+    <summary class="settings-section__guide-group">Vistas</summary>
     <dl class="settings-section__guide-list">
       <div class="settings-section__guide-item">
         <span class="settings-section__guide-icon settings-section__guide-icon--dashboard" aria-hidden="true">
@@ -197,7 +213,7 @@
         </span>
         <div>
           <dt>Dashboard</dt>
-          <dd>Resumen del día: capacidad, "Vence hoy" y prioridades.</dd>
+          <dd>Resumen: tareas (Todas / Vence hoy / Urgentes…), compras y finanzas, y estadísticas.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
@@ -252,7 +268,7 @@
         </span>
         <div>
           <dt>Hábitos</dt>
-          <dd>Lista simple: marca el día y sigue la racha.</dd>
+          <dd>Meta semanal, racha, calendario del mes, saltar un día y aviso a una hora.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
@@ -265,7 +281,7 @@
         </span>
         <div>
           <dt>Modo enfoque</dt>
-          <dd>Muestra solo el bloque de tiempo actual y sus tareas para concentrarte.</dd>
+          <dd>Botón flotante: elige tareas del bloque actual y sal cuando termines. No es otra pestaña.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
@@ -276,7 +292,7 @@
         </span>
         <div>
           <dt>Estadísticas</dt>
-          <dd>Tareas completadas, pendientes por urgencia y avance de presupuestos por dominio.</dd>
+          <dd>Van en el Dashboard (plegables): progreso, notas y presupuestos.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
@@ -304,8 +320,10 @@
         </div>
       </div>
     </dl>
+    </details>
 
-    <p class="settings-section__guide-group">Funciones</p>
+    <details class="settings-section__guide-block" data-role="guide-features">
+    <summary class="settings-section__guide-group">Funciones</summary>
     <dl class="settings-section__guide-list">
       <div class="settings-section__guide-item">
         <span class="settings-section__guide-icon settings-section__guide-icon--dashboard" aria-hidden="true">
@@ -351,7 +369,7 @@
         </span>
         <div>
           <dt>Presupuestos por dominio</dt>
-          <dd>Asigna un presupuesto mensual a un dominio y vincula tus pagos; el avance se ve en Estadísticas.</dd>
+          <dd>El avance de presupuestos se ve en Estadísticas del Dashboard.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
@@ -363,7 +381,7 @@
         </span>
         <div>
           <dt>Recordatorios y notificaciones</dt>
-          <dd>Activa las notificaciones aquí para recibir avisos de las notas con recordatorio.</dd>
+          <dd>Activa el permiso aquí e instala la app en el teléfono para avisos en la barra del sistema.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">
@@ -418,5 +436,6 @@
         </div>
       </div>
     </dl>
-  </div>
+    </details>
+  </details>
 </section>

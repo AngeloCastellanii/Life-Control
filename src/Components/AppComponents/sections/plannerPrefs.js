@@ -3,6 +3,7 @@ const DASHBOARD_TASK_FILTER_KEY = 'lc_dashboard_task_filter';
 
 export const DASHBOARD_TASK_FILTERS = {
    ALL: 'all',
+   DUE: 'due',
    URGENT: 'urgent',
    BLOCKS: 'blocks',
    DOMAIN: 'domain'

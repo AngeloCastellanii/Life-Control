@@ -1,18 +1,6 @@
 import { preloadModalForms } from '../forms/preloadForms.js';
 import { shouldShowOnboarding } from '../atoms/OnboardingOverlay/OnboardingOverlay.js';
-
-const NAV_ROUTES = [
-   '/',
-   '/planner',
-   '/finances',
-   '/shopping',
-   '/notes',
-   '/habits',
-   '/focus',
-   '/stats',
-   '/vision',
-   '/settings'
-];
+import { getNavItems, getNavPaths } from '../sections/navViews.js';
 
 export default class AppShell extends HTMLElement {
    constructor(props) {
@@ -26,22 +14,11 @@ export default class AppShell extends HTMLElement {
    async init() {
       await preloadModalForms();
 
-      const sidebar = await slice.build('Sidebar', {
+      this._sidebar = await slice.build('Sidebar', {
          sliceId: 'app-sidebar',
-         items: [
-            { text: 'Dashboard', path: '/' },
-            { text: 'Planificador', path: '/planner' },
-            { text: 'Finanzas', path: '/finances' },
-            { text: 'Compras', path: '/shopping' },
-            { text: 'Notas', path: '/notes' },
-            { text: 'Hábitos', path: '/habits' },
-            { text: 'Enfoque', path: '/focus' },
-            { text: 'Estadísticas', path: '/stats' },
-            { text: 'Vision Board', path: '/vision' },
-            { text: 'Perfil', path: '/settings' }
-         ]
+         items: getNavItems()
       });
-      this.$sidebar.appendChild(sidebar);
+      this.$sidebar.appendChild(this._sidebar);
 
       this.$multiRoute = await slice.build('MultiRoute', {
          sliceId: 'app-content',
@@ -53,7 +30,7 @@ export default class AppShell extends HTMLElement {
             { path: '/notes', component: 'NotesSection' },
             { path: '/habits', component: 'HabitsSection' },
             { path: '/focus', component: 'FocusSection' },
-            { path: '/stats', component: 'StatsSection' },
+            { path: '/stats', component: 'DashboardSection' },
             { path: '/vision', component: 'VisionSection' },
             { path: '/settings', component: 'SettingsSection' }
          ]
@@ -69,7 +46,15 @@ export default class AppShell extends HTMLElement {
       const fab = await slice.build('Fab', { sliceId: 'app-fab' });
       this.appendChild(fab);
 
+      const focusOverlay = await slice.build('FocusOverlay', { sliceId: 'focus-overlay' });
+      this.appendChild(focusOverlay);
+
       this.setupSwipeNavigation();
+      slice.events.subscribe('nav:items-changed', () => this.refreshNav(), { component: this });
+
+      if (window.location.pathname.replace(/\/+$/, '') === '/stats') {
+         requestAnimationFrame(() => document.getElementById('dashboard-stats')?.scrollIntoView({ behavior: 'smooth' }));
+      }
 
       try {
          if (shouldShowOnboarding() && !slice.controller.activeComponents?.has?.('onboarding-overlay')) {
@@ -80,6 +65,17 @@ export default class AppShell extends HTMLElement {
          }
       } catch (error) {
          console.error('No se pudo mostrar el onboarding:', error);
+      }
+   }
+
+   async refreshNav() {
+      if (!this._sidebar) {
+         return;
+      }
+      this._sidebar.items = getNavItems();
+      if (typeof this._sidebar.renderItems === 'function') {
+         await this._sidebar.renderItems();
+         this._sidebar.syncActivePath?.({ immediate: true, scroll: true });
       }
    }
 
@@ -97,13 +93,13 @@ export default class AppShell extends HTMLElement {
       const isInteractive = (target) =>
          Boolean(
             target?.closest?.(
-               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding, .sidebar'
+               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding, .sidebar, .lc-notice-root, .lc-focus-root'
             )
          );
 
       const currentNavIndex = () => {
          const current = window.location.pathname.replace(/\/+$/, '') || '/';
-         return NAV_ROUTES.indexOf(current);
+         return getNavPaths().indexOf(current);
       };
 
       stage.addEventListener(
@@ -139,6 +135,7 @@ export default class AppShell extends HTMLElement {
                return;
             }
 
+            const paths = getNavPaths();
             const index = currentNavIndex();
             if (index < 0) {
                return;
@@ -146,7 +143,7 @@ export default class AppShell extends HTMLElement {
 
             const direction = dx < 0 ? 1 : -1;
             const toIndex = index + direction;
-            if (toIndex < 0 || toIndex >= NAV_ROUTES.length) {
+            if (toIndex < 0 || toIndex >= paths.length) {
                return;
             }
 
@@ -184,7 +181,6 @@ export default class AppShell extends HTMLElement {
             }
 
             previewing = false;
-            // Deslizar izquierda → vista siguiente; derecha → anterior
             this.navigateBySwipe(dx < 0 ? 1 : -1);
          },
          { passive: true }
@@ -211,26 +207,26 @@ export default class AppShell extends HTMLElement {
       }
 
       const current = window.location.pathname.replace(/\/+$/, '') || '/';
-      const index = NAV_ROUTES.indexOf(current);
+      const paths = getNavPaths();
+      const index = paths.indexOf(current);
       if (index < 0) {
          return;
       }
 
       const nextIndex = index + direction;
-      if (nextIndex < 0 || nextIndex >= NAV_ROUTES.length) {
+      if (nextIndex < 0 || nextIndex >= paths.length) {
          return;
       }
 
       const content = this.$content;
       content?.classList.remove('app-shell__content--swipe-left', 'app-shell__content--swipe-right');
-      // force reflow for animation restart
       void content?.offsetWidth;
       content?.classList.add(
          direction > 0 ? 'app-shell__content--swipe-left' : 'app-shell__content--swipe-right'
       );
 
       window.setTimeout(() => {
-         slice.router?.navigate?.(NAV_ROUTES[nextIndex]);
+         slice.router?.navigate?.(paths[nextIndex]);
          content?.classList.remove('app-shell__content--swipe-left', 'app-shell__content--swipe-right');
       }, 160);
    }

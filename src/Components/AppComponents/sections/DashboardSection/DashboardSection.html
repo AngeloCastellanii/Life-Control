@@ -35,22 +35,6 @@
     </div>
   </div>
 
-  <div class="lc-card dashboard-section__today">
-    <div class="lc-view-card-head">
-      <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </span>
-      <div>
-        <h2 class="lc-view-card-label">Vence hoy</h2>
-      </div>
-    </div>
-    <ul class="dashboard-section__today-list" data-role="today-list"></ul>
-    <p class="lc-empty" data-role="today-empty" hidden>Nada vence hoy.</p>
-  </div>
-
   <div class="lc-card dashboard-section__tasks">
     <div class="lc-view-card-head">
       <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
@@ -65,6 +49,7 @@
     </div>
     <div class="dashboard-section__filters" role="tablist" aria-label="Filtro de tareas">
       <button type="button" class="dashboard-section__filter" data-filter="all" role="tab">Todas</button>
+      <button type="button" class="dashboard-section__filter" data-filter="due" role="tab">Vence hoy</button>
       <button type="button" class="dashboard-section__filter" data-filter="urgent" role="tab">Urgentes</button>
       <button type="button" class="dashboard-section__filter" data-filter="blocks" role="tab">En bloques</button>
       <button type="button" class="dashboard-section__filter" data-filter="domain" role="tab">Por dominio</button>
@@ -72,4 +57,57 @@
     <ul class="dashboard-section__urgent-list" data-role="task-list"></ul>
     <p class="lc-empty" data-role="task-empty" hidden>Sin pendientes.</p>
   </div>
+
+  <div class="lc-card dashboard-section__today">
+    <div class="lc-view-card-head">
+      <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <circle cx="9" cy="20" r="1" />
+          <circle cx="18" cy="20" r="1" />
+          <path d="M2 3h2l2.4 12.4a2 2 0 0 0 2 1.6h9.2a2 2 0 0 0 2-1.6L22 7H6" />
+        </svg>
+      </span>
+      <div>
+        <h2 class="lc-view-card-label">Compras y finanzas</h2>
+      </div>
+    </div>
+    <ul class="dashboard-section__today-list" data-role="money-list"></ul>
+    <p class="lc-empty" data-role="money-empty" hidden>Nada vence hoy.</p>
+  </div>
+
+  <details class="lc-card dashboard-section__stats" id="dashboard-stats" data-role="stats-card">
+    <summary class="dashboard-section__stats-summary">
+      <span class="lc-view-card-icon lc-view-card-icon--pay" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+      <span class="lc-view-card-label">Estadísticas</span>
+    </summary>
+    <div class="dashboard-section__stats-body">
+      <div class="lc-view-stat-grid dashboard-section__stats-grid">
+        <div class="lc-view-stat">
+          <span class="lc-view-stat__label">Completadas</span>
+          <span class="lc-view-stat__value" data-role="done-total">0</span>
+          <span class="lc-view-stat__meta" data-role="done-week">0 esta semana</span>
+        </div>
+        <div class="lc-view-stat">
+          <span class="lc-view-stat__label">Pendientes</span>
+          <span class="lc-view-stat__value" data-role="pending-total">0</span>
+          <span class="lc-view-stat__meta" data-role="pending-breakdown">—</span>
+        </div>
+        <div class="lc-view-stat">
+          <span class="lc-view-stat__label">Liquidado mes</span>
+          <span class="lc-view-stat__value text-xl" data-role="settled-month">$0.00</span>
+        </div>
+        <div class="lc-view-stat">
+          <span class="lc-view-stat__label">Notas</span>
+          <span class="lc-view-stat__value" data-role="notes-total">0</span>
+          <span class="lc-view-stat__meta" data-role="reminders-total">0 con recordatorio</span>
+        </div>
+      </div>
+      <ul class="stats-section__budget-list" data-role="budget-list"></ul>
+      <p class="lc-empty" data-role="budget-empty" hidden>Sin presupuestos de dominio.</p>
+    </div>
+  </details>
 </section>

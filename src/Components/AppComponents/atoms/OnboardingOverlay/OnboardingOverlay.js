@@ -21,7 +21,7 @@ const STEPS = [
    },
    {
       title: 'Dashboard',
-      text: 'Tu resumen del día: lo que vence hoy y tus prioridades.'
+      text: 'Tareas primero (Todas, Vence hoy, Urgentes…). Abajo compras y finanzas, y estadísticas plegables.'
    },
    {
       title: 'Planificador',
@@ -41,15 +41,11 @@ const STEPS = [
    },
    {
       title: 'Hábitos',
-      text: 'Marca el día en cada hábito. La racha cuenta si no rompes la cadena.'
+      text: 'Define frecuencia, meta semanal, calendario y un aviso a una hora. Puedes saltar un día sin romper la racha.'
    },
    {
-      title: 'Modo enfoque',
-      text: 'Muestra solo el bloque de tiempo actual y sus tareas, para que te concentres en lo de ahora mismo.'
-   },
-   {
-      title: 'Estadísticas',
-      text: 'Tu progreso: tareas completadas, pendientes por urgencia y el avance de tus presupuestos por dominio.'
+      title: 'Enfoque',
+      text: 'El botón flotante Enfoque abre el bloque actual. Eliges qué hacer y sales sin cambiar de vista.'
    },
    {
       title: 'Vision Board',
@@ -57,7 +53,7 @@ const STEPS = [
    },
    {
       title: 'Perfil',
-      text: 'Aquí ajustas tu nombre, el tema, los dominios (áreas de tu vida), la moneda, las notificaciones y el respaldo de tus datos.'
+      text: 'Aquí ajustas nombre, tema, el orden de las vistas, notificaciones del teléfono y el respaldo.'
    }
 ];
 
