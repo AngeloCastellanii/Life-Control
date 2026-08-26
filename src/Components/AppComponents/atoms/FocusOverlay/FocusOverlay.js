@@ -1,6 +1,6 @@
-import { taskInBlockOnDay, todayISO } from '../../sections/plannerDates.js';
+import { taskInBlockOnDay, taskShowsOnCalendarDay, todayISO } from '../../sections/plannerDates.js';
 import { formatDuration } from '../../../Utils/formatDuration.js';
-import { formatBlockRangeLabel, formatTaskSlotLabel } from '../../../Utils/taskSlotTimes.js';
+import { formatBlockRangeLabel } from '../../../Utils/taskSlotTimes.js';
 import { enableDockDrag, mountInDock } from '../../sections/floatDock.js';
 
 function toMinutes(hhmm) {
@@ -29,7 +29,40 @@ function nextBlock(blocks, nowMinutes) {
    const upcoming = blocks
       .filter((block) => toMinutes(block.start) > nowMinutes)
       .sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
-   return upcoming[0] ?? blocks[0] ?? null;
+   return upcoming[0] ?? null;
+}
+
+function atToday(hhmm, dayOffset = 0) {
+   const [h, m] = String(hhmm ?? '0:0').split(':').map(Number);
+   const date = new Date();
+   date.setHours(h || 0, m || 0, 0, 0);
+   if (dayOffset) {
+      date.setDate(date.getDate() + dayOffset);
+   }
+   return date;
+}
+
+function blockEndDate(block, now) {
+   const start = atToday(block.start);
+   let end = atToday(block.end);
+   if (end <= start) {
+      end = atToday(block.end, 1);
+   }
+   if (now < start && end < now) {
+      end.setDate(end.getDate() + 1);
+   }
+   return end;
+}
+
+function formatCountdown(ms) {
+   const total = Math.max(0, Math.floor(ms / 1000));
+   const hours = Math.floor(total / 3600);
+   const minutes = Math.floor((total % 3600) / 60);
+   const seconds = total % 60;
+   if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+   }
+   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 export default class FocusOverlay extends HTMLElement {
@@ -44,12 +77,13 @@ export default class FocusOverlay extends HTMLElement {
       this.$panel = this.querySelector('[data-role="panel"]');
       this.$close = this.querySelector('[data-role="close"]');
       this.$clock = this.querySelector('[data-role="clock"]');
-      this.$tag = this.querySelector('[data-role="block-tag"]');
+      this.$remain = this.querySelector('[data-role="remain"]');
+      this.$caption = this.querySelector('[data-role="caption"]');
       this.$label = this.querySelector('[data-role="block-label"]');
       this.$range = this.querySelector('[data-role="block-range"]');
+      this.$progress = this.querySelector('[data-role="progress"]');
       this.$tasks = this.querySelector('[data-role="tasks"]');
       this.$empty = this.querySelector('[data-role="empty"]');
-      this._selected = new Set();
       this._open = false;
       slice.controller.setComponentProps(this, props);
    }
@@ -58,6 +92,9 @@ export default class FocusOverlay extends HTMLElement {
       this.taskService = slice.getComponent('task-service');
       mountInDock(this, 'prepend');
       enableDockDrag(this.$toggle);
+      if (this.$panel && this.$panel.parentElement !== document.body) {
+         document.body.appendChild(this.$panel);
+      }
 
       this.$toggle.addEventListener('click', () => {
          if (this.$toggle._dockDidDrag) {
@@ -91,6 +128,7 @@ export default class FocusOverlay extends HTMLElement {
       this.stopTimer();
       document.removeEventListener('keydown', this._onKey);
       document.documentElement.classList.remove('lc-focus-mode');
+      this.$panel?.remove();
    }
 
    setOpen(open) {
@@ -105,8 +143,7 @@ export default class FocusOverlay extends HTMLElement {
       );
       this.$toggle.classList.toggle('lc-focus-toggle--on', this._open);
       if (this._open) {
-         this._selected = new Set();
-         this.render({ seedSelection: true });
+         this.render();
          this.startTimer();
          this.$close?.focus?.();
       } else {
@@ -116,7 +153,7 @@ export default class FocusOverlay extends HTMLElement {
 
    startTimer() {
       this.stopTimer();
-      this._timer = setInterval(() => this.render(), 30 * 1000);
+      this._timer = setInterval(() => this.render(), 1000);
    }
 
    stopTimer() {
@@ -126,50 +163,59 @@ export default class FocusOverlay extends HTMLElement {
       }
    }
 
-   render({ seedSelection = false } = {}) {
+   render() {
       const state = slice.context.getState('lifeControl') ?? {};
       const blocks = state.timeBlocks ?? [];
       const tasks = state.tasks ?? [];
       const now = new Date();
+      const today = todayISO();
       this.$clock.textContent = now.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
 
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      let block = currentBlock(blocks, nowMinutes);
-      let isNow = Boolean(block);
-      if (!block) {
-         block = nextBlock(blocks, nowMinutes);
-      }
+      const live = currentBlock(blocks, nowMinutes);
+      const upcoming = live ? null : nextBlock(blocks, nowMinutes);
+      const block = live || upcoming;
 
-      if (!block) {
-         this.$tag.textContent = 'Ahora';
-         this.$label.textContent = 'Sin bloques';
+      let focusTasks = [];
+      if (block) {
+         this.$remain.hidden = false;
+         this.$caption.hidden = false;
+         this.$label.textContent = block.label;
+         this.$range.textContent = formatBlockRangeLabel(block.start, block.end);
+         if (live) {
+            this.$caption.textContent = 'Quedan';
+            this.$remain.textContent = formatCountdown(blockEndDate(block, now) - now);
+         } else {
+            const start = atToday(block.start);
+            this.$caption.textContent = 'Empieza en';
+            this.$remain.textContent = formatCountdown(start - now);
+         }
+         focusTasks = tasks.filter((task) => task.blockId === block.id && taskInBlockOnDay(task, today));
+      } else {
+         this.$remain.hidden = true;
+         this.$caption.hidden = true;
+         this.$label.textContent = 'Hoy';
          this.$range.textContent = '';
-         this.$tasks.innerHTML = '';
-         this.$empty.hidden = false;
-         return;
+         focusTasks = tasks.filter((task) => !task.completed && taskShowsOnCalendarDay(task, today));
       }
 
-      this.$tag.textContent = isNow ? 'Ahora' : 'Próximo';
-      this.$label.textContent = block.label;
-      this.$range.textContent = formatBlockRangeLabel(block.start, block.end);
-
-      const today = todayISO();
-      const blockTasks = tasks
-         .filter((task) => task.blockId === block.id && taskInBlockOnDay(task, today))
-         .sort((a, b) => (a.slotStart ?? '').localeCompare(b.slotStart ?? ''));
-
-      if (seedSelection) {
-         this._selected = new Set(blockTasks.filter((task) => !task.completed).map((task) => task.id));
-      }
-
-      this.renderTasks(blockTasks);
+      focusTasks.sort((a, b) => (a.slotStart ?? '').localeCompare(b.slotStart ?? ''));
+      this.renderTasks(focusTasks);
    }
 
    renderTasks(blockTasks) {
       this.$tasks.innerHTML = '';
-      this.$empty.hidden = blockTasks.length > 0;
       const pending = blockTasks.filter((task) => !task.completed);
-      const ordered = [...pending, ...blockTasks.filter((task) => task.completed)];
+      const done = blockTasks.filter((task) => task.completed);
+      const total = blockTasks.length;
+      const completed = done.length;
+      this.$progress.hidden = total === 0;
+      this.$progress.textContent = total ? `${completed} / ${total}` : '';
+      this.$empty.hidden = total > 0;
+      this.$empty.textContent = 'Nada pendiente.';
+
+      const ordered = [...pending, ...done];
+      const currentId = pending[0]?.id;
 
       for (const task of ordered) {
          const li = document.createElement('li');
@@ -177,32 +223,18 @@ export default class FocusOverlay extends HTMLElement {
          if (task.completed) {
             li.classList.add('lc-focus-task--done');
          }
-         if (this._selected.has(task.id)) {
-            li.classList.add('lc-focus-task--picked');
+         if (task.id === currentId) {
+            li.classList.add('lc-focus-task--now');
          }
 
-         const pick = document.createElement('input');
-         pick.type = 'checkbox';
-         pick.className = 'lc-focus-task__pick';
-         pick.checked = this._selected.has(task.id);
-         pick.disabled = Boolean(task.completed);
-         pick.setAttribute('aria-label', `Incluir ${task.title}`);
-         pick.addEventListener('change', () => {
-            if (pick.checked) {
-               this._selected.add(task.id);
-            } else {
-               this._selected.delete(task.id);
-            }
-            li.classList.toggle('lc-focus-task--picked', pick.checked);
-         });
-
-         const done = document.createElement('input');
-         done.type = 'checkbox';
-         done.className = 'lc-focus-task__done';
-         done.checked = Boolean(task.completed);
-         done.setAttribute('aria-label', `Completar ${task.title}`);
-         done.addEventListener('change', () => {
-            this.taskService?.toggleComplete(task.id, done.checked);
+         const mark = document.createElement('input');
+         mark.type = 'checkbox';
+         mark.className = 'lc-focus-task__done';
+         mark.checked = Boolean(task.completed);
+         mark.setAttribute('aria-label', `Completar ${task.title}`);
+         mark.addEventListener('click', (event) => event.stopPropagation());
+         mark.addEventListener('change', () => {
+            this.taskService?.toggleComplete(task.id, mark.checked);
          });
 
          const info = document.createElement('div');
@@ -210,14 +242,18 @@ export default class FocusOverlay extends HTMLElement {
          const title = document.createElement('span');
          title.className = 'lc-focus-task__title';
          title.textContent = task.title;
-         const meta = document.createElement('span');
-         meta.className = 'lc-focus-task__meta';
-         const slot =
-            task.slotStart && task.slotEnd ? `${formatTaskSlotLabel(task.slotStart, task.slotEnd)} · ` : '';
-         meta.textContent = `${slot}${formatDuration(task.minutes ?? 0, { short: true })}`;
-         info.append(title, meta);
+         info.appendChild(title);
+         if (task.minutes) {
+            const meta = document.createElement('span');
+            meta.className = 'lc-focus-task__meta';
+            meta.textContent = formatDuration(task.minutes, { short: true });
+            info.appendChild(meta);
+         }
 
-         li.append(pick, done, info);
+         li.append(mark, info);
+         li.addEventListener('click', () => {
+            this.taskService?.toggleComplete(task.id, !task.completed);
+         });
          this.$tasks.appendChild(li);
       }
    }

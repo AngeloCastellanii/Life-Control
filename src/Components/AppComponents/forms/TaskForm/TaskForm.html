@@ -1,75 +1,72 @@
 <form class="flex flex-col gap-4" data-role="form">
   <div>
     <label class="lc-label" for="task-form-title">Título</label>
-    <input class="lc-input" id="task-form-title" type="text" placeholder="Estudiar capítulo 3…" required />
+    <input class="lc-input" id="task-form-title" type="text" placeholder="Estudiar…" required />
   </div>
   <div>
     <label class="lc-label" for="task-form-domain">Dominio</label>
-    <p class="lc-hint" data-role="domain-hint">Clasifica la tarea por área (aparece con color en el planificador).</p>
     <select class="lc-input" id="task-form-domain" required></select>
   </div>
   <div>
-    <label class="lc-label" for="task-form-urgency">Urgencia</label>
-    <select class="lc-input" id="task-form-urgency">
-      <option value="high">Alta</option>
-      <option value="medium" selected>Media</option>
-      <option value="low">Baja</option>
-    </select>
-  </div>
-  <div>
     <label class="lc-label" for="task-form-duration">Duración</label>
-    <p class="lc-hint" data-role="duration-hint">En minutos, horas o días. Si eliges días, la tarea aparece cada día de ese rango hasta completarla.</p>
     <div class="task-form__duration-row">
       <input class="lc-input" id="task-form-duration" type="number" min="0.01" step="any" value="30" required />
-      <select class="lc-input" id="task-form-duration-unit" aria-label="Unidad de duración">
-        <option value="minutes" selected>Minutos</option>
+      <select class="lc-input" id="task-form-duration-unit" aria-label="Unidad">
+        <option value="minutes" selected>Min</option>
         <option value="hours">Horas</option>
         <option value="days">Días</option>
       </select>
     </div>
   </div>
   <div>
-    <label class="lc-label" for="task-form-recurrence">Repetición</label>
-    <p class="lc-hint">Al completarla se crea automáticamente la siguiente.</p>
-    <select class="lc-input" id="task-form-recurrence">
-      <option value="none" selected>No se repite</option>
-      <option value="daily">Cada día</option>
-      <option value="weekly">Cada semana</option>
-      <option value="monthly">Cada mes</option>
-    </select>
-  </div>
-  <div class="grid gap-4 sm:grid-cols-2">
-    <div>
-      <label class="lc-label" for="task-form-start">Desde (inbox)</label>
-      <p class="lc-hint">Aparece en el inbox a partir de este día.</p>
-      <input class="lc-input" id="task-form-start" type="date" />
-    </div>
-    <div>
-      <label class="lc-label" for="task-form-due">Fecha tope</label>
-      <p class="lc-hint">Último día en inbox si no está en un bloque. Con duración en días se calcula sola.</p>
-      <input class="lc-input" id="task-form-due" type="date" />
-    </div>
-  </div>
-  <div>
-    <label class="lc-label" for="task-form-block">Bloque de tiempo</label>
-    <p class="lc-hint">Opcional. Si eliges uno, la franja se ajusta sola según la duración.</p>
+    <label class="lc-label" for="task-form-block">Bloque</label>
     <select class="lc-input" id="task-form-block">
-      <option value="">Inbox (sin bloque)</option>
+      <option value="">Inbox</option>
     </select>
   </div>
   <div class="grid gap-4 sm:grid-cols-2" data-role="slot-section" hidden>
     <div>
-      <label class="lc-label" for="task-form-slot-start">Hora inicio en bloque</label>
-      <p class="lc-hint" data-role="slot-hint">Se muestra en AM/PM. Al cambiarla, el fin se calcula con la duración.</p>
+      <label class="lc-label" for="task-form-slot-start">Inicio</label>
       <input class="lc-input" id="task-form-slot-start" type="time" step="60" />
     </div>
     <div>
-      <label class="lc-label" for="task-form-slot-end">Hora fin en bloque</label>
-      <p class="lc-hint">Al cambiarla, el inicio se calcula con la duración. Las tareas se apilan una detrás de otra.</p>
+      <label class="lc-label" for="task-form-slot-end">Fin</label>
       <input class="lc-input" id="task-form-slot-end" type="time" step="60" />
     </div>
   </div>
-  <p class="lc-empty" data-role="hint" hidden>Crea un dominio antes de añadir tareas.</p>
+  <details class="lc-form-more" data-role="more">
+    <summary class="lc-collapse-summary">Más</summary>
+    <div class="lc-form-more__body">
+      <div>
+        <label class="lc-label" for="task-form-urgency">Urgencia</label>
+        <select class="lc-input" id="task-form-urgency">
+          <option value="high">Alta</option>
+          <option value="medium" selected>Media</option>
+          <option value="low">Baja</option>
+        </select>
+      </div>
+      <div>
+        <label class="lc-label" for="task-form-recurrence">Repetir</label>
+        <select class="lc-input" id="task-form-recurrence">
+          <option value="none" selected>No</option>
+          <option value="daily">Cada día</option>
+          <option value="weekly">Cada semana</option>
+          <option value="monthly">Cada mes</option>
+        </select>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="lc-label" for="task-form-start">Desde</label>
+          <input class="lc-input" id="task-form-start" type="date" />
+        </div>
+        <div>
+          <label class="lc-label" for="task-form-due">Tope</label>
+          <input class="lc-input" id="task-form-due" type="date" />
+        </div>
+      </div>
+    </div>
+  </details>
+  <p class="lc-empty" data-role="hint" hidden>Crea un dominio primero.</p>
   <p class="block-form__error" data-role="error" hidden></p>
   <div class="flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>
 </form>

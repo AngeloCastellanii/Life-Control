@@ -20,9 +20,7 @@ export default class PaymentMethodForm extends HTMLElement {
       this.$name = this.querySelector('#payment-method-form-name');
       this.$balance = this.querySelector('#payment-method-form-balance');
       this.$balanceLabel = this.querySelector('[data-role="balance-label"]');
-      this.$balanceHint = this.querySelector('[data-role="balance-hint"]');
       this.$pool = this.querySelector('[data-role="pool"]');
-      this.$poolHint = this.querySelector('[data-role="pool-hint"]');
       this.$colors = this.querySelector('[data-role="colors"]');
       this.$error = this.querySelector('[data-role="error"]');
       this._color = PAYMENT_METHOD_COLORS[0];
@@ -87,8 +85,7 @@ export default class PaymentMethodForm extends HTMLElement {
 
    populate() {
       hideFormError(this.$error);
-      const service = getService('payment-method-service', ['getById', 'getPool', 'getAll', 'getLegacyWalletBalance']);
-      const pool = service?.getPool?.();
+      const service = getService('payment-method-service', ['getById', 'getAll', 'getLegacyWalletBalance']);
       const methods = service?.getAll?.() ?? [];
 
       if (this.paymentMethodId) {
@@ -101,11 +98,6 @@ export default class PaymentMethodForm extends HTMLElement {
          this.$balance.value = String(method.balance);
          this.$pool.checked = Boolean(method.isPool);
          this.selectColor(method.color || PAYMENT_METHOD_COLORS[0]);
-         this.$balanceHint.textContent = method.isPool
-            ? 'Fondo principal: al crear otros métodos se puede usar este saldo primero.'
-            : pool
-              ? `Si subes el saldo y hay dinero en “${pool.name}”, se usa primero ese fondo.`
-              : 'Este saldo suma al total del fondo.';
       } else {
          this.$name.value = '';
          this.$pool.checked = false;
@@ -115,11 +107,6 @@ export default class PaymentMethodForm extends HTMLElement {
          const legacy =
             methods.length === 0 ? Number(service?.getLegacyWalletBalance?.() || 0) : 0;
          this.$balance.value = legacy > 0 ? String(legacy) : '0';
-         this.$balanceHint.textContent = pool
-            ? `Si “${pool.name}” tiene saldo, se usará primero. Si no, entra directo aquí.`
-            : legacy > 0
-              ? 'Aún no tienes métodos: este será el primero. Ajusta el monto si hace falta.'
-              : 'Pon el saldo de este método. El total del fondo será la suma de todos.';
       }
    }
 

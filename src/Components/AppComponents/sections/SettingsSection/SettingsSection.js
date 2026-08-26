@@ -280,7 +280,9 @@ export default class SettingsSection extends HTMLElement {
       if (!this.$domainList) {
          return;
       }
-      this.$addDomain?.addEventListener('click', () => {
+      this.$addDomain?.addEventListener('click', (event) => {
+         event.preventDefault();
+         event.stopPropagation();
          slice.events.emit('ui:modal:open', { title: 'Nuevo dominio', form: 'DomainForm' });
       });
       slice.context.watch(

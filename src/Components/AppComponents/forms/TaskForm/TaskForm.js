@@ -45,9 +45,9 @@ export default class TaskForm extends HTMLElement {
       this.$startInput = this.querySelector('#task-form-start');
       this.$dueInput = this.querySelector('#task-form-due');
       this.$slotSection = this.querySelector('[data-role="slot-section"]');
-      this.$slotHint = this.querySelector('[data-role="slot-hint"]');
       this.$slotStart = this.querySelector('#task-form-slot-start');
       this.$slotEnd = this.querySelector('#task-form-slot-end');
+      this.$more = this.querySelector('[data-role="more"]');
       this.$error = this.querySelector('[data-role="error"]');
       this._buttonsReady = false;
       this._syncingSlot = false;
@@ -134,6 +134,9 @@ export default class TaskForm extends HTMLElement {
          this.$slotStart.value = '';
          this.$slotEnd.value = '';
          this.updateSlotFieldsVisibility();
+         if (this.$more) {
+            this.$more.open = false;
+         }
       }
    }
 
@@ -165,7 +168,7 @@ export default class TaskForm extends HTMLElement {
 
       const inboxOption = document.createElement('option');
       inboxOption.value = '';
-      inboxOption.textContent = 'Inbox (sin bloque)';
+      inboxOption.textContent = 'Inbox';
       this.$blockSelect.appendChild(inboxOption);
 
       for (const block of blocks) {
@@ -238,12 +241,6 @@ export default class TaskForm extends HTMLElement {
             input.min = block.start;
             input.max = blockEnd;
          }
-      }
-
-      if (this.$slotHint) {
-         this.$slotHint.textContent = overnight
-            ? `Dentro de ${formatBlockRangeLabel(block.start, blockEnd)} (cruza medianoche). Se apilan solas si hay otras tareas.`
-            : `Dentro de ${formatBlockRangeLabel(block.start, blockEnd)}. Se apilan solas si hay otras tareas.`;
       }
    }
 
@@ -407,6 +404,14 @@ export default class TaskForm extends HTMLElement {
       this.$startInput.value = start ?? '';
       this.$dueInput.value = end ?? '';
       this.updateSlotFieldsVisibility();
+      if (this.$more) {
+         const extra =
+            (task.urgency && task.urgency !== 'medium') ||
+            (task.recurrence && task.recurrence !== 'none') ||
+            Boolean(start) ||
+            Boolean(end);
+         this.$more.open = extra;
+      }
       const block = this.getSelectedBlock();
       if (block && blockNeedsSlotPicker(block) && !task.slotStart) {
          const { slotStart, slotEnd } = this.stackedSlotForSelectedBlock();

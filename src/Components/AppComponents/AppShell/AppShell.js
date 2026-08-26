@@ -94,7 +94,7 @@ export default class AppShell extends HTMLElement {
       const isInteractive = (target) =>
          Boolean(
             target?.closest?.(
-               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding, .sidebar, .lc-notice-root, .lc-focus-root, .lc-float-dock'
+               'input, textarea, select, button, a, [contenteditable="true"], .modal-shell, .onboarding, .sidebar, .lc-notice-root, .lc-focus-root, .lc-focus-stage, .lc-float-dock'
             )
          );
 

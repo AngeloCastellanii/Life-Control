@@ -9,6 +9,32 @@ function formatTarget(iso) {
    return date.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function daysUntilLabel(iso, achieved) {
+   if (achieved) {
+      return 'Lograda';
+   }
+   const target = new Date(`${iso}T12:00:00`);
+   if (Number.isNaN(target.getTime())) {
+      return '';
+   }
+   const today = new Date();
+   today.setHours(12, 0, 0, 0);
+   const days = Math.round((target.getTime() - today.getTime()) / 86400000);
+   if (days > 1) {
+      return `${days} días`;
+   }
+   if (days === 1) {
+      return '1 día';
+   }
+   if (days === 0) {
+      return 'Hoy';
+   }
+   if (days === -1) {
+      return 'Hace 1 día';
+   }
+   return `Hace ${Math.abs(days)} días`;
+}
+
 function todayISO() {
    return new Date().toISOString().slice(0, 10);
 }
@@ -231,12 +257,23 @@ export default class VisionSection extends HTMLElement {
          }
 
          if (item.targetDate) {
+            const row = document.createElement('div');
+            row.className = 'vision-section__dates';
+
             const badge = document.createElement('span');
             badge.className = 'vision-section__target';
             const overdue = !item.achieved && item.targetDate < today;
             badge.classList.toggle('vision-section__target--overdue', overdue);
             badge.textContent = `${overdue ? '⚠️' : '🎯'} ${formatTarget(item.targetDate)}`;
-            body.appendChild(badge);
+
+            const remain = document.createElement('span');
+            remain.className = 'vision-section__remain';
+            remain.classList.toggle('vision-section__remain--overdue', overdue);
+            remain.classList.toggle('vision-section__remain--done', Boolean(item.achieved));
+            remain.textContent = daysUntilLabel(item.targetDate, item.achieved);
+
+            row.append(badge, remain);
+            body.appendChild(row);
          }
 
          const actions = document.createElement('div');

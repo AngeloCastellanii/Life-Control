@@ -1,5 +1,9 @@
 <form class="flex flex-col gap-4" data-role="form">
   <div>
+    <label class="lc-label" for="shopping-form-name">Artículo</label>
+    <input class="lc-input" id="shopping-form-name" type="text" placeholder="Leche, pan…" required />
+  </div>
+  <div>
     <label class="lc-label" for="shopping-form-frequency">Frecuencia</label>
     <select class="lc-input" id="shopping-form-frequency">
       <option value="daily">Diaria</option>
@@ -8,40 +12,31 @@
       <option value="yearly">Anual</option>
     </select>
   </div>
-  <div>
-    <label class="lc-label" for="shopping-form-name">Artículo</label>
-    <input class="lc-input" id="shopping-form-name" type="text" placeholder="item" required />
-  </div>
   <div class="shopping-form__price-row">
     <div>
       <label class="lc-label" for="shopping-form-price">Precio (USD)</label>
-      <input
-        class="lc-input"
-        id="shopping-form-price"
-        type="number"
-        min="0"
-        step="0.01"
-        placeholder="0.00"
-      />
-      <p class="shopping-form__hint">Al marcar como comprado se registra un egreso en Finanzas.</p>
+      <input class="lc-input" id="shopping-form-price" type="number" min="0" step="0.01" placeholder="0.00" />
     </div>
     <div>
-      <label class="lc-label" for="shopping-form-account">Método de pago</label>
+      <label class="lc-label" for="shopping-form-account">Pago</label>
       <select class="lc-input" id="shopping-form-account">
-        <option value="">Método por defecto</option>
+        <option value="">Por defecto</option>
       </select>
     </div>
   </div>
-  <div>
-    <label class="lc-label" for="shopping-form-last-done">Última vez (opcional)</label>
-    <input class="lc-input" id="shopping-form-last-done" type="date" />
-    <p class="shopping-form__hint">Si ya pagaste o compraste antes de usar la app.</p>
-  </div>
-  <div>
-    <label class="lc-label" for="shopping-form-next-due">Próxima fecha (opcional)</label>
-    <input class="lc-input" id="shopping-form-next-due" type="date" />
-    <p class="shopping-form__hint" data-role="next-hint">Se calcula sola al indicar la última vez.</p>
-  </div>
+  <details class="lc-form-more" data-role="dates">
+    <summary class="lc-collapse-summary">Fechas</summary>
+    <div class="lc-form-more__body">
+      <div>
+        <label class="lc-label" for="shopping-form-last-done">Última vez</label>
+        <input class="lc-input" id="shopping-form-last-done" type="date" />
+      </div>
+      <div>
+        <label class="lc-label" for="shopping-form-next-due">Próxima</label>
+        <input class="lc-input" id="shopping-form-next-due" type="date" />
+      </div>
+    </div>
+  </details>
   <p class="block-form__error" data-role="error" hidden></p>
   <div class="flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>
 </form>

@@ -1,27 +1,26 @@
 <form class="vision-form flex flex-col gap-4" data-role="form">
   <div>
     <label class="lc-label" for="vision-form-title">Meta</label>
-    <input class="lc-input" id="vision-form-title" type="text" placeholder="Viajar a Japón, comprar casa…" required />
+    <input class="lc-input" id="vision-form-title" type="text" placeholder="Viajar a Japón…" required />
   </div>
   <div>
-    <label class="lc-label" for="vision-form-description">Descripción</label>
-    <textarea class="lc-input" id="vision-form-description" rows="3" placeholder="¿Por qué es importante para ti?"></textarea>
+    <label class="lc-label" for="vision-form-description">Nota</label>
+    <textarea class="lc-input" id="vision-form-description" rows="2"></textarea>
   </div>
   <div>
-    <label class="lc-label" for="vision-form-date">Fecha objetivo</label>
+    <label class="lc-label" for="vision-form-date">Fecha</label>
     <input class="lc-input" id="vision-form-date" type="date" />
   </div>
   <div>
-    <label class="lc-label" for="vision-form-image">Fotos (hasta 4)</label>
-    <p class="lc-hint">Sube una o varias fotos, o pega URLs. Con 2–4 fotos se arma un collage tipo Instagram.</p>
+    <label class="lc-label" for="vision-form-image">Fotos</label>
     <input class="lc-input" id="vision-form-image" type="file" accept="image/*" multiple />
     <div class="vision-form__url-row mt-2">
-      <input class="lc-input" id="vision-form-image-url" type="url" placeholder="https://… (añadir URL)" />
+      <input class="lc-input" id="vision-form-image-url" type="url" placeholder="URL de foto" />
       <button type="button" class="lc-btn-outline" data-role="add-url">Añadir</button>
     </div>
     <ul class="vision-form__thumbs" data-role="thumbs"></ul>
     <button type="button" class="lc-btn-outline vision-form__clear mt-2" data-role="clear-image" hidden>
-      Quitar todas
+      Quitar
     </button>
   </div>
   <p class="block-form__error" data-role="error" hidden></p>

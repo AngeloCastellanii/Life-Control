@@ -2,34 +2,32 @@
   <div>
     <label class="lc-label" for="finance-form-type">Tipo</label>
     <select class="lc-input" id="finance-form-type">
-      <option value="pay">Egreso / por pagar</option>
-      <option value="receive">Ingreso / por cobrar</option>
+      <option value="pay">Por pagar</option>
+      <option value="receive">Por cobrar</option>
     </select>
   </div>
   <div>
-    <label class="lc-label" for="finance-form-description">Descripción</label>
-    <input class="lc-input" id="finance-form-description" type="text" placeholder="Alquiler, cliente X…" required />
+    <label class="lc-label" for="finance-form-description">Qué</label>
+    <input class="lc-input" id="finance-form-description" type="text" placeholder="Alquiler, cliente…" required />
   </div>
   <div>
     <label class="lc-label" for="finance-form-amount">Monto (USD)</label>
     <input class="lc-input" id="finance-form-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required />
   </div>
   <div>
-    <label class="lc-label" for="finance-form-due">Fecha objetivo</label>
+    <label class="lc-label" for="finance-form-due">Fecha</label>
     <input class="lc-input" id="finance-form-due" type="date" />
   </div>
   <div>
-    <label class="lc-label" for="finance-form-account">Método de pago</label>
-    <p class="lc-hint">Dónde entra o sale el dinero (Zelle, Binance, efectivo…).</p>
+    <label class="lc-label" for="finance-form-account">Método</label>
     <select class="lc-input" id="finance-form-account" required>
-      <option value="">Selecciona un método</option>
+      <option value="">Elegir</option>
     </select>
   </div>
   <div>
     <label class="lc-label" for="finance-form-domain">Dominio</label>
-    <p class="lc-hint">Opcional. Se usa para el seguimiento de presupuesto por dominio.</p>
     <select class="lc-input" id="finance-form-domain">
-      <option value="">Sin dominio</option>
+      <option value="">Ninguno</option>
     </select>
   </div>
   <p class="block-form__error" data-role="error" hidden></p>

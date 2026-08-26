@@ -38,7 +38,7 @@ export default class ShoppingForm extends HTMLElement {
       this.$accountSelect = this.querySelector('#shopping-form-account');
       this.$lastDoneInput = this.querySelector('#shopping-form-last-done');
       this.$nextDueInput = this.querySelector('#shopping-form-next-due');
-      this.$nextHint = this.querySelector('[data-role="next-hint"]');
+      this.$dates = this.querySelector('[data-role="dates"]');
       this.$error = this.querySelector('[data-role="error"]');
       this._nextDueTouched = false;
       this._buttonsReady = false;
@@ -95,7 +95,7 @@ export default class ShoppingForm extends HTMLElement {
       this.$accountSelect.innerHTML = '';
       const empty = document.createElement('option');
       empty.value = '';
-      empty.textContent = methods.length ? 'Método por defecto' : 'Sin métodos (usa el fondo)';
+      empty.textContent = methods.length ? 'Por defecto' : 'Fondo';
       this.$accountSelect.appendChild(empty);
       for (const method of methods) {
          const option = document.createElement('option');
@@ -131,7 +131,6 @@ export default class ShoppingForm extends HTMLElement {
 
       if (!this._nextDueTouched || !currentNext || currentNext <= last) {
          this.$nextDueInput.value = next;
-         this.$nextHint.textContent = `Calculada según frecuencia: ${next}`;
       }
    }
 
@@ -156,6 +155,9 @@ export default class ShoppingForm extends HTMLElement {
             : (item.nextDueAt ?? todayISO());
       this.$nextDueInput.value = nextDue;
       this._nextDueTouched = Boolean(item.nextDueAt && item.nextDueAt > (item.lastDoneAt ?? ''));
+      if (this.$dates && (item.lastDoneAt || item.nextDueAt)) {
+         this.$dates.open = true;
+      }
    }
 
    async handleSubmit() {

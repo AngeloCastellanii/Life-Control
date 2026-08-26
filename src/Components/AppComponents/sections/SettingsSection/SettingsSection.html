@@ -68,8 +68,8 @@
       </label>
     </div>
 
-    <div class="lc-card settings-section__card settings-section__card--domains md:col-span-2">
-      <div class="settings-section__card-head">
+    <details class="lc-card settings-section__card settings-section__card--domains md:col-span-2" open>
+      <summary class="settings-section__card-head lc-collapse-summary">
         <span class="settings-section__card-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
             <circle cx="12" cy="12" r="3" />
@@ -81,10 +81,10 @@
           <p class="settings-section__hint">Áreas de tu vida con color para clasificar tareas y presupuestos.</p>
         </div>
         <button type="button" class="settings-section__add-domain" data-role="add-domain">+ Nuevo</button>
-      </div>
+      </summary>
       <ul class="domains-section__list" data-role="domain-list"></ul>
       <p class="lc-empty" data-role="domain-empty" hidden>Sin dominios todavía.</p>
-    </div>
+    </details>
 
     <div class="lc-card settings-section__card settings-section__card--backup md:col-span-2">
       <div class="settings-section__card-head">
@@ -188,7 +188,7 @@
   </div>
 
   <details class="lc-card settings-section__guide" data-role="guide">
-    <summary class="settings-section__guide-head">
+    <summary class="settings-section__guide-head lc-collapse-summary">
       <span class="settings-section__card-icon settings-section__card-icon--guide" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
           <path d="M4 6h16M4 12h10M4 18h14" stroke-linecap="round" />
@@ -200,7 +200,7 @@
       </div>
     </summary>
     <details class="settings-section__guide-block" data-role="guide-views">
-    <summary class="settings-section__guide-group">Vistas</summary>
+    <summary class="settings-section__guide-group lc-collapse-summary">Vistas</summary>
     <dl class="settings-section__guide-list">
       <div class="settings-section__guide-item">
         <span class="settings-section__guide-icon settings-section__guide-icon--dashboard" aria-hidden="true">
@@ -323,7 +323,7 @@
     </details>
 
     <details class="settings-section__guide-block" data-role="guide-features">
-    <summary class="settings-section__guide-group">Funciones</summary>
+    <summary class="settings-section__guide-group lc-collapse-summary">Funciones</summary>
     <dl class="settings-section__guide-list">
       <div class="settings-section__guide-item">
         <span class="settings-section__guide-icon settings-section__guide-icon--dashboard" aria-hidden="true">

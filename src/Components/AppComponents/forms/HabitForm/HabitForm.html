@@ -4,16 +4,16 @@
     <input class="lc-input" id="habit-form-name" type="text" maxlength="60" required />
   </div>
   <div>
-    <label class="lc-label" for="habit-form-notes">Para qué (opcional)</label>
+    <label class="lc-label" for="habit-form-notes">Para qué</label>
     <input class="lc-input" id="habit-form-notes" type="text" maxlength="120" />
   </div>
   <div>
-    <label class="lc-label" for="habit-form-frequency">Frecuencia</label>
+    <label class="lc-label" for="habit-form-frequency">Cuándo</label>
     <select class="lc-input" id="habit-form-frequency" data-role="frequency">
       <option value="daily">Todos los días</option>
       <option value="weekdays">Lunes a viernes</option>
       <option value="custom">Días concretos</option>
-      <option value="weekly">Meta semanal (X veces)</option>
+      <option value="weekly">X veces por semana</option>
     </select>
   </div>
   <div data-role="weekdays-wrap" hidden>
@@ -21,11 +21,11 @@
     <div class="habit-form__days" data-role="weekdays"></div>
   </div>
   <div data-role="target-wrap" hidden>
-    <label class="lc-label" for="habit-form-target">Veces por semana</label>
+    <label class="lc-label" for="habit-form-target">Veces / semana</label>
     <input class="lc-input" id="habit-form-target" type="number" min="1" max="7" value="4" />
   </div>
   <div>
-    <label class="lc-label" for="habit-form-remind">Aviso en el teléfono (opcional)</label>
+    <label class="lc-label" for="habit-form-remind">Aviso</label>
     <input class="lc-input" id="habit-form-remind" type="time" />
   </div>
   <div>

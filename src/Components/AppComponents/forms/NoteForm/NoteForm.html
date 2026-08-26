@@ -1,7 +1,7 @@
 <form class="note-form flex flex-col gap-4" data-role="form">
   <div class="note-form__field">
     <label class="lc-label" for="note-form-title">Título</label>
-    <input class="lc-input" id="note-form-title" type="text" maxlength="80" placeholder="Idea, recordatorio, pendiente…" />
+    <input class="lc-input" id="note-form-title" type="text" maxlength="80" placeholder="Idea…" />
   </div>
   <div class="note-form__field">
     <span class="lc-label">Tipo</span>
@@ -11,30 +11,28 @@
     </div>
   </div>
   <div class="note-form__field" data-role="body-field">
-    <label class="lc-label" for="note-form-body">Contenido</label>
-    <textarea class="lc-input note-form__textarea" id="note-form-body" rows="5" placeholder="Escribe tu nota…"></textarea>
+    <label class="lc-label" for="note-form-body">Nota</label>
+    <textarea class="lc-input note-form__textarea" id="note-form-body" rows="4" placeholder="Escribe…"></textarea>
   </div>
-    <div class="note-form__field" data-role="list-field" hidden>
-    <label class="lc-label" for="note-form-list-input">Ítems de la lista</label>
-    <p class="note-form__hint lc-view-hint">Pega viñetas (−, *, °, 1.) o varias líneas y se convierten solos. Al pasar de Texto a Lista también se detectan.</p>
+  <div class="note-form__field" data-role="list-field" hidden>
+    <label class="lc-label" for="note-form-list-input">Ítems</label>
     <ol class="note-form__checklist" data-role="checklist"></ol>
     <div class="note-form__list-add">
-      <input class="lc-input" id="note-form-list-input" type="text" placeholder="Añadir ítem o pegar una lista…" maxlength="2000" />
+      <input class="lc-input" id="note-form-list-input" type="text" placeholder="Añadir o pegar…" maxlength="2000" />
       <button type="button" class="lc-btn-outline note-form__list-add-btn" data-role="add-item">Añadir</button>
     </div>
   </div>
   <div class="note-form__field">
-    <label class="lc-label" for="note-form-remind">Recordatorio (opcional)</label>
+    <label class="lc-label" for="note-form-remind">Aviso</label>
     <input class="lc-input" id="note-form-remind" type="datetime-local" />
-    <p class="note-form__hint lc-view-hint">Te avisamos con una notificación a esa hora si la app está abierta o en segundo plano.</p>
   </div>
   <div class="note-form__field">
-    <span class="lc-label">Color (dominios)</span>
+    <span class="lc-label">Color</span>
     <div class="note-form__colors" data-role="colors"></div>
   </div>
   <label class="note-form__pinned">
     <input type="checkbox" id="note-form-pinned" />
-    <span>Fijar arriba</span>
+    <span>Fijar</span>
   </label>
   <p class="block-form__error" data-role="error" hidden></p>
   <div class="note-form__actions flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>
