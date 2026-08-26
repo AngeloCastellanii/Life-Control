@@ -234,7 +234,7 @@ export default class ReminderService {
 
       const notes = this.notesService?.getAll?.() ?? [];
       for (const note of notes) {
-         if (!note.remindAt || note.notified) {
+         if (note.archived || !note.remindAt || note.notified) {
             continue;
          }
          const at = new Date(note.remindAt).getTime();

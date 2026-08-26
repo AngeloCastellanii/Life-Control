@@ -46,6 +46,7 @@ export default class ModalShell extends HTMLElement {
          payload.shoppingId ??
          payload.financeId ??
          payload.noteId ??
+         payload.habitId ??
          payload.visionId ??
          payload.paymentMethodId ??
          payload.ledgerAccountId ??
@@ -113,6 +114,7 @@ export default class ModalShell extends HTMLElement {
          shoppingId: payload.shoppingId ?? null,
          financeId: payload.financeId ?? null,
          noteId: payload.noteId ?? null,
+         habitId: payload.habitId ?? null,
          visionId: payload.visionId ?? null,
          paymentMethodId: payload.paymentMethodId ?? payload.ledgerAccountId ?? null
       });

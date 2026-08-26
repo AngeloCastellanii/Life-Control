@@ -76,8 +76,8 @@ export default class StatsSection extends HTMLElement {
          .reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
       this.$settledMonth.textContent = money(settledMonth);
 
-      this.$notesTotal.textContent = String(notes.length);
-      this.$remindersTotal.textContent = `${notes.filter((n) => n.remindAt).length} con recordatorio`;
+      this.$notesTotal.textContent = String(notes.filter((n) => !n.archived).length);
+      this.$remindersTotal.textContent = `${notes.filter((n) => n.remindAt && !n.archived).length} con recordatorio`;
 
       this.renderBudgets(domains, finances, month);
    }

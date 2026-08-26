@@ -14,6 +14,7 @@ const VIEWS = [
    { kind: 'Vista', text: 'Finanzas', sub: 'Pagos y cobros', route: '/finances', aliases: ['dinero', 'pagos', 'cobros'] },
    { kind: 'Vista', text: 'Compras', sub: 'Lista de compras', route: '/shopping', aliases: ['shopping', 'super'] },
    { kind: 'Vista', text: 'Notas', sub: 'Notas y recordatorios', route: '/notes', aliases: ['nota', 'lista'] },
+   { kind: 'Vista', text: 'Hábitos', sub: 'Racha diaria', route: '/habits', aliases: ['habito', 'habitos', 'racha'] },
    { kind: 'Vista', text: 'Enfoque', sub: 'Bloque actual', route: '/focus', aliases: ['focus', 'concentracion'] },
    { kind: 'Vista', text: 'Estadísticas', sub: 'Progreso y presupuestos', route: '/stats', aliases: ['stats', 'estadisticas'] },
    { kind: 'Vista', text: 'Vision Board', sub: 'Metas visuales', route: '/vision', aliases: ['vision', 'metas', 'sueños'] },
@@ -68,9 +69,14 @@ export default class SearchPanel extends HTMLElement {
          items.push({
             kind: note.type === 'list' ? 'Lista' : 'Nota',
             text: note.title,
-            sub: note.body?.slice(0, 60) || checklistText.slice(0, 60) || '',
+            sub: note.archived
+               ? 'Archivada'
+               : note.body?.slice(0, 60) || checklistText.slice(0, 60) || '',
             route: '/notes'
          });
+      }
+      for (const habit of state.habits ?? []) {
+         items.push({ kind: 'Hábito', text: habit.name, sub: '', route: '/habits' });
       }
       for (const vision of state.vision ?? []) {
          items.push({

@@ -10,7 +10,7 @@
     </span>
     <div class="lc-view-hero__text">
       <h1 class="lc-section-title lc-view-hero__title" data-role="greeting-title">Bienvenido</h1>
-      <p class="lc-view-hero__subtitle" data-role="date-subtitle">Resumen del día.</p>
+      <p class="lc-view-hero__subtitle" data-role="date-subtitle">Hoy.</p>
     </div>
   </header>
 
@@ -18,8 +18,7 @@
     <div class="lc-card dashboard-section__capacity lc-view-stat">
       <span class="lc-view-stat__label">Capacidad hoy</span>
       <div data-role="capacity-ring"></div>
-      <p class="lc-view-stat__meta" data-role="capacity-text">0 / 0 tareas completadas</p>
-      <span class="lc-view-stat__meta" data-role="pending-count">0 pendientes</span>
+      <p class="lc-view-stat__meta" data-role="capacity-text">0 / 0 hoy</p>
     </div>
     <div class="lc-card lc-view-stat">
       <span class="lc-view-stat__label">Tareas pendientes</span>
@@ -46,61 +45,10 @@
       </span>
       <div>
         <h2 class="lc-view-card-label">Vence hoy</h2>
-        <p class="lc-view-hint">Tareas, pagos, compras y recordatorios para hoy.</p>
       </div>
     </div>
     <ul class="dashboard-section__today-list" data-role="today-list"></ul>
-    <p class="lc-empty" data-role="today-empty" hidden>Nada vence hoy. Disfruta el día.</p>
-  </div>
-
-  <div class="lc-view-grid-3">
-    <div class="lc-card">
-      <div class="lc-view-card-head">
-        <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
-        <div>
-          <h2 class="lc-view-card-label">Finanzas</h2>
-          <p class="lc-view-hint">Pagos y cobros pendientes.</p>
-        </div>
-      </div>
-      <div class="dashboard-section__finance-row">
-        <div>
-          <span class="dashboard-section__finance-label">Por pagar</span>
-          <span class="dashboard-section__finance-value dashboard-section__finance-value--pay" data-role="finance-pay">$0.00</span>
-        </div>
-        <div>
-          <span class="dashboard-section__finance-label">Por cobrar</span>
-          <span class="dashboard-section__finance-value dashboard-section__finance-value--receive" data-role="finance-receive">$0.00</span>
-        </div>
-      </div>
-    </div>
-    <div class="lc-card">
-      <div class="lc-view-card-head">
-        <span class="lc-view-card-icon lc-view-card-icon--orange" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="9" cy="20" r="1" />
-            <circle cx="18" cy="20" r="1" />
-            <path d="M2 3h2l2.4 12.4a2 2 0 0 0 2 1.6h9.2a2 2 0 0 0 2-1.6L22 7H6" />
-          </svg>
-        </span>
-        <div>
-          <h2 class="lc-view-card-label">Compras próximas</h2>
-          <p class="lc-view-hint">Lo que vence en las próximas semanas.</p>
-        </div>
-      </div>
-      <ul class="dashboard-section__due-list" data-role="shopping-due-list"></ul>
-      <p class="lc-empty" data-role="shopping-due-empty" hidden>Sin vencimientos próximos.</p>
-    </div>
-    <div class="lc-card">
-      <div class="lc-view-card-head">
-        <span class="lc-view-card-icon lc-view-card-icon--receive lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
-        <div>
-          <h2 class="lc-view-card-label">Liquidez pendiente</h2>
-          <p class="lc-view-hint">Solo ingresos por cobrar.</p>
-        </div>
-      </div>
-      <span class="dashboard-section__net-value dashboard-section__finance-value--receive" data-role="net-liquidity">$0.00 USD</span>
-      <span class="dashboard-section__net-bs" data-role="net-bs" hidden></span>
-    </div>
+    <p class="lc-empty" data-role="today-empty" hidden>Nada vence hoy.</p>
   </div>
 
   <div class="lc-card dashboard-section__tasks">
@@ -113,7 +61,6 @@
       </span>
       <div>
         <h2 class="lc-view-card-label">Tareas</h2>
-        <p class="lc-view-hint">Una sola lista, filtrada por urgencia, bloque o dominio.</p>
       </div>
     </div>
     <div class="dashboard-section__filters" role="tablist" aria-label="Filtro de tareas">
@@ -123,6 +70,6 @@
       <button type="button" class="dashboard-section__filter" data-filter="domain" role="tab">Por dominio</button>
     </div>
     <ul class="dashboard-section__urgent-list" data-role="task-list"></ul>
-    <p class="lc-empty" data-role="task-empty" hidden>Sin tareas en este filtro.</p>
+    <p class="lc-empty" data-role="task-empty" hidden>Sin pendientes.</p>
   </div>
 </section>

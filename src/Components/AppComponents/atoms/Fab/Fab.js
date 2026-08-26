@@ -4,6 +4,7 @@ const MODAL_BY_PATH = {
    '/finances': { title: 'Nueva transacción', form: 'FinanceForm' },
    '/shopping': { title: 'Nuevo artículo', form: 'ShoppingForm' },
    '/notes': { title: 'Nueva nota', form: 'NoteForm' },
+   '/habits': { title: 'Nuevo hábito', form: 'HabitForm' },
    '/vision': { title: 'Nueva meta', form: 'VisionForm' }
 };
 

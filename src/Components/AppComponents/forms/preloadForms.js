@@ -4,6 +4,7 @@ const MODAL_FORMS = [
    'FinanceForm',
    'ShoppingForm',
    'NoteForm',
+   'HabitForm',
    'VisionForm',
    'SearchPanel',
    'DomainForm',

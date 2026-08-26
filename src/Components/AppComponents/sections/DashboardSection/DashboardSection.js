@@ -1,6 +1,4 @@
-import { FINANCE_TYPE } from '../lifeControlConstants.js';
-import { getDueStatus } from '../shoppingDue.js';
-import { formatDayLong, taskShowsOnCalendarDay, daysUntil, todayISO, taskDateRange } from '../plannerDates.js';
+import { formatDayLong, taskShowsOnCalendarDay, todayISO, taskDateRange } from '../plannerDates.js';
 import { domainForTask } from '../domainLookup.js';
 import { greetingForName } from '../profileGreeting.js';
 import {
@@ -8,13 +6,6 @@ import {
    getDashboardTaskFilter,
    setDashboardTaskFilter
 } from '../plannerPrefs.js';
-
-const FREQUENCY_LABELS = {
-   daily: 'Diaria',
-   weekly: 'Semanal',
-   monthly: 'Mensual',
-   yearly: 'Anual'
-};
 
 export default class DashboardSection extends HTMLElement {
    static props = {
@@ -30,18 +21,11 @@ export default class DashboardSection extends HTMLElement {
       this.$dateSubtitle = this.querySelector('[data-role="date-subtitle"]');
       this.$capacityMount = this.querySelector('[data-role="capacity-ring"]');
       this.$capacityText = this.querySelector('[data-role="capacity-text"]');
-      this.$pendingCount = this.querySelector('[data-role="pending-count"]');
       this.$tasksCount = this.querySelector('[data-role="tasks-count"]');
       this.$blocksCount = this.querySelector('[data-role="blocks-count"]');
       this.$rate = this.querySelector('[data-role="rate"]');
       this.$rateCard = this.querySelector('[data-role="rate-card"]');
       this.$rateRetry = this.querySelector('[data-role="rate-retry"]');
-      this.$financePay = this.querySelector('[data-role="finance-pay"]');
-      this.$financeReceive = this.querySelector('[data-role="finance-receive"]');
-      this.$shoppingDueList = this.querySelector('[data-role="shopping-due-list"]');
-      this.$shoppingDueEmpty = this.querySelector('[data-role="shopping-due-empty"]');
-      this.$netLiquidity = this.querySelector('[data-role="net-liquidity"]');
-      this.$netBs = this.querySelector('[data-role="net-bs"]');
       this.$taskList = this.querySelector('[data-role="task-list"]');
       this.$taskEmpty = this.querySelector('[data-role="task-empty"]');
       this.$taskFilters = this.querySelectorAll('[data-filter]');
@@ -95,7 +79,8 @@ export default class DashboardSection extends HTMLElement {
             profile: state?.profile ?? { displayName: '' },
             exchangeRate: state?.exchangeRate ?? {},
             finances: state?.finances ?? [],
-            shopping: state?.shopping ?? []
+            shopping: state?.shopping ?? [],
+            notes: state?.notes ?? []
          })
       );
 
@@ -135,28 +120,6 @@ export default class DashboardSection extends HTMLElement {
       return `$${(Number(value) || 0).toFixed(2)}`;
    }
 
-   shoppingCountdownLabel(item, status) {
-      if (status.state === 'renew') {
-         return status.label;
-      }
-      if (status.state === 'done') {
-         const days = daysUntil(item.nextDueAt);
-         if (days <= 0) {
-            return 'faltan 0 días';
-         }
-         return days === 1 ? 'falta 1 día' : `faltan ${days} días`;
-      }
-      const days = daysUntil(item.nextDueAt);
-      if (days < 0) {
-         const overdue = Math.abs(days);
-         return overdue === 1 ? 'vencido hace 1 día' : `vencido hace ${overdue} días`;
-      }
-      if (days === 0) {
-         return 'faltan 0 días';
-      }
-      return days === 1 ? 'falta 1 día' : `faltan ${days} días`;
-   }
-
    openExchangeCalculator() {
       const exchangeRate = slice.context.getState('lifeControl')?.exchangeRate ?? {};
       if (!exchangeRate.rate) {
@@ -182,15 +145,11 @@ export default class DashboardSection extends HTMLElement {
       if (this._capacityRing) {
          this._capacityRing.percent = percent;
       }
-      this.$capacityText.textContent = `${completedToday} / ${totalToday} tareas completadas`;
-      this.$pendingCount.textContent = `${pending.length} pendientes`;
+      this.$capacityText.textContent = `${completedToday} / ${totalToday} hoy`;
       this.$tasksCount.textContent = String(pending.length);
       this.$blocksCount.textContent = String(timeBlocks.length);
 
       this.renderRate(exchangeRate);
-      this.renderFinances(finances);
-      this.renderShoppingDue();
-      this.renderIncomingLiquidity(finances, exchangeRate);
       this.renderDueToday(tasks, finances);
       this.renderTaskView(pending, domains ?? this.domainService?.getAll?.() ?? [], tasks);
    }
@@ -260,7 +219,7 @@ export default class DashboardSection extends HTMLElement {
       const notesService = slice.getComponent('notes-service');
       const notes = notesService?.getAll?.() ?? [];
       for (const note of notes) {
-         if (!note.remindAt) {
+         if (note.archived || !note.remindAt) {
             continue;
          }
          const day = note.remindAt.slice(0, 10);
@@ -335,14 +294,14 @@ export default class DashboardSection extends HTMLElement {
          rows = rows.filter((task) => task.blockId);
       }
 
-      this.fillList(this.$taskList, rows.slice(0, 8), this._taskFilter !== DASHBOARD_TASK_FILTERS.BLOCKS);
+      this.fillList(this.$taskList, rows.slice(0, 6), this._taskFilter !== DASHBOARD_TASK_FILTERS.BLOCKS);
       this.$taskEmpty.hidden = rows.length > 0;
       const emptyCopy = {
-         [DASHBOARD_TASK_FILTERS.ALL]: 'Sin tareas pendientes.',
-         [DASHBOARD_TASK_FILTERS.URGENT]: 'Sin tareas urgentes.',
+         [DASHBOARD_TASK_FILTERS.ALL]: 'Sin pendientes.',
+         [DASHBOARD_TASK_FILTERS.URGENT]: 'Sin urgentes.',
          [DASHBOARD_TASK_FILTERS.BLOCKS]: 'Sin tareas en bloques.'
       };
-      this.$taskEmpty.textContent = emptyCopy[this._taskFilter] ?? 'Sin tareas en este filtro.';
+      this.$taskEmpty.textContent = emptyCopy[this._taskFilter] ?? 'Sin pendientes.';
    }
 
    renderDomainSummary(domains, tasks) {
@@ -350,7 +309,7 @@ export default class DashboardSection extends HTMLElement {
       const pending = (Array.isArray(tasks) ? tasks : []).filter((task) => !task.completed);
       this.$taskList.innerHTML = '';
       this.$taskEmpty.hidden = list.length > 0;
-      this.$taskEmpty.textContent = 'Sin dominios configurados.';
+      this.$taskEmpty.textContent = 'Sin dominios.';
 
       for (const domain of list) {
          const count = pending.filter((task) => task.domainId === domain.id).length;
@@ -407,67 +366,6 @@ export default class DashboardSection extends HTMLElement {
 
       this.$rate.textContent = '—';
       this.$rateRetry.hidden = true;
-   }
-
-   renderFinances(finances) {
-      const list = Array.isArray(finances) ? finances : [];
-      const payTotal = list
-         .filter((item) => item.type === FINANCE_TYPE.PAY && !item.settled)
-         .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-      const receiveTotal = list
-         .filter((item) => item.type === FINANCE_TYPE.RECEIVE && !item.settled)
-         .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-
-      this.$financePay.textContent = this.formatMoney(payTotal);
-      this.$financeReceive.textContent = this.formatMoney(receiveTotal);
-   }
-
-   renderIncomingLiquidity(finances, exchangeRate) {
-      const incoming = (Array.isArray(finances) ? finances : [])
-         .filter((item) => item.type === FINANCE_TYPE.RECEIVE && !item.settled)
-         .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-
-      this.$netLiquidity.textContent = `${this.formatMoney(incoming)} USD`;
-
-      const rate = exchangeRate?.rate ?? null;
-      if (rate) {
-         this.$netBs.hidden = false;
-         this.$netBs.textContent = `• Bs. ${(incoming * rate).toFixed(2)}`;
-      } else {
-         this.$netBs.hidden = true;
-      }
-   }
-
-   renderShoppingDue() {
-      const items =
-         typeof this.shoppingService?.getDueItems === 'function'
-            ? this.shoppingService.getDueItems()
-            : [];
-      this.$shoppingDueList.innerHTML = '';
-      this.$shoppingDueEmpty.hidden = items.length > 0;
-
-      for (const item of items.slice(0, 6)) {
-         const status = getDueStatus(item);
-         const li = document.createElement('li');
-         li.className = `dashboard-section__due-item dashboard-section__due-item--${status.state}`;
-
-         const name = document.createElement('span');
-         name.className = 'dashboard-section__due-name';
-         name.textContent = item.name;
-
-         const meta = document.createElement('span');
-         meta.className = 'dashboard-section__due-meta';
-         const countdown = this.shoppingCountdownLabel(item, status);
-         const priceBit =
-            item.price != null && Number(item.price) > 0
-               ? ` · $${Number(item.price).toFixed(2)}`
-               : '';
-         meta.textContent = `${FREQUENCY_LABELS[item.frequency] ?? ''} · ${countdown}${priceBit}`;
-
-         li.appendChild(name);
-         li.appendChild(meta);
-         this.$shoppingDueList.appendChild(li);
-      }
    }
 
    fillList(listEl, tasks, withFlag) {

@@ -657,7 +657,7 @@
 
   /* Shared view chrome (estilo Perfil) */
   .lc-view-hero {
-    @apply mb-6 flex items-center gap-4;
+    @apply mb-4 flex items-center gap-4;
   }
 
   .lc-view-hero__icon {
@@ -718,6 +718,11 @@
     color: #fff;
   }
 
+  .lc-view-hero__icon--habits {
+    background: linear-gradient(135deg, #047857, #10b981);
+    color: #fff;
+  }
+
   .lc-view-hero__text {
     @apply min-w-0;
   }
@@ -732,7 +737,7 @@
   }
 
   .lc-view-card-head {
-    @apply mb-4 flex items-start gap-3;
+    @apply mb-3 flex items-start gap-3;
   }
 
   .lc-view-card-icon {
@@ -1023,6 +1028,11 @@
     color: #b45309;
   }
 
+  .settings-section__guide-icon--habits {
+    background: color-mix(in srgb, #10b981 16%, transparent);
+    color: #047857;
+  }
+
   .settings-section__guide-icon--focus {
     background: color-mix(in srgb, #6366f1 16%, transparent);
     color: #4338ca;
@@ -1161,7 +1171,24 @@
 
   /* Notes */
   .notes-section__reminder-cta {
-    @apply mb-4 flex items-center justify-between gap-3;
+    @apply mb-3 flex items-center justify-between gap-3;
+  }
+
+  .notes-section__filters {
+    @apply mb-3 flex flex-wrap gap-2;
+  }
+
+  .notes-section__filter {
+    @apply cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold;
+    border-color: var(--tertiary-background-color);
+    background: transparent;
+    color: var(--font-secondary-color);
+  }
+
+  .notes-section__filter--active {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    color: var(--primary-color);
   }
 
   .notes-section__grid {
@@ -1177,8 +1204,16 @@
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--note-accent, var(--primary-color)) 45%, transparent);
   }
 
+  .notes-section__card--archived {
+    opacity: 0.78;
+  }
+
   .notes-section__card-head {
     @apply flex items-start justify-between gap-2;
+  }
+
+  .notes-section__head-actions {
+    @apply flex shrink-0 items-center gap-0.5;
   }
 
   .notes-section__card-title {
@@ -1186,12 +1221,23 @@
     color: var(--font-primary-color);
   }
 
-  .notes-section__pin {
-    @apply shrink-0 cursor-pointer border-0 bg-transparent text-lg leading-none;
+  .notes-section__pin,
+  .notes-section__archive {
+    @apply flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent text-lg leading-none;
     color: var(--font-secondary-color);
   }
 
-  .notes-section__pin--active {
+  .notes-section__archive svg {
+    @apply h-4 w-4;
+  }
+
+  .notes-section__pin--active,
+  .notes-section__archive--ready {
+    color: var(--note-accent, var(--primary-color));
+  }
+
+  .notes-section__pin:hover,
+  .notes-section__archive:hover {
     color: var(--note-accent, var(--primary-color));
   }
 
@@ -1315,6 +1361,89 @@
 
   .notes-section__append-submit:disabled {
     opacity: 0.6;
+  }
+
+  .notes-section__edit:disabled,
+  .notes-section__check:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  /* Habits */
+  .habits-section__list {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+
+  .habits-section__item {
+    @apply flex flex-col gap-2.5;
+  }
+
+  .habits-section__row {
+    @apply flex items-center gap-3;
+  }
+
+  .habits-section__check {
+    @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs font-bold;
+    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--primary-color-contrast);
+  }
+
+  .habits-section__check--on {
+    background: var(--primary-color);
+  }
+
+  .habits-section__name {
+    @apply min-w-0 flex-1 truncate text-sm font-semibold;
+    color: var(--font-primary-color);
+  }
+
+  .habits-section__streak {
+    @apply shrink-0 text-xs font-semibold tabular-nums;
+    color: var(--font-secondary-color);
+  }
+
+  .habits-section__days {
+    @apply flex flex-wrap gap-1;
+  }
+
+  .habits-section__day {
+    @apply flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border text-[0.65rem] font-semibold;
+    border-color: var(--tertiary-background-color);
+    background: transparent;
+    color: var(--font-secondary-color);
+  }
+
+  .habits-section__day--on {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+    color: var(--primary-color);
+  }
+
+  .habits-section__day--today {
+    box-shadow: 0 0 0 1px var(--primary-color);
+  }
+
+  .habits-section__actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .habits-section__edit,
+  .habits-section__delete {
+    @apply cursor-pointer rounded-xl border px-3 py-1.5 text-sm transition-colors;
+    background-color: var(--secondary-background-color);
+    border-color: var(--tertiary-background-color);
+    color: var(--font-primary-color);
+  }
+
+  .habits-section__edit:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .habits-section__delete:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
   }
 
   /* NoteForm */

@@ -4,6 +4,11 @@ import {
    requestNotificationPermission
 } from '../notifications.js';
 
+const ICON_ARCHIVE =
+   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="3" width="18" height="4" rx="1"/><path d="M5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7M10 12h4" stroke-linecap="round"/></svg>';
+const ICON_RESTORE =
+   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7" stroke-linecap="round"/><path d="M3 4v5h5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
 function formatReminder(iso) {
    const date = new Date(iso);
    if (Number.isNaN(date.getTime())) {
@@ -15,6 +20,15 @@ function formatReminder(iso) {
       hour: '2-digit',
       minute: '2-digit'
    });
+}
+
+function isListComplete(note) {
+   return (
+      note.type === 'list' &&
+      Array.isArray(note.checklist) &&
+      note.checklist.length > 0 &&
+      note.checklist.every((item) => item.done)
+   );
 }
 
 export default class NotesSection extends HTMLElement {
@@ -31,6 +45,8 @@ export default class NotesSection extends HTMLElement {
       this.$empty = this.querySelector('[data-role="empty"]');
       this.$reminderCta = this.querySelector('[data-role="reminder-cta"]');
       this.$enableNotifications = this.querySelector('[data-role="enable-notifications"]');
+      this.$filters = this.querySelectorAll('[data-filter]');
+      this._view = 'active';
       slice.controller.setComponentProps(this, props);
    }
 
@@ -43,6 +59,10 @@ export default class NotesSection extends HTMLElement {
 
       this.$enableNotifications.addEventListener('click', () => this.enableNotifications());
 
+      for (const button of this.$filters) {
+         button.addEventListener('click', () => this.setView(button.dataset.filter));
+      }
+
       slice.context.watch(
          'lifeControl',
          this,
@@ -51,15 +71,34 @@ export default class NotesSection extends HTMLElement {
       );
 
       this.syncReminderCta();
+      this.syncFilters();
       this.renderList();
+   }
+
+   setView(view) {
+      this._view = view === 'archived' ? 'archived' : 'active';
+      this.syncFilters();
+      this.renderList();
+   }
+
+   syncFilters() {
+      const archivedCount = (this.notesService?.getAll?.() ?? []).filter((note) => note.archived).length;
+      for (const button of this.$filters) {
+         const active = button.dataset.filter === this._view;
+         button.classList.toggle('notes-section__filter--active', active);
+         button.setAttribute('aria-selected', active ? 'true' : 'false');
+         if (button.dataset.filter === 'archived') {
+            button.textContent = archivedCount ? `Archivadas (${archivedCount})` : 'Archivadas';
+         }
+      }
    }
 
    syncReminderCta() {
       const notes = this.notesService.getAll();
-      const hasReminders = notes.some((note) => note.remindAt);
+      const hasReminders = notes.some((note) => note.remindAt && !note.archived);
       const shouldAsk =
          notificationsSupported() && notificationPermission() === 'default' && hasReminders;
-      this.$reminderCta.hidden = !shouldAsk;
+      this.$reminderCta.hidden = !shouldAsk || this._view === 'archived';
    }
 
    async enableNotifications() {
@@ -88,7 +127,7 @@ export default class NotesSection extends HTMLElement {
 
    openAppend(noteId) {
       const note = this.notesService.getById(noteId);
-      if (!note) {
+      if (!note || note.archived) {
          return;
       }
 
@@ -109,8 +148,8 @@ export default class NotesSection extends HTMLElement {
       hint.id = 'notes-append-hint';
       hint.className = 'notes-section__append-hint';
       hint.textContent = isList
-         ? 'Escribe un ítem. Varias líneas se añaden como ítems separados.'
-         : 'Escribe solo lo nuevo. Se anexará al final de la nota.';
+         ? 'Un ítem por línea.'
+         : 'Se anexa al final de la nota.';
 
       const form = document.createElement('form');
       form.className = 'notes-section__append-form';
@@ -127,7 +166,7 @@ export default class NotesSection extends HTMLElement {
       input.rows = 3;
       input.required = true;
       input.setAttribute('aria-required', 'true');
-      input.placeholder = isList ? 'Leche\nPan' : 'Lo que quieras recordar…';
+      input.placeholder = '';
 
       const error = document.createElement('p');
       error.className = 'notes-section__append-error';
@@ -205,20 +244,26 @@ export default class NotesSection extends HTMLElement {
 
    renderList() {
       const notes = this.notesService.getAll();
+      const showArchived = this._view === 'archived';
+      const visible = notes.filter((note) => Boolean(note.archived) === showArchived);
       this.$list.innerHTML = '';
 
-      const hasItems = notes.length > 0;
-      this.$empty.hidden = hasItems;
+      this.$empty.hidden = visible.length > 0;
+      this.$empty.textContent = showArchived ? 'Nada archivado.' : 'Sin notas. Pulsa +.';
       this.syncReminderCta();
+      this.syncFilters();
 
       const now = Date.now();
 
-      for (const note of notes) {
+      for (const note of visible) {
          const card = document.createElement('article');
          card.className = 'notes-section__card lc-card';
          card.style.setProperty('--note-accent', note.color);
          if (note.pinned) {
             card.classList.add('notes-section__card--pinned');
+         }
+         if (note.archived) {
+            card.classList.add('notes-section__card--archived');
          }
 
          const head = document.createElement('div');
@@ -228,15 +273,35 @@ export default class NotesSection extends HTMLElement {
          title.className = 'notes-section__card-title';
          title.textContent = note.title;
 
-         const pinBtn = document.createElement('button');
-         pinBtn.type = 'button';
-         pinBtn.className = 'notes-section__pin';
-         pinBtn.classList.toggle('notes-section__pin--active', note.pinned);
-         pinBtn.textContent = note.pinned ? '★' : '☆';
-         pinBtn.setAttribute('aria-label', note.pinned ? 'Desfijar' : 'Fijar');
-         pinBtn.addEventListener('click', () => this.notesService.togglePinned(note.id));
+         const headActions = document.createElement('div');
+         headActions.className = 'notes-section__head-actions';
 
-         head.append(title, pinBtn);
+         if (!note.archived) {
+            const pinBtn = document.createElement('button');
+            pinBtn.type = 'button';
+            pinBtn.className = 'notes-section__pin';
+            pinBtn.classList.toggle('notes-section__pin--active', note.pinned);
+            pinBtn.textContent = note.pinned ? '★' : '☆';
+            pinBtn.setAttribute('aria-label', note.pinned ? 'Desfijar' : 'Fijar');
+            pinBtn.addEventListener('click', () => this.notesService.togglePinned(note.id));
+            headActions.appendChild(pinBtn);
+         }
+
+         const archiveBtn = document.createElement('button');
+         archiveBtn.type = 'button';
+         archiveBtn.className = 'notes-section__archive';
+         const complete = isListComplete(note);
+         archiveBtn.classList.toggle('notes-section__archive--ready', complete && !note.archived);
+         archiveBtn.innerHTML = note.archived ? ICON_RESTORE : ICON_ARCHIVE;
+         archiveBtn.setAttribute(
+            'aria-label',
+            note.archived ? 'Restaurar' : complete ? 'Archivar lista completada' : 'Archivar'
+         );
+         archiveBtn.title = note.archived ? 'Restaurar' : 'Archivar';
+         archiveBtn.addEventListener('click', () => this.notesService.toggleArchived(note.id));
+         headActions.appendChild(archiveBtn);
+
+         head.append(title, headActions);
          card.appendChild(head);
 
          if (note.type === 'list' && note.checklist?.length) {
@@ -256,11 +321,14 @@ export default class NotesSection extends HTMLElement {
                const check = document.createElement('button');
                check.type = 'button';
                check.className = 'notes-section__check';
+               check.disabled = Boolean(note.archived);
                check.setAttribute('aria-label', item.done ? 'Marcar pendiente' : 'Marcar hecho');
                check.textContent = item.done ? '✓' : '';
-               check.addEventListener('click', () =>
-                  this.notesService.toggleChecklistItem(note.id, item.id)
-               );
+               if (!note.archived) {
+                  check.addEventListener('click', () =>
+                     this.notesService.toggleChecklistItem(note.id, item.id)
+                  );
+               }
 
                const text = document.createElement('span');
                text.className = 'notes-section__check-text';
@@ -277,7 +345,7 @@ export default class NotesSection extends HTMLElement {
             card.appendChild(body);
          }
 
-         if (note.remindAt) {
+         if (note.remindAt && !note.archived) {
             const badge = document.createElement('span');
             badge.className = 'notes-section__reminder';
             const overdue = new Date(note.remindAt).getTime() <= now;
@@ -289,21 +357,34 @@ export default class NotesSection extends HTMLElement {
          const actions = document.createElement('div');
          actions.className = 'notes-section__actions';
 
-         const addBtn = document.createElement('button');
-         addBtn.type = 'button';
-         addBtn.className = 'notes-section__add';
-         addBtn.textContent = 'Agregar';
-         addBtn.setAttribute(
-            'aria-label',
-            note.type === 'list' ? `Añadir ítem a ${note.title}` : `Añadir contenido a ${note.title}`
-         );
-         addBtn.addEventListener('click', () => this.openAppend(note.id));
+         if (note.archived) {
+            const restoreBtn = document.createElement('button');
+            restoreBtn.type = 'button';
+            restoreBtn.className = 'notes-section__add';
+            restoreBtn.textContent = 'Restaurar';
+            restoreBtn.addEventListener('click', () => this.notesService.toggleArchived(note.id));
+            actions.appendChild(restoreBtn);
+         } else {
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.className = 'notes-section__add';
+            addBtn.textContent = 'Agregar';
+            addBtn.setAttribute(
+               'aria-label',
+               note.type === 'list' ? `Añadir ítem a ${note.title}` : `Añadir contenido a ${note.title}`
+            );
+            addBtn.addEventListener('click', () => this.openAppend(note.id));
+            actions.appendChild(addBtn);
+         }
 
          const editBtn = document.createElement('button');
          editBtn.type = 'button';
          editBtn.className = 'notes-section__edit';
          editBtn.textContent = 'Editar';
-         editBtn.addEventListener('click', () => this.openEdit(note.id));
+         editBtn.disabled = Boolean(note.archived);
+         if (!note.archived) {
+            editBtn.addEventListener('click', () => this.openEdit(note.id));
+         }
 
          const deleteBtn = document.createElement('button');
          deleteBtn.type = 'button';
@@ -315,7 +396,7 @@ export default class NotesSection extends HTMLElement {
             }
          });
 
-         actions.append(addBtn, editBtn, deleteBtn);
+         actions.append(editBtn, deleteBtn);
          card.appendChild(actions);
 
          this.$list.appendChild(card);

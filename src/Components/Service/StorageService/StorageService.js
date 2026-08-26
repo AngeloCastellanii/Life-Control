@@ -1,4 +1,4 @@
-const DEFAULT_STORES = ['domains', 'tasks', 'timeBlocks', 'finances', 'shopping', 'notes', 'vision', 'paymentMethods', 'meta'];
+const DEFAULT_STORES = ['domains', 'tasks', 'timeBlocks', 'finances', 'shopping', 'notes', 'habits', 'vision', 'paymentMethods', 'meta'];
 
 function isClosingError(error) {
    const message = String(error?.message || error || '');
@@ -12,7 +12,7 @@ function isClosingError(error) {
 export default class StorageService {
    constructor(props = {}) {
       this.dbName = props.dbName ?? 'life-control';
-      this.dbVersion = props.dbVersion ?? 5;
+      this.dbVersion = props.dbVersion ?? 6;
       this.stores = props.stores ?? DEFAULT_STORES;
       this.db = null;
       this._opening = null;

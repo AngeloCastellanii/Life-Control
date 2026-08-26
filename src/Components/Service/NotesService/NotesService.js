@@ -25,6 +25,8 @@ function normalizeNote(note) {
    const checklist = type === 'list' ? normalizeChecklist(note.checklist) : [];
    const colors = getNoteColors();
 
+   const archived = Boolean(note.archived);
+
    return {
       id: note.id,
       title: (note.title ?? '').trim(),
@@ -32,7 +34,9 @@ function normalizeNote(note) {
       type,
       checklist,
       color: note.color ?? colors[0],
-      pinned: Boolean(note.pinned),
+      pinned: archived ? false : Boolean(note.pinned),
+      archived,
+      archivedAt: archived ? (note.archivedAt ?? note.updatedAt ?? nowISO()) : null,
       remindAt: note.remindAt ?? null,
       notified: Boolean(note.notified),
       createdAt: note.createdAt ?? nowISO(),
@@ -41,6 +45,9 @@ function normalizeNote(note) {
 }
 
 function compareNotes(a, b) {
+   if (a.archived !== b.archived) {
+      return a.archived ? 1 : -1;
+   }
    if (a.pinned !== b.pinned) {
       return a.pinned ? -1 : 1;
    }
@@ -100,6 +107,8 @@ export default class NotesService {
          checklist: checklist ?? [],
          color: color || colors[0],
          pinned: Boolean(pinned),
+         archived: false,
+         archivedAt: null,
          remindAt: remindAt || null,
          notified: false,
          createdAt: nowISO(),
@@ -144,7 +153,7 @@ export default class NotesService {
 
    async appendContent(id, rawText) {
       const existing = this.getById(id);
-      if (!existing) {
+      if (!existing || existing.archived) {
          return null;
       }
 
@@ -176,15 +185,28 @@ export default class NotesService {
 
    async togglePinned(id) {
       const existing = this.getById(id);
-      if (!existing) {
+      if (!existing || existing.archived) {
          return null;
       }
       return this.update(id, { pinned: !existing.pinned });
    }
 
+   async toggleArchived(id) {
+      const existing = this.getById(id);
+      if (!existing) {
+         return null;
+      }
+      const archived = !existing.archived;
+      return this.update(id, {
+         archived,
+         archivedAt: archived ? nowISO() : null,
+         pinned: archived ? false : existing.pinned
+      });
+   }
+
    async toggleChecklistItem(noteId, itemId) {
       const existing = this.getById(noteId);
-      if (!existing || existing.type !== 'list') {
+      if (!existing || existing.type !== 'list' || existing.archived) {
          return null;
       }
       const checklist = existing.checklist.map((item) =>
@@ -214,7 +236,7 @@ export default class NotesService {
    getDueReminders(reference = new Date()) {
       const nowStamp = reference.getTime();
       return this.getAll().filter((note) => {
-         if (!note.remindAt || note.notified) {
+         if (note.archived || !note.remindAt || note.notified) {
             return false;
          }
          const when = new Date(note.remindAt).getTime();
@@ -227,7 +249,7 @@ export default class NotesService {
       const limit = now + withinHours * 60 * 60 * 1000;
       return this.getAll()
          .filter((note) => {
-            if (!note.remindAt) {
+            if (note.archived || !note.remindAt) {
                return false;
             }
             const when = new Date(note.remindAt).getTime();

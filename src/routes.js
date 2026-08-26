@@ -4,6 +4,7 @@ const routes = [
    { path: '/finances', component: 'AppShell', metadata: { title: 'Finanzas' } },
    { path: '/shopping', component: 'AppShell', metadata: { title: 'Compras' } },
    { path: '/notes', component: 'AppShell', metadata: { title: 'Notas' } },
+   { path: '/habits', component: 'AppShell', metadata: { title: 'Hábitos' } },
    { path: '/vision', component: 'AppShell', metadata: { title: 'Vision Board' } },
    { path: '/focus', component: 'AppShell', metadata: { title: 'Modo enfoque' } },
    { path: '/stats', component: 'AppShell', metadata: { title: 'Estadísticas' } },

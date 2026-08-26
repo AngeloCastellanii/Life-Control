@@ -46,6 +46,7 @@ async function bootstrapLifeControl() {
       paymentMethods: [],
       shopping: [],
       notes: [],
+      habits: [],
       vision: [],
       walletBalance: 0,
       profile: { displayName: '' }
@@ -63,6 +64,7 @@ async function bootstrapLifeControl() {
    await initService('ShoppingService', 'shopping-service');
    await initService('ProfileService', 'profile-service');
    await initService('NotesService', 'notes-service');
+   await initService('HabitsService', 'habits-service');
    await initService('VisionService', 'vision-service');
    await initService('ReminderService', 'reminder-service');
 }

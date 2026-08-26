@@ -11,7 +11,7 @@ const THEME_OPTIONS = [
 const STEPS = [
    {
       title: 'Bienvenido a Life Control',
-      text: 'Tu vida organizada en un solo lugar: tareas, tiempo, finanzas, compras, notas y metas. Todo se guarda en tu dispositivo.',
+      text: 'Tu vida organizada en un solo lugar: tareas, tiempo, finanzas, compras, notas, hábitos y metas. Todo se guarda en tu dispositivo.',
       askName: true
    },
    {
@@ -21,7 +21,7 @@ const STEPS = [
    },
    {
       title: 'Dashboard',
-      text: 'Tu resumen del día: capacidad, lo que vence hoy, finanzas y tus prioridades de un vistazo.'
+      text: 'Tu resumen del día: lo que vence hoy y tus prioridades.'
    },
    {
       title: 'Planificador',
@@ -33,11 +33,15 @@ const STEPS = [
    },
    {
       title: 'Compras',
-      text: 'Tu lista de compras con cantidades, precios y fechas. Lo próximo a vencer aparece también en el Dashboard.'
+      text: 'Tu lista de compras con cantidades, precios y fechas. Lo que vence hoy aparece en el Dashboard.'
    },
    {
       title: 'Notas y recordatorios',
-      text: 'Guarda notas rápidas y ponles un recordatorio con notificación para que no se te olvide nada importante.'
+      text: 'Guarda notas y listas. Archívalas al terminar y ponles un recordatorio si hace falta.'
+   },
+   {
+      title: 'Hábitos',
+      text: 'Marca el día en cada hábito. La racha cuenta si no rompes la cadena.'
    },
    {
       title: 'Modo enfoque',

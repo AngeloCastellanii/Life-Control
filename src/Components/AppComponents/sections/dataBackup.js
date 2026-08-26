@@ -1,5 +1,5 @@
 const BACKUP_VERSION = 1;
-const STORE_NAMES = ['domains', 'tasks', 'timeBlocks', 'finances', 'shopping', 'notes', 'vision', 'paymentMethods', 'meta'];
+const STORE_NAMES = ['domains', 'tasks', 'timeBlocks', 'finances', 'shopping', 'notes', 'habits', 'vision', 'paymentMethods', 'meta'];
 
 function isBackupPayload(value) {
    if (!value || typeof value !== 'object' || !value.stores || typeof value.stores !== 'object') {
@@ -142,6 +142,7 @@ export async function reloadAllServicesFromStorage() {
       'shopping-service',
       'profile-service',
       'notes-service',
+      'habits-service',
       'vision-service'
    ];
 

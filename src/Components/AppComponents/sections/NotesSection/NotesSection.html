@@ -8,18 +8,23 @@
     </span>
     <div class="lc-view-hero__text">
       <h1 class="lc-section-title lc-view-hero__title">Notas</h1>
-      <p class="lc-view-hero__subtitle">Guarda ideas y pendientes. Añade un recordatorio y te avisamos con una notificación.</p>
+      <p class="lc-view-hero__subtitle">Ideas, listas y recordatorios.</p>
     </div>
   </header>
 
   <div class="notes-section__reminder-cta lc-card" data-role="reminder-cta" hidden>
     <div>
       <h2 class="lc-view-card-label">Activa las notificaciones</h2>
-      <p class="lc-view-hint">Permite las notificaciones para recibir tus recordatorios.</p>
+      <p class="lc-view-hint">Para recibir recordatorios.</p>
     </div>
     <button type="button" class="settings-section__save" data-role="enable-notifications">Activar</button>
   </div>
 
+  <div class="notes-section__filters" role="tablist" aria-label="Filtro de notas">
+    <button type="button" class="notes-section__filter notes-section__filter--active" data-filter="active" role="tab" aria-selected="true">Activas</button>
+    <button type="button" class="notes-section__filter" data-filter="archived" role="tab" aria-selected="false">Archivadas</button>
+  </div>
+
   <div class="notes-section__grid" data-role="list"></div>
-  <p class="lc-empty" data-role="empty" hidden>Sin notas todavía. Pulsa + para crear una.</p>
+  <p class="lc-empty" data-role="empty" hidden>Sin notas. Pulsa +.</p>
 </section>

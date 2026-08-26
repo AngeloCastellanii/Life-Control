@@ -25,9 +25,11 @@ const components = {
   "ExchangeCalculatorPanel": "forms",
   "ShoppingForm": "forms",
   "NoteForm": "forms",
+  "HabitForm": "forms",
   "VisionForm": "forms",
   "SearchPanel": "forms",
   "NotesSection": "sections",
+  "HabitsSection": "sections",
   "VisionSection": "sections",
   "StatsSection": "sections",
   "FocusSection": "sections",
@@ -49,6 +51,7 @@ const components = {
   "ShoppingService": "Service",
   "ProfileService": "Service",
   "NotesService": "Service",
+  "HabitsService": "Service",
   "ReminderService": "Service",
   "VisionService": "Service"
 };
