@@ -16,10 +16,23 @@
     <select class="task-card__block-select lc-input" data-role="block-select" aria-label="Elegir bloque"></select>
     <button type="button" class="task-card__assign-btn" data-role="assign-btn" aria-label="Asignar al bloque">Asignar</button>
   </div>
-  <div class="task-card__actions" data-role="actions">
-    <button type="button" class="task-card__action" data-role="edit" hidden aria-label="Editar tarea">✎</button>
-    <button type="button" class="task-card__action task-card__action--danger" data-role="delete" hidden aria-label="Eliminar tarea">×</button>
+  <div class="task-card__actions" data-role="card-actions">
+    <button type="button" class="lc-icon-btn task-card__action" data-role="edit" hidden aria-label="Editar tarea">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+        <path d="M4 20h4l10.5-10.5-4-4L4 16v4z" stroke-linejoin="round" />
+        <path d="M13.5 6.5l4 4" stroke-linecap="round" />
+      </svg>
+    </button>
+    <button type="button" class="lc-icon-btn lc-icon-btn--danger task-card__action" data-role="delete" hidden aria-label="Eliminar tarea">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+        <path d="M4 7h16M9 7V5h6v2M8 7l1 13h6l1-13" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
   </div>
-  <button type="button" class="task-card__remove" data-role="remove" hidden aria-label="Sacar del bloque" title="Sacar al inbox">↩</button>
+  <button type="button" class="lc-icon-btn task-card__remove" data-role="remove" hidden aria-label="Sacar del bloque" title="Sacar al inbox">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+      <path d="M9 14l-4-4 4-4M5 10h10a4 4 0 0 1 0 8h-2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
   <span class="task-card__accent" data-role="accent"></span>
 </article>

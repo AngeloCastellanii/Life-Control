@@ -449,7 +449,7 @@
   }
 
   .time-block__toggle-tasks {
-    @apply mb-2 flex w-full cursor-pointer items-center gap-1 rounded-md border-0 px-2 py-1 text-left text-xs font-semibold uppercase tracking-wide transition-colors;
+    @apply mb-2 flex w-full cursor-pointer items-center gap-1.5 rounded-md border-0 px-2 py-1 text-left text-xs font-medium transition-colors;
     color: var(--font-secondary-color);
     background: color-mix(in srgb, var(--primary-color) 8%, transparent);
   }
@@ -463,8 +463,20 @@
     @apply mb-0;
   }
 
+  .time-block--tasks-collapsed .time-block__toggle-tasks svg {
+    transform: rotate(-90deg);
+  }
+
+  .time-block--now {
+    box-shadow: 0 0 0 1.5px var(--primary-color);
+  }
+
+  .planner-section__blocks--live .time-block:not(.time-block--now) {
+    opacity: 0.78;
+  }
+
   .time-block__rule {
-    @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide;
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-medium;
   }
 
   .time-block__rule--flexible {
@@ -528,7 +540,7 @@
   }
 
   .modal-shell__dialog {
-    @apply absolute left-1/2 top-1/2 w-full max-w-110 -translate-x-1/2 -translate-y-1/2 overflow-hidden border;
+    @apply absolute left-1/2 top-1/2 flex w-full max-w-110 -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border;
     max-height: min(85vh, 560px);
     border-radius: 1.35rem;
     background: var(--surface-glass, var(--secondary-background-color));
@@ -562,8 +574,20 @@
   }
 
   .modal-shell__body {
-    @apply overflow-y-auto px-5 py-4;
-    max-height: calc(min(85vh, 560px) - 4.5rem);
+    @apply min-h-0 flex-1 overflow-y-auto px-5 py-4;
+  }
+
+  .modal-shell__footer {
+    @apply border-t px-5 py-3;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .modal-shell__footer [data-role='actions'] {
+    @apply flex w-full gap-2;
+  }
+
+  .modal-shell__footer [data-role='actions'] > * {
+    flex: 1;
   }
 
   .modal-shell__placeholder {
@@ -810,7 +834,7 @@
   }
 
   .lc-view-stat__label {
-    @apply text-[0.68rem] font-semibold uppercase tracking-wider;
+    @apply text-xs font-medium;
     color: var(--font-secondary-color);
   }
 
@@ -3153,13 +3177,104 @@
     @apply font-semibold;
   }
 
+  .planner-week__day--jump {
+    @apply flex min-h-0 cursor-pointer flex-col items-start gap-1 text-left;
+  }
+
+  .planner-week__meta,
+  .planner-month__count {
+    @apply text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  .planner-month__cell {
+    min-height: 4.25rem;
+  }
+
+  .planner-section__money {
+    @apply mb-3 flex flex-wrap gap-2;
+  }
+
+  .planner-section__money-chip,
+  .planner-section__inbox-strip {
+    @apply cursor-pointer rounded-full border-0 px-3 py-1.5 text-sm font-medium;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--font-primary-color);
+  }
+
+  .planner-section__inbox {
+    @apply mb-3;
+  }
+
+  .finances-section__hero {
+    @apply mb-4 flex flex-col gap-3;
+  }
+
+  .finances-section__total-label {
+    @apply m-0 text-sm;
+    color: var(--font-secondary-color);
+  }
+
+  .finances-section__total-value {
+    @apply m-0 cursor-pointer border-0 bg-transparent p-0 text-left text-4xl font-semibold tabular-nums;
+    font-family: Fraunces, Georgia, serif;
+    letter-spacing: -0.03em;
+    color: var(--font-primary-color);
+  }
+
+  .finances-section__hero-actions,
+  .finances-section__filter {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .finances-section__methods {
+    @apply m-0 flex list-none gap-2 overflow-x-auto p-0;
+  }
+
+  .finances-section__method {
+    @apply flex min-w-36 shrink-0 cursor-pointer flex-col gap-0.5 rounded-2xl border px-3 py-2.5 text-left;
+    border-color: color-mix(in srgb, var(--account-color, var(--primary-color)) 45%, var(--tertiary-background-color));
+    background: color-mix(in srgb, var(--account-color, var(--primary-color)) 10%, transparent);
+  }
+
+  .finances-section__method-name {
+    @apply text-sm font-semibold;
+  }
+
+  .finances-section__method-amount {
+    @apply text-base font-semibold tabular-nums;
+  }
+
+  .finances-section__method-share {
+    @apply text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  .finances-section__movements {
+    @apply flex flex-col gap-3;
+  }
+
+  .finances-section__filter-total {
+    @apply m-0 text-sm font-semibold tabular-nums;
+    color: var(--font-secondary-color);
+  }
+
+  .finances-section__list {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+
+  .payment-method-ledger__method-actions {
+    @apply flex shrink-0 gap-1;
+  }
+
   .planner-week {
     @apply grid min-w-0 gap-3 md:grid-cols-7;
   }
 
   .planner-week__day {
-    @apply flex min-h-55 min-w-0 flex-col gap-2 overflow-hidden rounded-xl border p-2;
+    @apply flex min-h-24 min-w-0 flex-col gap-2 overflow-hidden rounded-xl border p-3;
     border-color: var(--tertiary-background-color);
+    background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-elevated, transparent));
   }
 
   .planner-week__day--today {
@@ -3222,8 +3337,9 @@
   }
 
   .planner-month__cell {
-    @apply flex min-h-24 flex-col gap-1 rounded-lg border p-2 text-left;
+    @apply flex min-h-16 flex-col justify-between gap-1 rounded-xl border p-2 text-left;
     border-color: var(--tertiary-background-color);
+    background: color-mix(in srgb, var(--primary-color) 4%, transparent);
   }
 
   .planner-month__cell--muted {

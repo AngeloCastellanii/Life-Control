@@ -5,6 +5,19 @@
       <p class="payment-method-ledger__subtitle" data-role="subtitle"></p>
     </div>
     <span class="payment-method-ledger__balance" data-role="balance"></span>
+    <div class="payment-method-ledger__method-actions" data-role="method-actions" hidden>
+      <button type="button" class="lc-icon-btn" data-role="edit-method" aria-label="Editar método">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+          <path d="M4 20h4l10.5-10.5-4-4L4 16v4z" stroke-linejoin="round" />
+          <path d="M13.5 6.5l4 4" stroke-linecap="round" />
+        </svg>
+      </button>
+      <button type="button" class="lc-icon-btn lc-icon-btn--danger" data-role="delete-method" aria-label="Eliminar método">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+          <path d="M4 7h16M9 7V5h6v2M8 7l1 13h6l1-13" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
   </header>
 
   <div class="payment-method-ledger__stats">

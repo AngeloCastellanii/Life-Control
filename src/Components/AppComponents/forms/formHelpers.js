@@ -81,5 +81,11 @@ export async function buildModalButtons(form, options = {}) {
       actions.appendChild(submitBtn);
    }
 
+   const footer = form.closest('.modal-shell')?.querySelector('[data-role="footer"]');
+   if (footer) {
+      footer.hidden = false;
+      footer.appendChild(actions);
+   }
+
    return Boolean(cancelBtn && submitBtn);
 }

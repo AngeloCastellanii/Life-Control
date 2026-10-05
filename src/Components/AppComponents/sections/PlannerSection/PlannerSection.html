@@ -8,98 +8,52 @@
     </span>
     <div class="lc-view-hero__text">
       <h1 class="lc-section-title lc-view-hero__title">Planificador</h1>
-      <p class="lc-view-hero__subtitle">El día, la semana o el mes. Las tareas van en bloques.</p>
+      <p class="lc-view-hero__subtitle">El día, en bloques. Semana y mes sirven para saltar.</p>
     </div>
   </header>
 
   <div class="lc-card planner-section__toolbar">
     <div class="planner-section__nav">
-      <button type="button" class="planner-section__nav-btn" data-role="prev" aria-label="Anterior">‹</button>
+      <button type="button" class="lc-icon-btn" data-role="prev" aria-label="Anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
       <span class="planner-section__period" data-role="period-label"></span>
-      <button type="button" class="planner-section__nav-btn" data-role="next" aria-label="Siguiente">›</button>
+      <button type="button" class="lc-icon-btn" data-role="next" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
       <button type="button" class="planner-section__today" data-role="today">Hoy</button>
     </div>
     <div class="planner-section__controls">
-      <button type="button" class="planner-section__pending-btn" data-role="pending-tasks">Tareas pendientes</button>
-      <button type="button" class="planner-section__add-block" data-role="add-block">Configurar bloques</button>
-      <div class="planner-section__view-toggle" data-role="view-toggle">
-        <button type="button" class="planner-section__view-btn" data-view="day">Día</button>
-        <button type="button" class="planner-section__view-btn" data-view="week">Semana</button>
-        <button type="button" class="planner-section__view-btn" data-view="month">Mes</button>
+      <button type="button" class="lc-btn-outline" data-role="add-block">Bloques</button>
+      <div class="lc-segment" data-role="view-toggle">
+        <button type="button" class="lc-segment__btn" data-view="day">Día</button>
+        <button type="button" class="lc-segment__btn" data-view="week">Semana</button>
+        <button type="button" class="lc-segment__btn" data-view="month">Mes</button>
       </div>
     </div>
   </div>
 
   <div data-role="view-day">
-    <div class="grid min-h-90 gap-4 lg:grid-cols-[7fr_3fr]">
-      <div class="flex flex-col gap-4">
-        <div class="lc-card">
-          <div class="lc-view-card-head">
-            <span class="lc-view-card-icon lc-view-card-icon--amber lc-icon-dollar lc-icon-dollar--sm" aria-hidden="true">$</span>
-            <div>
-              <h2 class="lc-view-card-label">Flujo del día</h2>
-            </div>
-          </div>
-          <div class="planner-section__cash-flow" data-role="cash-flow">
-            <details class="planner-section__cash-group" data-role="cash-pay-wrap" hidden>
-              <summary class="planner-section__cash-summary lc-collapse-summary">
-                <span>Cuentas por pagar</span>
-                <span class="planner-section__cash-count" data-role="cash-pay-count">0</span>
-              </summary>
-              <div class="planner-section__cash-list" data-role="cash-pay"></div>
-            </details>
-            <details class="planner-section__cash-group" data-role="cash-receive-wrap" hidden>
-              <summary class="planner-section__cash-summary lc-collapse-summary">
-                <span>Cuentas por cobrar</span>
-                <span class="planner-section__cash-count" data-role="cash-receive-count">0</span>
-              </summary>
-              <div class="planner-section__cash-list" data-role="cash-receive"></div>
-            </details>
-            <details class="planner-section__cash-group" data-role="cash-shopping-wrap" hidden>
-              <summary class="planner-section__cash-summary lc-collapse-summary">
-                <span>Compras</span>
-                <span class="planner-section__cash-count" data-role="cash-shopping-count">0</span>
-              </summary>
-              <div class="planner-section__cash-list" data-role="cash-shopping"></div>
-            </details>
-          </div>
-          <p class="lc-empty" data-role="cash-flow-empty" hidden>Sin movimientos.</p>
-        </div>
-        <div class="lc-card">
-          <div class="lc-view-card-head">
-            <span class="lc-view-card-icon lc-view-card-icon--blue" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-                <rect x="3" y="4" width="18" height="16" rx="2" />
-                <path d="M3 10h18M8 2v4M16 2v4" stroke-linecap="round" />
-              </svg>
-            </span>
-            <div>
-              <h2 class="lc-view-card-label">Bloques de tiempo</h2>
-            </div>
-          </div>
-          <div class="flex flex-col gap-3" data-role="blocks"></div>
-          <p class="lc-empty" data-role="blocks-empty" hidden>Sin bloques. Configura uno arriba.</p>
-        </div>
-      </div>
-      <aside class="lc-card">
-        <div class="lc-view-card-head">
-          <span class="lc-view-card-icon lc-view-card-icon--primary" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-              <path d="M22 12H2M22 6H2M22 18H2" stroke-linecap="round" />
-            </svg>
-          </span>
-          <div>
-            <h2 class="lc-view-card-label">
-              Bandeja de entrada
-              <span class="planner-section__inbox-count" data-role="inbox-count"></span>
-            </h2>
-            <p class="lc-view-hint">Sin bloque asignado.</p>
-          </div>
-        </div>
-        <div class="flex flex-col gap-2.5" data-role="tasks"></div>
-        <p class="lc-empty" data-role="empty" hidden>Sin tareas. Pulsa +.</p>
-      </aside>
+    <div class="planner-section__money" data-role="money-line" hidden>
+      <button type="button" class="planner-section__money-chip" data-role="money-pay" hidden>0 pagos</button>
+      <button type="button" class="planner-section__money-chip" data-role="money-receive" hidden>0 cobros</button>
+      <button type="button" class="planner-section__money-chip" data-role="money-shopping" hidden>0 compras</button>
     </div>
+
+    <button type="button" class="planner-section__inbox-strip" data-role="inbox-toggle" hidden aria-expanded="false">
+      <span data-role="inbox-label">Sin bloque</span>
+    </button>
+    <div class="planner-section__inbox" data-role="inbox-panel" hidden>
+      <div class="flex flex-col gap-2.5" data-role="tasks"></div>
+      <p class="lc-empty" data-role="empty" hidden></p>
+    </div>
+
+    <div class="flex flex-col gap-3" data-role="blocks"></div>
+    <p class="lc-empty" data-role="blocks-empty" hidden>Sin bloques. Configura uno arriba.</p>
   </div>
 
   <div data-role="view-week" hidden>

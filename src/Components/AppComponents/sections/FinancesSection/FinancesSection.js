@@ -14,20 +14,11 @@ export default class FinancesSection extends HTMLElement {
       this.$addMethod = this.querySelector('[data-role="add-method"]');
       this.$accountsList = this.querySelector('[data-role="accounts-list"]');
       this.$accountsEmpty = this.querySelector('[data-role="accounts-empty"]');
-      this.$payList = this.querySelector('[data-role="pay-list"]');
-      this.$receiveList = this.querySelector('[data-role="receive-list"]');
-      this.$payEmpty = this.querySelector('[data-role="pay-empty"]');
-      this.$receiveEmpty = this.querySelector('[data-role="receive-empty"]');
-      this.$payTotal = this.querySelector('[data-role="pay-total"]');
-      this.$receiveTotal = this.querySelector('[data-role="receive-total"]');
-      this.$paySettledWrap = this.querySelector('[data-role="pay-settled-wrap"]');
-      this.$receiveSettledWrap = this.querySelector('[data-role="receive-settled-wrap"]');
-      this.$paySettledList = this.querySelector('[data-role="pay-settled-list"]');
-      this.$receiveSettledList = this.querySelector('[data-role="receive-settled-list"]');
-      this.$paySettledEmpty = this.querySelector('[data-role="pay-settled-empty"]');
-      this.$receiveSettledEmpty = this.querySelector('[data-role="receive-settled-empty"]');
-      this.$paySettledCount = this.querySelector('[data-role="pay-settled-count"]');
-      this.$receiveSettledCount = this.querySelector('[data-role="receive-settled-count"]');
+      this.$filter = this.querySelector('[data-role="movement-filter"]');
+      this.$filterTotal = this.querySelector('[data-role="filter-total"]');
+      this.$movementList = this.querySelector('[data-role="movement-list"]');
+      this.$movementEmpty = this.querySelector('[data-role="movement-empty"]');
+      this._movementFilter = 'pay';
       slice.controller.setComponentProps(this, props);
    }
 
@@ -49,6 +40,15 @@ export default class FinancesSection extends HTMLElement {
          event.preventDefault();
          event.stopPropagation();
          this.openMethodLedger('all');
+      });
+
+      this.$filter?.addEventListener('click', (event) => {
+         const button = event.target.closest('[data-filter]');
+         if (!button) {
+            return;
+         }
+         this._movementFilter = button.dataset.filter;
+         this.renderFromState();
       });
 
       this.$walletBalance?.addEventListener('click', (event) => {
@@ -151,7 +151,7 @@ export default class FinancesSection extends HTMLElement {
 
       for (const method of list) {
          const li = document.createElement('li');
-         li.className = 'finances-section__account finances-section__account--clickable';
+         li.className = 'finances-section__method';
          if (method.isPool) {
             li.classList.add('finances-section__account--general');
          }
@@ -179,77 +179,26 @@ export default class FinancesSection extends HTMLElement {
 
          const pct = total > 0 ? Math.min(100, (Math.abs(method.balance) / total) * 100) : 0;
 
-         const head = document.createElement('div');
-         head.className = 'finances-section__account-head';
-
          const name = document.createElement('span');
-         name.className = 'finances-section__account-name';
+         name.className = 'finances-section__method-name';
          name.textContent = method.name;
 
-         const amountWrap = document.createElement('div');
-         amountWrap.className = 'finances-section__account-amounts';
-
          const amount = document.createElement('span');
-         amount.className = 'finances-section__account-amount';
+         amount.className = 'finances-section__method-amount';
          amount.textContent = this.formatMoney(method.balance);
 
-         const pctLabel = document.createElement('span');
-         pctLabel.className = 'finances-section__account-pct';
-         pctLabel.textContent = `${pct.toFixed(0)}% del total · ver movimientos`;
+         const share = document.createElement('span');
+         share.className = 'finances-section__method-share';
+         share.textContent = `${pct.toFixed(0)}%`;
 
-         amountWrap.append(amount, pctLabel);
-         head.append(name, amountWrap);
-
-         const bar = document.createElement('div');
-         bar.className = 'finances-section__account-bar';
-         const fill = document.createElement('span');
-         fill.className = 'finances-section__account-fill';
-         fill.style.width = `${pct}%`;
-         bar.appendChild(fill);
-
-         const actions = document.createElement('div');
-         actions.className = 'finances-section__account-actions';
-
-         const edit = document.createElement('button');
-         edit.type = 'button';
-         edit.className = 'finances-section__account-edit';
-         edit.textContent = 'Editar';
-         edit.addEventListener('click', (event) => {
-            event.stopPropagation();
-            this.openMethodForm(method.id);
-         });
-         actions.appendChild(edit);
-
-         const remove = document.createElement('button');
-         remove.type = 'button';
-         remove.className = 'finances-section__account-delete';
-         remove.textContent = 'Eliminar';
-         remove.addEventListener('click', async (event) => {
-            event.stopPropagation();
-            const pool = this.paymentMethodService?.getPool?.();
-            const refund =
-               !method.isPool && pool
-                  ? ` El saldo volverá a “${pool.name}”.`
-                  : '';
-            if (!confirm(`¿Eliminar “${method.name}”?${refund}`)) {
-               return;
-            }
-            try {
-               await this.paymentMethodService.remove(method.id);
-            } catch (error) {
-               alert(error.message || 'No se pudo eliminar.');
-            }
-         });
-         actions.appendChild(remove);
-
-         li.append(head, bar, actions);
+         li.append(name, amount, share);
          this.$accountsList.appendChild(li);
       }
    }
 
    renderItemRow(item, { settledSection = false } = {}) {
       const row = document.createElement('li');
-      row.className = 'finances-section__item';
+      row.className = 'lc-row finances-section__item';
       if (item.settled || settledSection) {
          row.classList.add('finances-section__item--settled');
       }
@@ -268,7 +217,7 @@ export default class FinancesSection extends HTMLElement {
       row.appendChild(checkWrap);
 
       const body = document.createElement('div');
-      body.className = 'finances-section__item-body finances-section__item-body--clickable';
+      body.className = 'lc-row__main finances-section__item-body finances-section__item-body--clickable';
       body.tabIndex = 0;
       body.setAttribute('role', 'button');
       body.setAttribute('aria-label', `Ver detalle: ${item.description}`);
@@ -283,11 +232,11 @@ export default class FinancesSection extends HTMLElement {
       });
 
       const title = document.createElement('span');
-      title.className = 'finances-section__item-title';
+      title.className = 'lc-row__title finances-section__item-title';
       title.textContent = item.description;
 
       const meta = document.createElement('span');
-      meta.className = 'finances-section__item-meta';
+      meta.className = 'lc-row__meta finances-section__item-meta';
       const isPay = item.type === FINANCE_TYPE.PAY;
       const method = this.methodName(item.accountId);
       const bits = [];
@@ -308,14 +257,15 @@ export default class FinancesSection extends HTMLElement {
       row.appendChild(body);
 
       const amount = document.createElement('span');
-      amount.className = 'finances-section__item-amount';
+      amount.className = 'lc-row__amount finances-section__item-amount';
       amount.textContent = this.formatMoney(item.amount);
       row.appendChild(amount);
 
       const editBtn = document.createElement('button');
       editBtn.type = 'button';
-      editBtn.className = 'finances-section__edit';
-      editBtn.textContent = '✎';
+      editBtn.className = 'lc-icon-btn finances-section__edit';
+      editBtn.innerHTML =
+         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M4 20h4l10.5-10.5-4-4L4 16v4z" stroke-linejoin="round"/><path d="M13.5 6.5l4 4" stroke-linecap="round"/></svg>';
       editBtn.setAttribute('aria-label', 'Editar');
       editBtn.addEventListener('click', (event) => {
          event.stopPropagation();
@@ -325,8 +275,9 @@ export default class FinancesSection extends HTMLElement {
 
       const deleteBtn = document.createElement('button');
       deleteBtn.type = 'button';
-      deleteBtn.className = 'finances-section__delete';
-      deleteBtn.textContent = '×';
+      deleteBtn.className = 'lc-icon-btn lc-icon-btn--danger finances-section__delete';
+      deleteBtn.innerHTML =
+         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M8 7l1 13h6l1-13" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       deleteBtn.setAttribute('aria-label', 'Eliminar');
       deleteBtn.addEventListener('click', (event) => {
          event.stopPropagation();
@@ -374,31 +325,30 @@ export default class FinancesSection extends HTMLElement {
       this.renderAccounts(methods, total);
 
       const list = Array.isArray(finances) ? finances : [];
-      const payPending = list.filter((item) => item.type === FINANCE_TYPE.PAY && !item.settled);
-      const paySettled = list.filter((item) => item.type === FINANCE_TYPE.PAY && item.settled);
-      const receivePending = list.filter((item) => item.type === FINANCE_TYPE.RECEIVE && !item.settled);
-      const receiveSettled = list.filter((item) => item.type === FINANCE_TYPE.RECEIVE && item.settled);
+      const filter = this._movementFilter || 'pay';
+      for (const button of this.$filter?.querySelectorAll('[data-filter]') ?? []) {
+         button.classList.toggle('lc-segment__btn--active', button.dataset.filter === filter);
+      }
 
-      this.$payTotal.textContent = this.formatMoney(this.pendingTotal(list, FINANCE_TYPE.PAY));
-      this.$receiveTotal.textContent = this.formatMoney(this.pendingTotal(list, FINANCE_TYPE.RECEIVE));
+      let items = [];
+      let emptyText = 'Sin pendientes por pagar.';
+      if (filter === 'receive') {
+         items = list.filter((item) => item.type === FINANCE_TYPE.RECEIVE && !item.settled);
+         emptyText = 'Sin pendientes por cobrar.';
+         this.$filterTotal.textContent = this.formatMoney(this.pendingTotal(list, FINANCE_TYPE.RECEIVE));
+      } else if (filter === 'done') {
+         items = list.filter((item) => item.settled);
+         emptyText = 'Sin movimientos hechos.';
+         this.$filterTotal.textContent = `${items.length}`;
+      } else {
+         items = list.filter((item) => item.type === FINANCE_TYPE.PAY && !item.settled);
+         this.$filterTotal.textContent = this.formatMoney(this.pendingTotal(list, FINANCE_TYPE.PAY));
+      }
 
-      this.renderItemList(this.$payList, this.$payEmpty, payPending);
-      this.renderItemList(this.$receiveList, this.$receiveEmpty, receivePending);
-
-      this.renderSettledSection(
-         this.$paySettledWrap,
-         this.$paySettledList,
-         this.$paySettledEmpty,
-         this.$paySettledCount,
-         paySettled
-      );
-      this.renderSettledSection(
-         this.$receiveSettledWrap,
-         this.$receiveSettledList,
-         this.$receiveSettledEmpty,
-         this.$receiveSettledCount,
-         receiveSettled
-      );
+      this.$movementEmpty.textContent = emptyText;
+      this.renderItemList(this.$movementList, this.$movementEmpty, items, {
+         settledSection: filter === 'done'
+      });
    }
 }
 

@@ -9,8 +9,17 @@
         <p class="time-block__time" data-role="time"></p>
       </div>
       <div class="time-block__actions">
-        <button type="button" class="time-block__action" data-role="edit" aria-label="Editar bloque">✎</button>
-        <button type="button" class="time-block__action time-block__action--danger" data-role="delete" aria-label="Eliminar bloque">×</button>
+        <button type="button" class="lc-icon-btn time-block__action" data-role="edit" aria-label="Editar bloque">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path d="M4 20h4l10.5-10.5-4-4L4 16v4z" stroke-linejoin="round" />
+            <path d="M13.5 6.5l4 4" stroke-linecap="round" />
+          </svg>
+        </button>
+        <button type="button" class="lc-icon-btn lc-icon-btn--danger time-block__action" data-role="delete" aria-label="Eliminar bloque">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path d="M4 7h16M9 7V5h6v2M8 7l1 13h6l1-13" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
       </div>
     </div>
     <div class="time-block__stats">
@@ -23,7 +32,12 @@
       <div class="time-block__progress-bar" data-role="progress-bar"></div>
     </div>
   </div>
-  <button type="button" class="time-block__toggle-tasks" data-role="toggle-tasks" aria-expanded="true">▾ Tareas</button>
+  <button type="button" class="time-block__toggle-tasks" data-role="toggle-tasks" aria-expanded="true">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    Tareas
+  </button>
   <div class="time-block__tasks" data-role="tasks"></div>
   <p class="time-block__empty lc-empty" data-role="empty" hidden>Sin tareas en este bloque.</p>
 </article>

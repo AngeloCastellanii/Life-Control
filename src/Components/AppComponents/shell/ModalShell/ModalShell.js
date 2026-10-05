@@ -11,6 +11,7 @@ export default class ModalShell extends HTMLElement {
       this.$close = this.querySelector('[data-role="close"]');
       this.$title = this.querySelector('[data-role="title"]');
       this.$body = this.querySelector('[data-role="body"]');
+      this.$footer = this.querySelector('[data-role="footer"]');
       this._currentForm = null;
       this._openToken = 0;
       this._opening = false;
@@ -71,6 +72,10 @@ export default class ModalShell extends HTMLElement {
 
       this._currentForm = null;
       this.$body.innerHTML = '';
+      if (this.$footer) {
+         this.$footer.innerHTML = '';
+         this.$footer.hidden = true;
+      }
    }
 
    async open(payload = {}) {
@@ -131,6 +136,7 @@ export default class ModalShell extends HTMLElement {
       } else {
          this._currentForm = form;
          this.$body.appendChild(form);
+         this.mountFooter(form);
       }
 
       this.$root.hidden = false;
@@ -146,6 +152,24 @@ export default class ModalShell extends HTMLElement {
       document.removeEventListener('keydown', this._onKeydown);
       this.getAppShell()?.classList.remove('app-shell--modal-open');
       slice.events.emit('ui:modal:closed', {});
+   }
+
+   mountFooter(form) {
+      if (!this.$footer) {
+         return;
+      }
+      const actions =
+         form?.querySelector?.('[data-role="actions"]') ||
+         this.$footer.querySelector('[data-role="actions"]');
+      if (!actions) {
+         this.$footer.hidden = true;
+         this.$footer.innerHTML = '';
+         return;
+      }
+      this.$footer.hidden = false;
+      if (actions.parentElement !== this.$footer) {
+         this.$footer.replaceChildren(actions);
+      }
    }
 }
 

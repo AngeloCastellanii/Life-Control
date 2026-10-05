@@ -3,8 +3,8 @@ import { formatDuration, formatDurationUsage } from '../../../Utils/formatDurati
 import { formatBlockRangeLabel } from '../../../Utils/taskSlotTimes.js';
 
 const RULE_LABELS = {
-   [BLOCK_RULE.FLEXIBLE]: 'FLEXIBLE',
-   [BLOCK_RULE.LOCKED]: 'FIJO'
+   [BLOCK_RULE.FLEXIBLE]: 'Flexible',
+   [BLOCK_RULE.LOCKED]: 'Fijo'
 };
 
 const collapsedByBlock = new Map();
@@ -66,7 +66,6 @@ export default class TimeBlock extends HTMLElement {
       this.$tasks.hidden = collapsed;
       this.$empty.hidden = collapsed || (Number(this.taskCount) || 0) > 0;
       this.$toggleTasks.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-      this.$toggleTasks.textContent = collapsed ? '▸ Tareas' : '▾ Tareas';
       this.classList.toggle('time-block--tasks-collapsed', collapsed);
    }
 
@@ -93,7 +92,7 @@ export default class TimeBlock extends HTMLElement {
 
       this.$label.textContent = block.label;
       this.$time.textContent = formatBlockRangeLabel(block.start, end);
-      this.$rule.textContent = locked ? '🔒 FIJO' : RULE_LABELS[BLOCK_RULE.FLEXIBLE];
+      this.$rule.textContent = RULE_LABELS[rule] || RULE_LABELS[BLOCK_RULE.FLEXIBLE];
       this.$rule.classList.toggle('time-block__rule--flexible', !locked);
       this.$rule.classList.toggle('time-block__rule--fixed', locked);
       this.$usage.textContent = formatDurationUsage(used, duration);

@@ -18,6 +18,9 @@ export default class PaymentMethodLedgerPanel extends HTMLElement {
       this.$filterOut = this.querySelector('[data-role="filter-out"]');
       this.$list = this.querySelector('[data-role="list"]');
       this.$empty = this.querySelector('[data-role="empty"]');
+      this.$methodActions = this.querySelector('[data-role="method-actions"]');
+      this.$editMethod = this.querySelector('[data-role="edit-method"]');
+      this.$deleteMethod = this.querySelector('[data-role="delete-method"]');
       /** @type {null | 'in' | 'out'} */
       this._typeFilter = null;
       slice.controller.setComponentProps(this, props);
@@ -71,6 +74,36 @@ export default class PaymentMethodLedgerPanel extends HTMLElement {
 
       bind(this.$filterIn, 'in');
       bind(this.$filterOut, 'out');
+
+      this.$editMethod?.addEventListener('click', () => {
+         const method = this.method();
+         if (!method) {
+            return;
+         }
+         slice.events.emit('ui:modal:open', {
+            title: 'Editar método de pago',
+            form: 'PaymentMethodForm',
+            paymentMethodId: method.id
+         });
+      });
+      this.$deleteMethod?.addEventListener('click', async () => {
+         const method = this.method();
+         if (!method) {
+            return;
+         }
+         const pool = this.paymentMethodService?.getPool?.();
+         const refund = !method.isPool && pool ? ` El saldo volverá a “${pool.name}”.` : '';
+         if (!confirm(`¿Eliminar “${method.name}”?${refund}`)) {
+            return;
+         }
+         try {
+            await this.paymentMethodService.remove(method.id);
+            slice.events.emit('ui:modal:close');
+         } catch (error) {
+            alert(error.message || 'No se pudo eliminar.');
+         }
+      });
+
       this._filtersBound = true;
    }
 
@@ -130,6 +163,9 @@ export default class PaymentMethodLedgerPanel extends HTMLElement {
 
    paint() {
       const method = this.method();
+      if (this.$methodActions) {
+         this.$methodActions.hidden = this.isAll() || !method;
+      }
       const allItems = this.transactions().sort((a, b) =>
          String(this.transactionSortKey(b)).localeCompare(String(this.transactionSortKey(a)))
       );

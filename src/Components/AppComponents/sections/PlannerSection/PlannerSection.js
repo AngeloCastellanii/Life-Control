@@ -16,7 +16,7 @@ import {
    taskShowsOnCalendarDay,
    todayISO
 } from '../plannerDates.js';
-import { compareTasksBySlot, isBlockPast } from '../../../Utils/taskSlotTimes.js';
+import { compareTasksBySlot, isBlockPast, blockRelationToNow } from '../../../Utils/taskSlotTimes.js';
 import { getHidePastBlocks } from '../plannerPrefs.js';
 
 export default class PlannerSection extends HTMLElement {
@@ -37,34 +37,27 @@ export default class PlannerSection extends HTMLElement {
       this.$viewDay = this.querySelector('[data-role="view-day"]');
       this.$viewWeek = this.querySelector('[data-role="view-week"]');
       this.$viewMonth = this.querySelector('[data-role="view-month"]');
-      this.$cashFlow = this.querySelector('[data-role="cash-flow"]');
-      this.$cashFlowEmpty = this.querySelector('[data-role="cash-flow-empty"]');
-      this.$cashPayWrap = this.querySelector('[data-role="cash-pay-wrap"]');
-      this.$cashReceiveWrap = this.querySelector('[data-role="cash-receive-wrap"]');
-      this.$cashShoppingWrap = this.querySelector('[data-role="cash-shopping-wrap"]');
-      this.$cashPay = this.querySelector('[data-role="cash-pay"]');
-      this.$cashReceive = this.querySelector('[data-role="cash-receive"]');
-      this.$cashShopping = this.querySelector('[data-role="cash-shopping"]');
-      this.$cashPayCount = this.querySelector('[data-role="cash-pay-count"]');
-      this.$cashReceiveCount = this.querySelector('[data-role="cash-receive-count"]');
-      this.$cashShoppingCount = this.querySelector('[data-role="cash-shopping-count"]');
+      this.$moneyLine = this.querySelector('[data-role="money-line"]');
+      this.$moneyPay = this.querySelector('[data-role="money-pay"]');
+      this.$moneyReceive = this.querySelector('[data-role="money-receive"]');
+      this.$moneyShopping = this.querySelector('[data-role="money-shopping"]');
       this.$blocks = this.querySelector('[data-role="blocks"]');
       this.$blocksEmpty = this.querySelector('[data-role="blocks-empty"]');
       this.$tasks = this.querySelector('[data-role="tasks"]');
       this.$empty = this.querySelector('[data-role="empty"]');
-      this.$inboxCount = this.querySelector('[data-role="inbox-count"]');
+      this.$inboxToggle = this.querySelector('[data-role="inbox-toggle"]');
+      this.$inboxLabel = this.querySelector('[data-role="inbox-label"]');
+      this.$inboxPanel = this.querySelector('[data-role="inbox-panel"]');
       this.$weekGrid = this.querySelector('[data-role="week-grid"]');
       this.$monthGrid = this.querySelector('[data-role="month-grid"]');
       this.$addBlock = this.querySelector('[data-role="add-block"]');
-      this.$pendingTasks = this.querySelector('[data-role="pending-tasks"]');
       this._viewMode = 'day';
       this._cursorDate = todayISO();
+      this._inboxOpen = false;
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
-      this.$pendingTasks.addEventListener('click', () => this.openPendingTasks());
-
       this.$addBlock.addEventListener('click', () => {
          slice.events.emit('ui:modal:open', {
             title: 'Configurar Contenedor de Tiempo',
@@ -77,6 +70,17 @@ export default class PlannerSection extends HTMLElement {
       this.$today.addEventListener('click', () => {
          this._cursorDate = todayISO();
          this.renderAll();
+      });
+
+      this.$moneyPay?.addEventListener('click', () => slice.router?.navigate?.('/finances'));
+      this.$moneyReceive?.addEventListener('click', () => slice.router?.navigate?.('/finances'));
+      this.$moneyShopping?.addEventListener('click', () => slice.router?.navigate?.('/shopping'));
+      this.$inboxToggle?.addEventListener('click', () => {
+         if (!this.inboxTasks().length) {
+            return;
+         }
+         this._inboxOpen = !this._inboxOpen;
+         this.syncInboxPanel();
       });
 
       this.$viewToggle.addEventListener('click', (event) => {
@@ -250,7 +254,7 @@ export default class PlannerSection extends HTMLElement {
       }
 
       for (const button of this.$viewToggle.querySelectorAll('[data-view]')) {
-         button.classList.toggle('planner-section__view-btn--active', button.dataset.view === this._viewMode);
+         button.classList.toggle('lc-segment__btn--active', button.dataset.view === this._viewMode);
       }
 
       this.$viewDay.hidden = this._viewMode !== 'day';
@@ -328,51 +332,13 @@ export default class PlannerSection extends HTMLElement {
          });
       }
 
-      this.$cashPay.innerHTML = '';
-      this.$cashReceive.innerHTML = '';
-      this.$cashShopping.innerHTML = '';
-      this.$cashPayCount.textContent = String(payables.length);
-      this.$cashReceiveCount.textContent = String(receivables.length);
-      this.$cashShoppingCount.textContent = String(shoppingItems.length);
-      this.$cashPayWrap.hidden = payables.length === 0;
-      this.$cashReceiveWrap.hidden = receivables.length === 0;
-      this.$cashShoppingWrap.hidden = shoppingItems.length === 0;
-      this.$cashFlowEmpty.hidden = payables.length + receivables.length + shoppingItems.length > 0;
-
-      for (const item of payables) {
-         this.$cashPay.appendChild(this.createCashItem(item));
-      }
-      for (const item of receivables) {
-         this.$cashReceive.appendChild(this.createCashItem(item));
-      }
-      for (const item of shoppingItems) {
-         this.$cashShopping.appendChild(this.createCashItem(item));
-      }
-   }
-
-   createCashItem(item) {
-      const card = document.createElement('article');
-      card.className = `planner-section__cash-item planner-section__cash-item--${item.kind}`;
-
-      const label = document.createElement('span');
-      label.className = 'planner-section__cash-label';
-      if (item.kind === 'receive') {
-         label.textContent = 'COBRAR';
-      } else if (item.kind === 'shopping') {
-         label.textContent = 'COMPRA';
-      } else {
-         label.textContent = 'PAGAR';
-      }
-
-      const name = document.createElement('strong');
-      name.textContent = item.name;
-
-      const amount = document.createElement('span');
-      amount.className = 'planner-section__cash-amount';
-      amount.textContent = item.amount != null ? `$${Number(item.amount).toFixed(2)}` : '—';
-
-      card.append(label, name, amount);
-      return card;
+      this.$moneyPay.hidden = payables.length === 0;
+      this.$moneyReceive.hidden = receivables.length === 0;
+      this.$moneyShopping.hidden = shoppingItems.length === 0;
+      this.$moneyPay.textContent = `${payables.length} pago${payables.length === 1 ? '' : 's'}`;
+      this.$moneyReceive.textContent = `${receivables.length} cobro${receivables.length === 1 ? '' : 's'}`;
+      this.$moneyShopping.textContent = `${shoppingItems.length} compra${shoppingItems.length === 1 ? '' : 's'}`;
+      this.$moneyLine.hidden = payables.length + receivables.length + shoppingItems.length === 0;
    }
 
    async renderBlocks() {
@@ -402,7 +368,11 @@ export default class PlannerSection extends HTMLElement {
 
       const allBlocks = this.timeBlockService.getAll();
       const hidePast = getHidePastBlocks() && this._cursorDate === todayISO();
-      const blocks = hidePast ? allBlocks.filter((block) => !isBlockPast(block)) : allBlocks;
+      const visible = hidePast ? allBlocks.filter((block) => !isBlockPast(block)) : allBlocks;
+      const viewingToday = this._cursorDate === todayISO();
+      const blocks = [...visible].sort((a, b) => this.blockRank(a, viewingToday) - this.blockRank(b, viewingToday));
+      const hasNow = viewingToday && blocks.some((block) => blockRelationToNow(block) === 'current');
+      this.$blocks.classList.toggle('planner-section__blocks--live', hasNow);
       this.$blocksEmpty.hidden = blocks.length > 0;
       if (this.$blocksEmpty && hidePast && allBlocks.length > 0 && blocks.length === 0) {
          this.$blocksEmpty.textContent = 'Los bloques de hoy ya pasaron. Puedes mostrarlos en Perfil.';
@@ -434,6 +404,9 @@ export default class PlannerSection extends HTMLElement {
 
          if (!blockEl) {
             continue;
+         }
+         if (viewingToday && blockRelationToNow(block) === 'current') {
+            blockEl.classList.add('time-block--now');
          }
 
          const tasksHost = blockEl.querySelector('[data-role="tasks"]');
@@ -473,21 +446,28 @@ export default class PlannerSection extends HTMLElement {
             .filter((b) => this.timeBlockService.acceptsTasks(b))
             .map((b) => ({ id: b.id, label: b.label }));
 
-         this.$inboxCount.textContent = tasks.length ? String(tasks.length) : '';
+         this.$inboxLabel.textContent = tasks.length === 1 ? '1 sin bloque' : `${tasks.length} sin bloque`;
+         this.$inboxToggle.hidden = tasks.length === 0 && domains.length > 0;
 
          if (domains.length === 0) {
+            this.$inboxToggle.hidden = false;
+            this.$inboxLabel.textContent = 'Crea un dominio en Perfil';
+            this.$inboxOpen = false;
             this.$empty.textContent = 'Crea un dominio en Dominios primero.';
             this.$empty.hidden = false;
+            this.syncInboxPanel();
             return;
          }
 
          if (tasks.length === 0) {
-            this.$empty.textContent = 'Sin tareas en el inbox. Pulsa +.';
-            this.$empty.hidden = false;
+            this._inboxOpen = false;
+            this.$empty.hidden = true;
+            this.syncInboxPanel();
             return;
          }
 
          this.$empty.hidden = true;
+         this.syncInboxPanel();
 
          for (const task of tasks) {
             const domain = this.domainForTask(task.domainId);
@@ -515,110 +495,71 @@ export default class PlannerSection extends HTMLElement {
       }
    }
 
+   syncInboxPanel() {
+      const open = this._inboxOpen && !this.$inboxToggle.hidden;
+      this.$inboxPanel.hidden = !open;
+      this.$inboxToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+   }
+
+   blockRank(block, viewingToday) {
+      if (!viewingToday) {
+         return 1;
+      }
+      const relation = blockRelationToNow(block);
+      if (relation === 'current') {
+         return 0;
+      }
+      if (relation === 'future') {
+         return 1;
+      }
+      return 2;
+   }
+
    renderWeekView() {
       this.$weekGrid.innerHTML = '';
       const days = getWeekDays(this._cursorDate);
       const tasks = this.taskService?.getAll?.() ?? [];
 
       for (const iso of days) {
-         const column = document.createElement('article');
-         column.className = 'planner-week__day';
+         const dayTasks = tasks.filter((task) => taskShowsOnCalendarDay(task, iso));
+         const financeDue =
+            typeof this.financeService?.getDueOnDate === 'function'
+               ? this.financeService.getDueOnDate(iso).length
+               : 0;
+         const shoppingDue =
+            typeof this.shoppingService?.getDueOnDate === 'function'
+               ? this.shoppingService.getDueOnDate(iso).length
+               : 0;
+         const paymentCount = financeDue + shoppingDue;
+
+         const column = document.createElement('button');
+         column.type = 'button';
+         column.className = 'planner-week__day planner-week__day--jump';
          if (isSameDay(iso, todayISO())) {
             column.classList.add('planner-week__day--today');
          }
-         if (isSameDay(iso, this._cursorDate) && !isSameDay(iso, todayISO())) {
+         if (isSameDay(iso, this._cursorDate)) {
             column.classList.add('planner-week__day--selected');
          }
 
-         const header = document.createElement('button');
-         header.type = 'button';
+         const header = document.createElement('span');
          header.className = 'planner-week__day-head';
          header.textContent = formatShortDay(iso);
-         header.addEventListener('click', () => this.goToDay(iso));
 
-         const tasksSection = document.createElement('div');
-         tasksSection.className = 'planner-week__section';
-         const tasksTitle = document.createElement('span');
-         tasksTitle.className = 'planner-week__section-title';
-         tasksTitle.textContent = 'Tareas';
-         tasksSection.appendChild(tasksTitle);
-
-         const dayTasks = tasks.filter((task) => taskShowsOnCalendarDay(task, iso));
-         if (dayTasks.length === 0) {
-            const empty = document.createElement('p');
-            empty.className = 'planner-week__empty';
-            empty.textContent = 'Día libre';
-            tasksSection.appendChild(empty);
-         } else {
-            for (const task of dayTasks) {
-               tasksSection.appendChild(this.weekTaskChip(task));
-            }
+         const meta = document.createElement('span');
+         meta.className = 'planner-week__meta';
+         const bits = [];
+         if (dayTasks.length) {
+            bits.push(`${dayTasks.length} tarea${dayTasks.length === 1 ? '' : 's'}`);
          }
+         if (paymentCount) {
+            bits.push(`${paymentCount} pago${paymentCount === 1 ? '' : 's'}`);
+         }
+         meta.textContent = bits.join(' · ') || 'Libre';
 
-         const paymentsSection = document.createElement('div');
-         paymentsSection.className = 'planner-week__section';
-         const paymentsTitle = document.createElement('span');
-         paymentsTitle.className = 'planner-week__section-title';
-         paymentsTitle.textContent = 'Pagos';
-         paymentsSection.appendChild(paymentsTitle);
-         this.fillWeekPayments(paymentsSection, iso);
-
-         column.append(header, tasksSection, paymentsSection);
+         column.append(header, meta);
+         column.addEventListener('click', () => this.goToDay(iso));
          this.$weekGrid.appendChild(column);
-      }
-   }
-
-   weekTaskChip(task) {
-      const domain = this.domainForTask(task.domainId);
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'planner-week__task';
-      chip.title = `${domain.name} · ${task.title}`;
-
-      const badge = document.createElement('span');
-      badge.className = 'lc-domain-badge planner-week__task-domain';
-      badge.style.setProperty('--domain-color', domain.color);
-      badge.textContent = domain.name;
-
-      const title = document.createElement('span');
-      title.className = 'planner-week__task-title';
-      title.textContent = task.title;
-
-      chip.append(badge, title);
-      chip.addEventListener('click', () => this.openTaskDetail(task.id));
-      return chip;
-   }
-
-   fillWeekPayments(section, iso) {
-      const finances =
-         typeof this.financeService?.getDueOnDate === 'function'
-            ? this.financeService.getDueOnDate(iso)
-            : [];
-      const shopping =
-         typeof this.shoppingService?.getDueOnDate === 'function'
-            ? this.shoppingService.getDueOnDate(iso)
-            : [];
-      const payments = [
-         ...finances.map((item) => ({
-            name: item.description,
-            kind: item.type === FINANCE_TYPE.RECEIVE ? 'income' : 'debt'
-         })),
-         ...shopping.map((item) => ({ name: item.name, kind: 'debt' }))
-      ];
-
-      if (payments.length === 0) {
-         const empty = document.createElement('p');
-         empty.className = 'planner-week__empty';
-         empty.textContent = '—';
-         section.appendChild(empty);
-         return;
-      }
-
-      for (const payment of payments) {
-         const row = document.createElement('span');
-         row.className = `planner-week__payment planner-week__payment--${payment.kind}`;
-         row.textContent = payment.name;
-         section.appendChild(row);
       }
    }
 
@@ -643,20 +584,7 @@ export default class PlannerSection extends HTMLElement {
             dayNumber.className = 'planner-month__day-num';
             dayNumber.textContent = String(parseISO(cell.iso).getDate());
 
-            const list = document.createElement('div');
-            list.className = 'planner-month__list';
-
             const dayTasks = tasks.filter((task) => taskShowsOnCalendarDay(task, cell.iso));
-            for (const task of dayTasks.slice(0, 3)) {
-               list.appendChild(this.monthTaskLine(task));
-            }
-            if (dayTasks.length > 3) {
-               const more = document.createElement('span');
-               more.className = 'planner-month__more';
-               more.textContent = `+${dayTasks.length - 3} más`;
-               list.appendChild(more);
-            }
-
             const financeDue =
                typeof this.financeService?.getDueOnDate === 'function'
                   ? this.financeService.getDueOnDate(cell.iso).length
@@ -665,29 +593,23 @@ export default class PlannerSection extends HTMLElement {
                typeof this.shoppingService?.getDueOnDate === 'function'
                   ? this.shoppingService.getDueOnDate(cell.iso).length
                   : 0;
-            const paymentCount = financeDue + shoppingDue;
-            if (paymentCount > 0) {
-               const badge = document.createElement('span');
-               badge.className = 'planner-month__payment-dot';
-               badge.textContent = `${paymentCount} pago${paymentCount > 1 ? 's' : ''}`;
-               list.appendChild(badge);
-            }
 
-            dayEl.append(dayNumber, list);
+            const meta = document.createElement('span');
+            meta.className = 'planner-month__count';
+            const bits = [];
+            if (dayTasks.length) {
+               bits.push(String(dayTasks.length));
+            }
+            if (financeDue + shoppingDue > 0) {
+               bits.push(`${financeDue + shoppingDue} pago${financeDue + shoppingDue === 1 ? '' : 's'}`);
+            }
+            meta.textContent = bits.join(' · ');
+
+            dayEl.append(dayNumber, meta);
             dayEl.addEventListener('click', () => this.goToDay(cell.iso));
             this.$monthGrid.appendChild(dayEl);
          }
       }
-   }
-
-   monthTaskLine(task) {
-      const domain = this.domainForTask(task.domainId);
-      const line = document.createElement('span');
-      line.className = 'planner-month__task';
-      line.title = `${domain.name} · ${task.title}`;
-      line.style.setProperty('--domain-color', domain.color);
-      line.textContent = task.title;
-      return line;
    }
 
    _taskCardPrefix() {

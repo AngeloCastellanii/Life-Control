@@ -67,13 +67,72 @@
   }
 
   .lc-card-title {
-    @apply mb-3 text-[0.68rem] font-semibold uppercase text-lc-muted;
-    letter-spacing: var(--tracking-lc-label, 0.12em);
+    @apply mb-3 text-sm font-medium text-lc-muted;
   }
 
   .lc-label {
-    @apply mb-1.5 block text-[0.68rem] font-semibold uppercase text-lc-muted;
-    letter-spacing: var(--tracking-lc-label, 0.12em);
+    @apply mb-1.5 block text-xs font-medium text-lc-muted;
+  }
+
+  .lc-icon-btn {
+    @apply inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 p-0;
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    color: var(--primary-color);
+  }
+
+  .lc-icon-btn:hover {
+    background: color-mix(in srgb, var(--primary-color) 22%, transparent);
+  }
+
+  .lc-icon-btn--danger {
+    background: color-mix(in srgb, var(--danger-color) 12%, transparent);
+    color: var(--danger-color);
+  }
+
+  .lc-icon-btn--danger:hover {
+    background: color-mix(in srgb, var(--danger-color) 22%, transparent);
+  }
+
+  .lc-icon-btn svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .lc-segment {
+    @apply inline-flex gap-0.5 rounded-full p-1;
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--secondary-background-color));
+  }
+
+  .lc-segment__btn {
+    @apply cursor-pointer rounded-full border-0 bg-transparent px-3 py-1.5 text-sm font-medium;
+    color: var(--font-secondary-color);
+  }
+
+  .lc-segment__btn--active {
+    background: var(--primary-color);
+    color: var(--primary-color-contrast, #fff);
+  }
+
+  .lc-row {
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5;
+    background: color-mix(in srgb, var(--primary-color) 5%, var(--surface-elevated, transparent));
+  }
+
+  .lc-row__main {
+    @apply min-w-0 flex-1;
+  }
+
+  .lc-row__title {
+    @apply block truncate text-sm font-semibold;
+  }
+
+  .lc-row__meta {
+    @apply block truncate text-xs;
+    color: var(--font-secondary-color);
+  }
+
+  .lc-row__amount {
+    @apply shrink-0 text-sm font-semibold tabular-nums;
   }
 
   .lc-input {
