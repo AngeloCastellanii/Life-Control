@@ -6,52 +6,46 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #141816;
+  background: linear-gradient(155deg, #9fbfad 0%, #c5d8cc 42%, #e8f0ea 100%);
 }
 
 .lc-boot__mark {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.1rem;
+  gap: 0.85rem;
+  padding: 1.5rem 1.75rem;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, #f3f6f4 78%, transparent);
+  border: 1px solid color-mix(in srgb, #3f7359 35%, #c9d5ce);
+  box-shadow: 0 8px 32px rgb(63 115 89 / 18%);
 }
 
 .lc-boot__brand {
   margin: 0;
-  color: #f4f1ea;
-  font-family: "Times New Roman", Georgia, serif;
-  font-size: clamp(1.6rem, 6vw, 2.4rem);
-  font-weight: 500;
-  letter-spacing: 0.42em;
-  text-indent: 0.42em;
-  animation: lc-boot-in 0.9s ease both;
+  color: #1f2a24;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
 }
 
 .lc-boot__line {
   display: block;
-  height: 1px;
-  width: 7.5rem;
-  background: #c4b59a;
+  height: 3px;
+  width: 2.25rem;
+  border-radius: 999px;
+  background: #3f7359;
   transform-origin: center;
-  animation: lc-boot-line 1.4s ease-in-out infinite;
-}
-
-@keyframes lc-boot-in {
-  from {
-    opacity: 0;
-    letter-spacing: 0.7em;
-  }
-  to {
-    opacity: 1;
-    letter-spacing: 0.42em;
-  }
+  animation: lc-boot-line 1.1s ease-in-out infinite;
 }
 
 @keyframes lc-boot-line {
   0%,
   100% {
     opacity: 0.35;
-    transform: scaleX(0.45);
+    transform: scaleX(0.6);
   }
   50% {
     opacity: 1;
