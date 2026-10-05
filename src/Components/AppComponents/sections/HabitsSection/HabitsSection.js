@@ -7,6 +7,7 @@ import {
    monthGrid,
    weekProgress
 } from '../../../Service/HabitsService/HabitsService.js';
+import { paintIconButton } from '../iconButtons.js';
 
 const WEEKDAY = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
 
@@ -250,14 +251,16 @@ export default class HabitsSection extends HTMLElement {
 
          const editBtn = document.createElement('button');
          editBtn.type = 'button';
-         editBtn.className = 'habits-section__edit';
-         editBtn.textContent = 'Editar';
+         editBtn.className = 'lc-icon-btn habits-section__edit';
+         editBtn.setAttribute('aria-label', 'Editar');
+         paintIconButton(editBtn, 'edit');
          editBtn.addEventListener('click', () => this.openEdit(habit.id));
 
          const deleteBtn = document.createElement('button');
          deleteBtn.type = 'button';
-         deleteBtn.className = 'habits-section__delete';
-         deleteBtn.textContent = 'Eliminar';
+         deleteBtn.className = 'lc-icon-btn lc-icon-btn--danger habits-section__delete';
+         deleteBtn.setAttribute('aria-label', 'Eliminar');
+         paintIconButton(deleteBtn, 'delete');
          deleteBtn.addEventListener('click', () => {
             if (confirm('¿Eliminar este hábito? Se pierde el historial.')) {
                this.habitsService.remove(habit.id);

@@ -5,10 +5,10 @@ export const NAV_CATALOG = [
    { id: 'dashboard', path: '/', text: 'Dashboard', locked: 'start' },
    { id: 'planner', path: '/planner', text: 'Planificador' },
    { id: 'finances', path: '/finances', text: 'Finanzas' },
-   { id: 'shopping', path: '/shopping', text: 'Compras' },
-   { id: 'notes', path: '/notes', text: 'Notas' },
-   { id: 'habits', path: '/habits', text: 'Hábitos' },
-   { id: 'vision', path: '/vision', text: 'Vision Board' },
+   { id: 'shopping', path: '/shopping', text: 'Compras', placement: 'dashboard' },
+   { id: 'notes', path: '/notes', text: 'Notas', placement: 'dashboard' },
+   { id: 'habits', path: '/habits', text: 'Hábitos', placement: 'dashboard' },
+   { id: 'vision', path: '/vision', text: 'Vision Board', placement: 'dashboard' },
    { id: 'settings', path: '/settings', text: 'Perfil', locked: 'end' }
 ];
 
@@ -107,13 +107,11 @@ export function setNavPrefs(next) {
 }
 
 export function getNavItems() {
-   const { order, hidden } = getNavPrefs();
-   const catalog = catalogById();
-   const hiddenSet = new Set(hidden);
-   return order
-      .map((id) => catalog[id])
-      .filter((item) => item && !hiddenSet.has(item.id))
-      .map((item) => ({ id: item.id, path: item.path, text: item.text }));
+   return NAV_CATALOG.filter((item) => item.placement !== 'dashboard').map((item) => ({
+      id: item.id,
+      path: item.path,
+      text: item.text
+   }));
 }
 
 export function getNavPaths() {

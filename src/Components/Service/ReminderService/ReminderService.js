@@ -11,6 +11,7 @@ import { enableDockDrag, mountInDock } from '../../AppComponents/sections/floatD
 import { getDueStatus } from '../../AppComponents/sections/shoppingDue.js';
 import { todayISO } from '../../AppComponents/sections/plannerDates.js';
 import { isHabitDueOn } from '../HabitsService/HabitsService.js';
+import { paintIconButton } from '../../AppComponents/sections/iconButtons.js';
 
 const CHECK_INTERVAL_MS = 30 * 1000;
 const JUST_DUE_MS = 2 * 60 * 1000;
@@ -128,9 +129,9 @@ function renderInboxUi() {
 
       const dismiss = document.createElement('button');
       dismiss.type = 'button';
-      dismiss.className = 'lc-notice-item__dismiss';
+      dismiss.className = 'lc-icon-btn lc-notice-item__dismiss';
       dismiss.setAttribute('aria-label', 'Descartar aviso');
-      dismiss.textContent = '×';
+      paintIconButton(dismiss, 'close');
       dismiss.addEventListener('click', (event) => {
          event.stopPropagation();
          dismissInboxItem(item.id);

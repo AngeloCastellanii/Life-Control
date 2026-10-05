@@ -2756,6 +2756,21 @@
   }
 
   /* Dashboard: Finanzas y Compras separadas */
+  .dashboard-section__launch {
+    @apply mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4;
+  }
+
+  .dashboard-section__launch-card {
+    @apply flex cursor-pointer flex-col items-start gap-3 p-4 text-left;
+    font: inherit;
+    color: var(--font-primary-color);
+  }
+
+  .dashboard-section__launch-name {
+    @apply text-base font-semibold;
+    font-family: Fraunces, Georgia, serif;
+  }
+
   .dashboard-section__money-grid {
     @apply mb-4 grid gap-4 sm:grid-cols-2;
   }
@@ -3229,6 +3244,8 @@
 
   .finances-section__methods {
     @apply m-0 flex list-none gap-2 overflow-x-auto p-0;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
   }
 
   .finances-section__method {

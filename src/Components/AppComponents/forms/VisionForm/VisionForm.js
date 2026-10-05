@@ -5,6 +5,7 @@ import {
    hideFormError,
    showFormError
 } from '../formHelpers.js';
+import { paintIconButton } from '../../sections/iconButtons.js';
 
 const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
 const MAX_IMAGES = 4;
@@ -126,9 +127,9 @@ export default class VisionForm extends HTMLElement {
 
          const remove = document.createElement('button');
          remove.type = 'button';
-         remove.className = 'vision-form__thumb-remove';
+         remove.className = 'lc-icon-btn lc-icon-btn--danger vision-form__thumb-remove';
          remove.setAttribute('aria-label', 'Quitar foto');
-         remove.textContent = '×';
+         paintIconButton(remove, 'delete');
          remove.addEventListener('click', () => this.removeAt(index));
 
          li.append(img, remove);

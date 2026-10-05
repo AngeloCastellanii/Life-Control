@@ -106,6 +106,24 @@ export default class AppShell extends HTMLElement {
             )
          );
 
+      const inHorizontalScroller = (target) => {
+         let el = target instanceof Element ? target : null;
+         while (el && el !== stage) {
+            if (el.classList?.contains('finances-section__methods')) {
+               return el.scrollWidth > el.clientWidth + 4;
+            }
+            const overflowX = getComputedStyle(el).overflowX;
+            if (
+               (overflowX === 'auto' || overflowX === 'scroll' || overflowX === 'overlay') &&
+               el.scrollWidth > el.clientWidth + 4
+            ) {
+               return true;
+            }
+            el = el.parentElement;
+         }
+         return false;
+      };
+
       const currentNavIndex = () => {
          const current = window.location.pathname.replace(/\/+$/, '') || '/';
          return getNavPaths().indexOf(current);
@@ -114,7 +132,7 @@ export default class AppShell extends HTMLElement {
       stage.addEventListener(
          'touchstart',
          (event) => {
-            if (event.touches.length !== 1 || isInteractive(event.target)) {
+            if (event.touches.length !== 1 || isInteractive(event.target) || inHorizontalScroller(event.target)) {
                tracking = false;
                previewing = false;
                return;

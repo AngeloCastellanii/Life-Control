@@ -4,6 +4,7 @@ import {
    requestNotificationPermission,
    setNotificationsEnabled
 } from '../notifications.js';
+import { paintIconButton } from '../iconButtons.js';
 
 const ICON_ARCHIVE =
    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="3" width="18" height="4" rx="1"/><path d="M5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7M10 12h4" stroke-linecap="round"/></svg>';
@@ -423,8 +424,9 @@ export default class NotesSection extends HTMLElement {
 
          const editBtn = document.createElement('button');
          editBtn.type = 'button';
-         editBtn.className = 'notes-section__edit';
-         editBtn.textContent = 'Editar';
+         editBtn.className = 'lc-icon-btn notes-section__edit';
+         editBtn.setAttribute('aria-label', 'Editar');
+         paintIconButton(editBtn, 'edit');
          editBtn.disabled = Boolean(note.archived);
          if (!note.archived) {
             editBtn.addEventListener('click', () => this.openEdit(note.id));
@@ -432,8 +434,9 @@ export default class NotesSection extends HTMLElement {
 
          const deleteBtn = document.createElement('button');
          deleteBtn.type = 'button';
-         deleteBtn.className = 'notes-section__delete';
-         deleteBtn.textContent = 'Eliminar';
+         deleteBtn.className = 'lc-icon-btn lc-icon-btn--danger notes-section__delete';
+         deleteBtn.setAttribute('aria-label', 'Eliminar');
+         paintIconButton(deleteBtn, 'delete');
          deleteBtn.addEventListener('click', () => {
             if (confirm('¿Eliminar esta nota?')) {
                this.notesService.remove(note.id);

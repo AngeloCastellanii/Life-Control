@@ -65,7 +65,7 @@ const STEPS = [
    {
       kicker: 'Ajustes',
       title: 'Perfil',
-      text: 'Nombre, tema, orden de las vistas, avisos del teléfono y una copia de tus datos para pasarlos a otro dispositivo.'
+      text: 'Nombre, tema, avisos del teléfono y una copia de tus datos para pasarlos a otro dispositivo.'
    }
 ];
 

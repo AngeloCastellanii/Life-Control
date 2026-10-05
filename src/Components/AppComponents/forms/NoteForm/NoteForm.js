@@ -6,6 +6,7 @@ import {
    showFormError
 } from '../formHelpers.js';
 import { looksLikeListText, parseListText } from '../../sections/parseListText.js';
+import { paintIconButton } from '../../sections/iconButtons.js';
 
 const DEFAULT_COLOR = '#3f7359';
 
@@ -224,9 +225,9 @@ export default class NoteForm extends HTMLElement {
 
          const remove = document.createElement('button');
          remove.type = 'button';
-         remove.className = 'note-form__check-remove';
+         remove.className = 'lc-icon-btn lc-icon-btn--danger note-form__check-remove';
          remove.setAttribute('aria-label', 'Quitar ítem');
-         remove.textContent = '×';
+         paintIconButton(remove, 'delete');
          remove.addEventListener('click', () => this.removeChecklistItem(item.id));
 
          li.append(num, text, remove);

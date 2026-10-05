@@ -16,12 +16,7 @@ import {
 } from '../notifications.js';
 import { CURRENCIES, getPreferredCurrency, setPreferredCurrency } from '../currency.js';
 import { getHidePastBlocks, setHidePastBlocks } from '../plannerPrefs.js';
-import {
-   getNavPrefs,
-   moveNavView,
-   NAV_CATALOG,
-   toggleNavViewHidden
-} from '../navViews.js';
+import { paintIconButton } from '../iconButtons.js';
 
 export default class SettingsSection extends HTMLElement {
    static props = {
@@ -51,7 +46,6 @@ export default class SettingsSection extends HTMLElement {
       this.$backupStatus = this.querySelector('[data-role="backup-status"]');
       this.$themeMount = this.querySelector('[data-role="theme-mount"]');
       this.$hidePastBlocks = this.querySelector('[data-role="hide-past-blocks"]');
-      this.$navList = this.querySelector('[data-role="nav-list"]');
       this.$guide = this.querySelector('[data-role="guide"]');
       this.$replayGuide = this.querySelector('[data-role="replay-guide"]');
       this.$guideViews = this.querySelector('[data-role="guide-views"]');
@@ -81,7 +75,6 @@ export default class SettingsSection extends HTMLElement {
       this.syncNotificationState();
       this.setupCurrency();
       this.setupPlannerPrefs();
-      this.setupNavOrder();
       this.setupGuide();
       this.setupDomains();
       this.$nameInput.addEventListener('input', () => this.updateAvatar());
@@ -176,74 +169,6 @@ export default class SettingsSection extends HTMLElement {
          setHidePastBlocks(this.$hidePastBlocks.checked);
          slice.events.emit('planner:prefs-changed', { hidePastBlocks: this.$hidePastBlocks.checked });
       });
-   }
-
-   setupNavOrder() {
-      this.renderNavOrder();
-   }
-
-   renderNavOrder() {
-      if (!this.$navList) {
-         return;
-      }
-      const prefs = getNavPrefs();
-      const hidden = new Set(prefs.hidden);
-      this.$navList.innerHTML = '';
-      for (const id of prefs.order) {
-         const item = NAV_CATALOG.find((entry) => entry.id === id);
-         if (!item) {
-            continue;
-         }
-         const li = document.createElement('li');
-         li.className = 'settings-section__nav-item';
-         if (hidden.has(id)) {
-            li.classList.add('settings-section__nav-item--hidden');
-         }
-
-         const name = document.createElement('span');
-         name.textContent = item.text;
-
-         const actions = document.createElement('div');
-         actions.className = 'settings-section__nav-actions';
-
-         const up = document.createElement('button');
-         up.type = 'button';
-         up.className = 'settings-section__nav-btn settings-section__nav-btn--icon';
-         up.innerHTML =
-            '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 14l6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-         up.setAttribute('aria-label', 'Subir');
-         up.disabled = Boolean(item.locked);
-         up.addEventListener('click', () => {
-            moveNavView(id, -1);
-            this.renderNavOrder();
-         });
-
-         const down = document.createElement('button');
-         down.type = 'button';
-         down.className = 'settings-section__nav-btn settings-section__nav-btn--icon';
-         down.innerHTML =
-            '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 10l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-         down.setAttribute('aria-label', 'Bajar');
-         down.disabled = Boolean(item.locked);
-         down.addEventListener('click', () => {
-            moveNavView(id, 1);
-            this.renderNavOrder();
-         });
-
-         const hide = document.createElement('button');
-         hide.type = 'button';
-         hide.className = 'settings-section__nav-btn';
-         hide.textContent = item.locked ? 'Fijo' : hidden.has(id) ? 'Mostrar' : 'Ocultar';
-         hide.disabled = Boolean(item.locked);
-         hide.addEventListener('click', () => {
-            toggleNavViewHidden(id);
-            this.renderNavOrder();
-         });
-
-         actions.append(up, down, hide);
-         li.append(name, actions);
-         this.$navList.appendChild(li);
-      }
    }
 
    setupGuide() {
@@ -350,16 +275,18 @@ export default class SettingsSection extends HTMLElement {
 
          const editBtn = document.createElement('button');
          editBtn.type = 'button';
-         editBtn.className = 'domains-section__edit';
-         editBtn.textContent = 'Editar';
+         editBtn.className = 'lc-icon-btn domains-section__edit';
+         editBtn.setAttribute('aria-label', 'Editar');
+         paintIconButton(editBtn, 'edit');
          editBtn.addEventListener('click', () => {
             slice.events.emit('ui:modal:open', { title: 'Editar dominio', form: 'DomainForm', domainId: domain.id });
          });
 
          const deleteBtn = document.createElement('button');
          deleteBtn.type = 'button';
-         deleteBtn.className = 'domains-section__delete';
-         deleteBtn.textContent = 'Eliminar';
+         deleteBtn.className = 'lc-icon-btn lc-icon-btn--danger domains-section__delete';
+         deleteBtn.setAttribute('aria-label', 'Eliminar');
+         paintIconButton(deleteBtn, 'delete');
          deleteBtn.addEventListener('click', async () => {
             const ok = await domainService?.remove(domain.id);
             if (!ok) {

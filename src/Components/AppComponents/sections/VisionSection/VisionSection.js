@@ -1,3 +1,5 @@
+import { paintIconButton } from '../iconButtons.js';
+
 function formatTarget(iso) {
    if (!iso) {
       return '';
@@ -116,9 +118,9 @@ export default class VisionSection extends HTMLElement {
 
       const closeBtn = document.createElement('button');
       closeBtn.type = 'button';
-      closeBtn.className = 'vision-lightbox__close';
+      closeBtn.className = 'lc-icon-btn vision-lightbox__close';
       closeBtn.setAttribute('aria-label', 'Cerrar');
-      closeBtn.textContent = '×';
+      paintIconButton(closeBtn, 'close');
       closeBtn.addEventListener('click', () => this.closeLightbox());
 
       const counter = document.createElement('span');
@@ -142,9 +144,9 @@ export default class VisionSection extends HTMLElement {
       if (images.length > 1) {
          prevBtn = document.createElement('button');
          prevBtn.type = 'button';
-         prevBtn.className = 'vision-lightbox__nav vision-lightbox__nav--prev';
+         prevBtn.className = 'lc-icon-btn vision-lightbox__nav vision-lightbox__nav--prev';
          prevBtn.setAttribute('aria-label', 'Anterior');
-         prevBtn.textContent = '‹';
+         paintIconButton(prevBtn, 'prev');
          prevBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             index = (index - 1 + images.length) % images.length;
@@ -153,9 +155,9 @@ export default class VisionSection extends HTMLElement {
 
          nextBtn = document.createElement('button');
          nextBtn.type = 'button';
-         nextBtn.className = 'vision-lightbox__nav vision-lightbox__nav--next';
+         nextBtn.className = 'lc-icon-btn vision-lightbox__nav vision-lightbox__nav--next';
          nextBtn.setAttribute('aria-label', 'Siguiente');
-         nextBtn.textContent = '›';
+         paintIconButton(nextBtn, 'next');
          nextBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             index = (index + 1) % images.length;
@@ -287,14 +289,16 @@ export default class VisionSection extends HTMLElement {
 
          const editBtn = document.createElement('button');
          editBtn.type = 'button';
-         editBtn.className = 'vision-section__edit';
-         editBtn.textContent = 'Editar';
+         editBtn.className = 'lc-icon-btn vision-section__edit';
+         editBtn.setAttribute('aria-label', 'Editar');
+         paintIconButton(editBtn, 'edit');
          editBtn.addEventListener('click', () => this.openEdit(item.id));
 
          const deleteBtn = document.createElement('button');
          deleteBtn.type = 'button';
-         deleteBtn.className = 'vision-section__delete';
-         deleteBtn.textContent = 'Eliminar';
+         deleteBtn.className = 'lc-icon-btn lc-icon-btn--danger vision-section__delete';
+         deleteBtn.setAttribute('aria-label', 'Eliminar');
+         paintIconButton(deleteBtn, 'delete');
          deleteBtn.addEventListener('click', () => {
             if (confirm('¿Eliminar esta meta del Vision Board?')) {
                this.service.remove(item.id);

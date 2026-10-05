@@ -90,6 +90,14 @@ export default class DashboardSection extends HTMLElement {
          }
       });
 
+      this.querySelector('[data-role="launch"]')?.addEventListener('click', (event) => {
+         const card = event.target.closest('[data-route]');
+         if (!card) {
+            return;
+         }
+         slice.router?.navigate?.(card.dataset.route);
+      });
+
       slice.context.watch(
          'lifeControl',
          this,
