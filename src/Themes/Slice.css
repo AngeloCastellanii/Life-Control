@@ -1,5 +1,5 @@
 :root {
-  --font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-family: Outfit, system-ui, sans-serif;
 
   /* Slice — verdes vivos, brillo / glass */
   --slice-bg: #c5d8cc;
@@ -92,8 +92,6 @@
 :root .lc-input,
 :root .lc-btn-outline,
 :root .task-card__assign-btn,
-:root .domains-section__edit,
-:root .domains-section__delete,
 :root .finances-section__wallet-adjust,
 :root .shopping-section__col-btn,
 :root .planner-section__nav-btn {
@@ -104,7 +102,6 @@
 
 :root .lc-btn-outline:hover,
 :root .task-card__assign-btn:hover:not(:disabled),
-:root .domains-section__edit:hover,
 :root .finances-section__wallet-adjust:hover,
 :root .shopping-section__col-btn:hover,
 :root .planner-section__nav-btn:hover {
@@ -113,7 +110,6 @@
   box-shadow: 0 0 16px rgb(63 115 89 / 28%);
 }
 
-:root .domains-section__delete:hover,
 :root .shopping-section__col-btn--danger:hover {
   border-color: var(--danger-color);
   color: var(--danger-color);

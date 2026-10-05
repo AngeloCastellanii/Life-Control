@@ -13,19 +13,59 @@ const STEPS = [
    {
       kicker: 'Life Control',
       title: 'Tu día, en un solo lugar',
-      text: 'Tareas, dinero, compras, notas y hábitos. Todo queda en este dispositivo.',
+      text: 'Tareas, tiempo, dinero, compras, notas, hábitos y metas. Todo se guarda en este dispositivo.',
       askName: true
    },
    {
       kicker: 'Estilo',
       title: 'Elige un tema',
-      text: 'Lo cambias después en Perfil.',
+      text: 'Claro, oscuro, rosa, morado o verde. Lo cambias cuando quieras desde Perfil.',
       chooseTheme: true
    },
    {
-      kicker: 'Cómo se usa',
-      title: 'Tres gestos',
-      points: ['+ crea lo que necesites', 'Enfoque deja solo lo de ahora', 'Perfil guarda nombre, avisos y respaldo']
+      kicker: 'Inicio',
+      title: 'Dashboard',
+      text: 'Lo primero son las tareas de hoy. Más abajo, finanzas y compras por separado, el Vision Board y las estadísticas, que se pliegan.'
+   },
+   {
+      kicker: 'Tiempo',
+      title: 'Planificador',
+      text: 'Las tareas viven en bloques (mañana, tarde, noche). La urgencia las ordena. Si se repiten, al completarlas aparece la siguiente.'
+   },
+   {
+      kicker: 'Dinero',
+      title: 'Finanzas',
+      text: 'Cada método (Zelle, efectivo, banco) tiene su saldo. El fondo total es la suma. “Fondo para repartir” es opcional: si lo marcas en un método, al crear otro se puede descontar primero de ese saldo.'
+   },
+   {
+      kicker: 'Compras',
+      title: 'Compras',
+      text: 'Artículos con frecuencia, precio y fecha. Al marcar uno como comprado, se registra el egreso en Finanzas.'
+   },
+   {
+      kicker: 'Notas',
+      title: 'Notas y listas',
+      text: 'Texto o lista. En una lista, toca el texto para editarlo. Fija las importantes, archiva las terminadas y pon un aviso a una hora.'
+   },
+   {
+      kicker: 'Constancia',
+      title: 'Hábitos',
+      text: 'Frecuencia, meta de la semana y racha. El botón Enfoque, dentro de Hábitos, deja solo lo que toca hoy.'
+   },
+   {
+      kicker: 'Ahora',
+      title: 'Enfoque',
+      text: 'El botón flotante abre el bloque en el que estás. Marca la tarea y sal cuando termines. En Hábitos muestra los de hoy.'
+   },
+   {
+      kicker: 'Metas',
+      title: 'Vision Board',
+      text: 'Está en el inicio. Cada meta muestra la fecha a la izquierda y, a la derecha, cuántos días faltan.'
+   },
+   {
+      kicker: 'Ajustes',
+      title: 'Perfil',
+      text: 'Nombre, tema, orden de las vistas, avisos del teléfono y una copia de tus datos para pasarlos a otro dispositivo.'
    }
 ];
 

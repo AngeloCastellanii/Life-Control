@@ -11,9 +11,10 @@
     <input type="checkbox" data-role="pool" />
     <span>Fondo para repartir</span>
   </label>
+  <p class="lc-hint">Opcional. Si lo marcas, al crear otros métodos el saldo puede salir primero de este.</p>
   <div>
-    <span class="lc-label">Color</span>
-    <div class="payment-method-form__colors" data-role="colors"></div>
+    <label class="lc-label" for="payment-method-form-color">Color</label>
+    <input class="lc-color-wheel" id="payment-method-form-color" data-role="color-input" type="color" value="#3f7359" aria-label="Color" />
   </div>
   <p class="block-form__error" data-role="error" hidden></p>
   <div class="flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>

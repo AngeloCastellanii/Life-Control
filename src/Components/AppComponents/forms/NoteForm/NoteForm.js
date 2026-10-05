@@ -5,8 +5,9 @@ import {
    hideFormError,
    showFormError
 } from '../formHelpers.js';
-import { getNoteColors } from '../../sections/noteColors.js';
 import { looksLikeListText, parseListText } from '../../sections/parseListText.js';
+
+const DEFAULT_COLOR = '#3f7359';
 
 function isoToLocalInput(iso) {
    if (!iso) {
@@ -56,17 +57,17 @@ export default class NoteForm extends HTMLElement {
       this.$types = this.querySelector('[data-role="types"]');
       this.$remind = this.querySelector('#note-form-remind');
       this.$pinned = this.querySelector('#note-form-pinned');
-      this.$colors = this.querySelector('[data-role="colors"]');
+      this.$color = this.querySelector('[data-role="color-input"]');
       this.$error = this.querySelector('[data-role="error"]');
       this._type = 'text';
       this._checklist = [];
-      this._color = getNoteColors()[0];
+      this._color = DEFAULT_COLOR;
       this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
-      this.renderColors();
+      this.bindColor();
       this.bindTypeButtons();
       this.bindListControls();
       this.bindSmartPaste();
@@ -76,7 +77,7 @@ export default class NoteForm extends HTMLElement {
    }
 
    async update() {
-      this.renderColors(true);
+      this.bindColor();
       await this.ensureButtons();
       this.populate();
    }
@@ -233,32 +234,20 @@ export default class NoteForm extends HTMLElement {
       });
    }
 
-   renderColors(force = false) {
-      if (!force && this.$colors.childElementCount > 0) {
+   bindColor() {
+      if (!this.$color || this._colorBound) {
          return;
       }
-      this.$colors.innerHTML = '';
-      const colors = getNoteColors();
-      if (!colors.includes(this._color)) {
-         this._color = colors[0];
-      }
-      for (const color of colors) {
-         const swatch = document.createElement('button');
-         swatch.type = 'button';
-         swatch.className = 'note-form__color';
-         swatch.style.backgroundColor = color;
-         swatch.dataset.color = color;
-         swatch.setAttribute('aria-label', `Color ${color}`);
-         swatch.addEventListener('click', () => this.selectColor(color));
-         this.$colors.appendChild(swatch);
-      }
-      this.selectColor(this._color);
+      this.$color.addEventListener('input', () => {
+         this._color = this.$color.value;
+      });
+      this._colorBound = true;
    }
 
    selectColor(color) {
-      this._color = color;
-      for (const swatch of this.$colors.children) {
-         swatch.classList.toggle('note-form__color--active', swatch.dataset.color === color);
+      this._color = color || DEFAULT_COLOR;
+      if (this.$color) {
+         this.$color.value = this._color;
       }
    }
 
@@ -290,7 +279,7 @@ export default class NoteForm extends HTMLElement {
          this.loadNote(this.noteId);
       } else {
          this.setType('text', { convertBody: false });
-         this.selectColor(getNoteColors()[0]);
+         this.selectColor(DEFAULT_COLOR);
          this.renderChecklist();
       }
    }
@@ -310,7 +299,7 @@ export default class NoteForm extends HTMLElement {
       this._checklist = (note.checklist ?? []).map((item) => ({ ...item }));
       this.setType(note.type === 'list' ? 'list' : 'text', { convertBody: false });
       this.renderChecklist();
-      this.selectColor(note.color || getNoteColors()[0]);
+      this.selectColor(note.color || DEFAULT_COLOR);
    }
 
    async handleSubmit() {

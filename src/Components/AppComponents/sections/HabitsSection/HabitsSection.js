@@ -155,7 +155,7 @@ export default class HabitsSection extends HTMLElement {
          check.disabled = habit.paused || !dueToday;
          check.setAttribute('aria-pressed', todayDone ? 'true' : 'false');
          check.setAttribute('aria-label', todayDone ? `Desmarcar ${habit.name} hoy` : `Marcar ${habit.name} hoy`);
-         check.textContent = todayDone ? '✓' : '';
+         check.textContent = '';
          check.addEventListener('click', () => this.habitsService.toggleDate(habit.id, today));
 
          const text = document.createElement('div');

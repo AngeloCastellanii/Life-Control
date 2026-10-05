@@ -14,7 +14,8 @@
   --color-lc-danger: var(--danger-color);
   --color-lc-success: var(--success-color);
   --color-lc-warning: var(--warning-color);
-  --font-sans: var(--font-family, "Plus Jakarta Sans", system-ui, sans-serif);
+  --font-sans: var(--font-family, Outfit, system-ui, sans-serif);
+  --font-display: Fraunces, Georgia, serif;
   --radius-lc: var(--lc-radius-lg, 1rem);
   --radius-lc-xl: var(--lc-radius-xl, 1.5rem);
   --tracking-lc-tight: -0.02em;
@@ -40,6 +41,7 @@
   h2,
   h3 {
     @apply font-semibold tracking-tight;
+    font-family: var(--font-display, Fraunces, Georgia, serif);
     text-wrap: balance;
   }
 }
@@ -56,6 +58,7 @@
 
   .lc-section-title {
     @apply m-0 mb-1.5 text-[1.75rem] font-semibold leading-[1.15] tracking-tight text-lc-text;
+    font-family: var(--font-display, Fraunces, Georgia, serif);
     letter-spacing: var(--tracking-lc-tight, -0.02em);
   }
 

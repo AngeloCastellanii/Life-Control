@@ -318,7 +318,9 @@ export default class NotesSection extends HTMLElement {
             pinBtn.type = 'button';
             pinBtn.className = 'notes-section__pin';
             pinBtn.classList.toggle('notes-section__pin--active', note.pinned);
-            pinBtn.textContent = note.pinned ? '★' : '☆';
+            pinBtn.innerHTML = note.pinned
+               ? '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M8 3h8l-1.1 5.2H18L12 16.4 6 8.2h3.1L8 3zm3.2 13.6V21h1.6v-4.4L12 16.4z"/></svg>'
+               : '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M12 17.2V21M8 3h8l-1 5.2H18L12 17.2 6 8.2h3L8 3z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
             pinBtn.setAttribute('aria-label', note.pinned ? 'Desfijar' : 'Fijar');
             pinBtn.addEventListener('click', () => this.notesService.togglePinned(note.id));
             headActions.appendChild(pinBtn);
@@ -360,7 +362,7 @@ export default class NotesSection extends HTMLElement {
                check.className = 'notes-section__check';
                check.disabled = Boolean(note.archived);
                check.setAttribute('aria-label', item.done ? 'Marcar pendiente' : 'Marcar hecho');
-               check.textContent = item.done ? '✓' : '';
+               check.textContent = '';
                if (!note.archived) {
                   check.addEventListener('click', () =>
                      this.notesService.toggleChecklistItem(note.id, item.id)

@@ -528,13 +528,14 @@
   }
 
   .modal-shell__dialog {
-    @apply absolute left-1/2 top-1/2 w-full max-w-110 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border;
+    @apply absolute left-1/2 top-1/2 w-full max-w-110 -translate-x-1/2 -translate-y-1/2 overflow-hidden border;
     max-height: min(85vh, 560px);
+    border-radius: 1.35rem;
     background: var(--surface-glass, var(--secondary-background-color));
     backdrop-filter: var(--surface-blur, blur(12px));
     -webkit-backdrop-filter: var(--surface-blur, blur(12px));
     border-color: var(--border-glow, var(--tertiary-background-color));
-    box-shadow: var(--box-shadow-primary, 0 16px 48px rgb(0 0 0 / 25%));
+    box-shadow: var(--box-shadow-primary, 0 18px 50px rgb(0 0 0 / 22%));
   }
 
   .modal-shell__header {
@@ -543,12 +544,14 @@
   }
 
   .modal-shell__title {
-    @apply m-0 text-lg font-semibold tracking-tight;
+    @apply m-0 text-lg font-semibold;
+    font-family: Fraunces, Georgia, serif;
+    letter-spacing: -0.03em;
     color: var(--font-primary-color);
   }
 
   .modal-shell__close {
-    @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 text-xl leading-none transition-colors;
+    @apply flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 text-xl leading-none transition-colors;
     background: color-mix(in srgb, var(--primary-color) 12%, transparent);
     color: var(--font-secondary-color);
   }
@@ -832,7 +835,7 @@
 
   .lc-icon-dollar {
     @apply font-bold leading-none;
-    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-family: Outfit, system-ui, sans-serif;
     font-size: 1.85rem;
     letter-spacing: -0.04em;
   }
@@ -2000,7 +2003,9 @@
   }
 
   .onboarding__card {
-    @apply relative z-10 flex w-full max-w-md flex-col gap-4 px-6 py-7;
+    @apply relative z-10 flex w-full max-w-lg flex-col gap-4 px-6 py-7;
+    max-height: min(88vh, 40rem);
+    overflow: auto;
   }
 
   .onboarding__points {
@@ -2020,7 +2025,8 @@
 
   .onboarding__title {
     @apply m-0 text-[1.75rem] font-semibold leading-[1.15];
-    letter-spacing: var(--tracking-lc-tight, -0.02em);
+    font-family: Fraunces, Georgia, serif;
+    letter-spacing: -0.03em;
     color: var(--font-primary-color);
   }
 
@@ -3544,7 +3550,7 @@
     @apply pointer-events-auto fixed inset-0 flex flex-col overflow-auto px-5 pb-24 pt-5;
     z-index: 440;
     background: var(--app-background, var(--primary-background-color));
-    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-family: Outfit, system-ui, sans-serif;
   }
 
   html.lc-focus-mode .app-shell,
@@ -3721,10 +3727,19 @@
   }
 
   .settings-section__nav-btn {
-    @apply cursor-pointer rounded-lg border px-2 py-1 text-xs;
-    border-color: var(--tertiary-background-color);
-    background: transparent;
+    @apply inline-flex cursor-pointer items-center justify-center rounded-full border-0 px-3 py-1 text-xs font-semibold;
+    background: color-mix(in srgb, var(--font-secondary-color) 12%, transparent);
     color: var(--font-primary-color);
+  }
+
+  .settings-section__nav-btn--icon {
+    @apply h-8 w-8 p-0;
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    color: var(--primary-color);
+  }
+
+  .settings-section__nav-btn:disabled {
+    opacity: 0.35;
   }
 
   .settings-section__guide-head,
@@ -3734,5 +3749,175 @@
 
   .settings-section__guide-block {
     @apply mt-3;
+  }
+
+  input[type='checkbox']:not(.task-card__check) {
+    appearance: none;
+    display: inline-grid;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0.15rem 0 0;
+    place-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    border-radius: 0.4rem;
+    border: 1.5px solid color-mix(in srgb, var(--primary-color) 48%, var(--tertiary-background-color));
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--secondary-background-color));
+  }
+
+  input[type='checkbox']:not(.task-card__check)::after {
+    content: '';
+    width: 0.28rem;
+    height: 0.48rem;
+    border: solid transparent;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+
+  input[type='checkbox']:not(.task-card__check):checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  input[type='checkbox']:not(.task-card__check):checked::after {
+    border-color: #fff;
+  }
+
+  .notes-section__check,
+  .habits-section__check {
+    @apply mt-0.5 inline-flex h-[1.2rem] w-[1.2rem] shrink-0 items-center justify-center rounded-[0.4rem] border-0 p-0 text-[0];
+    border: 1.5px solid color-mix(in srgb, var(--primary-color) 48%, var(--tertiary-background-color));
+    background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+    color: transparent;
+  }
+
+  .notes-section__check::after,
+  .habits-section__check::after {
+    content: '';
+    width: 0.28rem;
+    height: 0.48rem;
+    border: solid transparent;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translateY(-1px);
+  }
+
+  .notes-section__check-item--done .notes-section__check,
+  .habits-section__check--on {
+    background: var(--note-accent, var(--habit-color, var(--primary-color)));
+    border-color: var(--note-accent, var(--habit-color, var(--primary-color)));
+  }
+
+  .notes-section__check-item--done .notes-section__check::after,
+  .habits-section__check--on::after {
+    border-color: #fff;
+  }
+
+  .notes-section__pin {
+    @apply rounded-full;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--font-secondary-color);
+  }
+
+  .notes-section__pin--active {
+    background: color-mix(in srgb, var(--note-accent, var(--primary-color)) 20%, transparent);
+    color: var(--note-accent, var(--primary-color));
+  }
+
+  .lc-color-wheel {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-top: 0.25rem;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--font-primary-color) 16%, transparent);
+    background: transparent;
+  }
+
+  .lc-color-wheel::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  .lc-color-wheel::-webkit-color-swatch,
+  .lc-color-wheel::-moz-color-swatch {
+    border: 0;
+    border-radius: 50%;
+  }
+
+  .lc-hint {
+    @apply -mt-2 m-0 text-xs leading-relaxed;
+    color: var(--font-secondary-color);
+  }
+
+  .domains-section__edit,
+  .notes-section__edit,
+  .notes-section__add,
+  .habits-section__edit,
+  .vision-section__edit,
+  .vision-section__achieve,
+  .finances-section__account-edit {
+    border: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .domains-section__edit:hover,
+  .notes-section__edit:hover,
+  .notes-section__add:hover,
+  .habits-section__edit:hover,
+  .vision-section__edit:hover,
+  .vision-section__achieve:hover,
+  .finances-section__account-edit:hover {
+    background: color-mix(in srgb, var(--primary-color) 22%, transparent);
+    color: var(--primary-color);
+    border-color: transparent;
+  }
+
+  .domains-section__delete,
+  .notes-section__delete,
+  .habits-section__delete,
+  .vision-section__delete,
+  .finances-section__account-delete {
+    border: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--danger-color) 12%, transparent);
+    color: var(--danger-color);
+    font-weight: 600;
+  }
+
+  .domains-section__delete:hover,
+  .notes-section__delete:hover,
+  .habits-section__delete:hover,
+  .vision-section__delete:hover,
+  .finances-section__account-delete:hover {
+    background: color-mix(in srgb, var(--danger-color) 20%, transparent);
+    color: var(--danger-color);
+    border-color: transparent;
+  }
+
+  .finances-section__edit,
+  .finances-section__delete,
+  .task-card__action,
+  .task-card__remove {
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-full p-0 text-sm;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--font-secondary-color);
+  }
+
+  .finances-section__edit,
+  .task-card__action {
+    color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  }
+
+  .finances-section__delete,
+  .task-card__action--danger {
+    color: var(--danger-color);
+    background: color-mix(in srgb, var(--danger-color) 12%, transparent);
   }
 }

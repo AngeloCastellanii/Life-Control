@@ -5,7 +5,7 @@ import {
    hideFormError,
    showFormError
 } from '../formHelpers.js';
-import { PAYMENT_METHOD_COLORS } from '../../sections/paymentMethodColors.js';
+const DEFAULT_COLOR = '#3f7359';
 
 export default class PaymentMethodForm extends HTMLElement {
    static props = {
@@ -21,15 +21,15 @@ export default class PaymentMethodForm extends HTMLElement {
       this.$balance = this.querySelector('#payment-method-form-balance');
       this.$balanceLabel = this.querySelector('[data-role="balance-label"]');
       this.$pool = this.querySelector('[data-role="pool"]');
-      this.$colors = this.querySelector('[data-role="colors"]');
+      this.$color = this.querySelector('[data-role="color-input"]');
       this.$error = this.querySelector('[data-role="error"]');
-      this._color = PAYMENT_METHOD_COLORS[0];
+      this._color = DEFAULT_COLOR;
       this._buttonsReady = false;
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
-      this.renderColors();
+      this.bindColor();
       await this.ensureButtons();
       this.bindForm();
       this.populate();
@@ -40,25 +40,20 @@ export default class PaymentMethodForm extends HTMLElement {
       this.populate();
    }
 
-   renderColors() {
-      if (this.$colors.childElementCount > 0) {
+   bindColor() {
+      if (!this.$color || this._colorBound) {
          return;
       }
-      for (const color of PAYMENT_METHOD_COLORS) {
-         const swatch = document.createElement('button');
-         swatch.type = 'button';
-         swatch.className = 'payment-method-form__color';
-         swatch.style.backgroundColor = color;
-         swatch.dataset.color = color;
-         swatch.addEventListener('click', () => this.selectColor(color));
-         this.$colors.appendChild(swatch);
-      }
+      this.$color.addEventListener('input', () => {
+         this._color = this.$color.value;
+      });
+      this._colorBound = true;
    }
 
    selectColor(color) {
-      this._color = color;
-      for (const swatch of this.$colors.children) {
-         swatch.classList.toggle('payment-method-form__color--active', swatch.dataset.color === color);
+      this._color = color || DEFAULT_COLOR;
+      if (this.$color) {
+         this.$color.value = this._color;
       }
    }
 
@@ -97,11 +92,11 @@ export default class PaymentMethodForm extends HTMLElement {
          this.$name.value = method.name;
          this.$balance.value = String(method.balance);
          this.$pool.checked = Boolean(method.isPool);
-         this.selectColor(method.color || PAYMENT_METHOD_COLORS[0]);
+         this.selectColor(method.color || DEFAULT_COLOR);
       } else {
          this.$name.value = '';
          this.$pool.checked = false;
-         this.selectColor(PAYMENT_METHOD_COLORS[0]);
+         this.selectColor(DEFAULT_COLOR);
 
          // Solo sugiere el saldo legado si aún no hay métodos (no inventa cuentas).
          const legacy =

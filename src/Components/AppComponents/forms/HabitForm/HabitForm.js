@@ -6,7 +6,7 @@ import {
    showFormError
 } from '../formHelpers.js';
 
-const COLORS = ['#3f7359', '#2563eb', '#c41e5a', '#d97706', '#7c3aed', '#0891b2'];
+const DEFAULT_COLOR = '#3f7359';
 const WEEKDAYS = [
    { id: 1, label: 'L' },
    { id: 2, label: 'M' },
@@ -35,17 +35,17 @@ export default class HabitForm extends HTMLElement {
       this.$targetWrap = this.querySelector('[data-role="target-wrap"]');
       this.$target = this.querySelector('#habit-form-target');
       this.$remind = this.querySelector('#habit-form-remind');
-      this.$colors = this.querySelector('[data-role="colors"]');
+      this.$color = this.querySelector('[data-role="color-input"]');
       this.$error = this.querySelector('[data-role="error"]');
       this._buttonsReady = false;
-      this._color = COLORS[0];
+      this._color = DEFAULT_COLOR;
       this._days = new Set([1, 2, 3, 4, 5]);
       slice.controller.setComponentProps(this, props);
    }
 
    async init() {
       this.renderWeekdays();
-      this.renderColors();
+      this.bindColor();
       await this.ensureButtons();
       this.bindForm();
       this.populate();
@@ -98,20 +98,20 @@ export default class HabitForm extends HTMLElement {
       }
    }
 
-   renderColors() {
-      this.$colors.innerHTML = '';
-      for (const color of COLORS) {
-         const btn = document.createElement('button');
-         btn.type = 'button';
-         btn.className = 'habit-form__color';
-         btn.style.background = color;
-         btn.classList.toggle('habit-form__color--on', color === this._color);
-         btn.setAttribute('aria-label', `Color ${color}`);
-         btn.addEventListener('click', () => {
-            this._color = color;
-            this.renderColors();
-         });
-         this.$colors.appendChild(btn);
+   bindColor() {
+      if (!this.$color || this._colorBound) {
+         return;
+      }
+      this.$color.addEventListener('input', () => {
+         this._color = this.$color.value;
+      });
+      this._colorBound = true;
+   }
+
+   selectColor(color) {
+      this._color = color || DEFAULT_COLOR;
+      if (this.$color) {
+         this.$color.value = this._color;
       }
    }
 
@@ -128,7 +128,7 @@ export default class HabitForm extends HTMLElement {
       this.$frequency.value = 'daily';
       this.$target.value = '4';
       this.$remind.value = '';
-      this._color = COLORS[0];
+      this._color = DEFAULT_COLOR;
       this._days = new Set([1, 2, 3, 4, 5]);
       if (this.habitId) {
          const habitsService = getService('habits-service', ['getById']);
@@ -142,11 +142,11 @@ export default class HabitForm extends HTMLElement {
          this.$frequency.value = habit.frequency || 'daily';
          this.$target.value = String(habit.weeklyTarget || 4);
          this.$remind.value = habit.remindAt || '';
-         this._color = habit.color || COLORS[0];
+         this._color = habit.color || DEFAULT_COLOR;
          this._days = new Set(habit.weekdays?.length ? habit.weekdays : [1, 2, 3, 4, 5]);
       }
       this.renderWeekdays();
-      this.renderColors();
+      this.selectColor(this._color);
       this.syncFrequencyUi();
    }
 

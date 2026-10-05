@@ -208,8 +208,10 @@ export default class SettingsSection extends HTMLElement {
 
          const up = document.createElement('button');
          up.type = 'button';
-         up.className = 'settings-section__nav-btn';
-         up.textContent = '↑';
+         up.className = 'settings-section__nav-btn settings-section__nav-btn--icon';
+         up.innerHTML =
+            '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 14l6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+         up.setAttribute('aria-label', 'Subir');
          up.disabled = Boolean(item.locked);
          up.addEventListener('click', () => {
             moveNavView(id, -1);
@@ -218,8 +220,10 @@ export default class SettingsSection extends HTMLElement {
 
          const down = document.createElement('button');
          down.type = 'button';
-         down.className = 'settings-section__nav-btn';
-         down.textContent = '↓';
+         down.className = 'settings-section__nav-btn settings-section__nav-btn--icon';
+         down.innerHTML =
+            '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 10l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+         down.setAttribute('aria-label', 'Bajar');
          down.disabled = Boolean(item.locked);
          down.addEventListener('click', () => {
             moveNavView(id, 1);
