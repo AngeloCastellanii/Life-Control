@@ -2,6 +2,7 @@ import { taskInBlockOnDay, taskShowsOnCalendarDay, todayISO } from '../../sectio
 import { formatDuration } from '../../../Utils/formatDuration.js';
 import { formatBlockRangeLabel } from '../../../Utils/taskSlotTimes.js';
 import { enableDockDrag, mountInDock } from '../../sections/floatDock.js';
+import { isHabitDueOn } from '../../../Service/HabitsService/HabitsService.js';
 
 function toMinutes(hhmm) {
    const [h, m] = String(hhmm ?? '0:0').split(':').map(Number);
@@ -120,7 +121,11 @@ export default class FocusOverlay extends HTMLElement {
                this.render();
             }
          },
-         (state) => ({ tasks: state?.tasks ?? [], timeBlocks: state?.timeBlocks ?? [] })
+         (state) => ({
+            tasks: state?.tasks ?? [],
+            timeBlocks: state?.timeBlocks ?? [],
+            habits: state?.habits ?? []
+         })
       );
    }
 
@@ -171,6 +176,12 @@ export default class FocusOverlay extends HTMLElement {
       const today = todayISO();
       this.$clock.textContent = now.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
 
+      const path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+      if (path === '/habits') {
+         this.renderHabitFocus(state.habits ?? [], today);
+         return;
+      }
+
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
       const live = currentBlock(blocks, nowMinutes);
       const upcoming = live ? null : nextBlock(blocks, nowMinutes);
@@ -201,6 +212,57 @@ export default class FocusOverlay extends HTMLElement {
 
       focusTasks.sort((a, b) => (a.slotStart ?? '').localeCompare(b.slotStart ?? ''));
       this.renderTasks(focusTasks);
+   }
+
+   renderHabitFocus(habits, today) {
+      const due = (habits ?? []).filter((habit) => !habit.paused && isHabitDueOn(habit, today));
+      const done = due.filter((habit) => (habit.doneDates ?? []).includes(today));
+      this.$remain.hidden = true;
+      this.$caption.hidden = true;
+      this.$label.textContent = 'Hábitos de hoy';
+      this.$range.textContent = due.length ? `${done.length} de ${due.length}` : '';
+      this.$progress.hidden = due.length === 0;
+      this.$progress.textContent = due.length ? `${done.length} / ${due.length}` : '';
+      this.$tasks.innerHTML = '';
+      this.$empty.hidden = due.length > 0;
+      this.$empty.textContent = 'Hoy no toca ningún hábito.';
+
+      const service = slice.getComponent('habits-service');
+      const ordered = [
+         ...due.filter((habit) => !(habit.doneDates ?? []).includes(today)),
+         ...due.filter((habit) => (habit.doneDates ?? []).includes(today))
+      ];
+
+      for (const habit of ordered) {
+         const checked = (habit.doneDates ?? []).includes(today);
+         const li = document.createElement('li');
+         li.className = 'lc-focus-task';
+         if (checked) {
+            li.classList.add('lc-focus-task--done');
+         }
+         if (!checked && habit.id === ordered.find((item) => !(item.doneDates ?? []).includes(today))?.id) {
+            li.classList.add('lc-focus-task--now');
+         }
+
+         const mark = document.createElement('input');
+         mark.type = 'checkbox';
+         mark.className = 'lc-focus-task__done';
+         mark.checked = checked;
+         mark.setAttribute('aria-label', `Marcar ${habit.name}`);
+         mark.addEventListener('click', (event) => event.stopPropagation());
+         mark.addEventListener('change', () => service?.toggleDate(habit.id, today));
+
+         const info = document.createElement('div');
+         info.className = 'lc-focus-task__info';
+         const title = document.createElement('span');
+         title.className = 'lc-focus-task__title';
+         title.textContent = habit.name;
+         info.appendChild(title);
+
+         li.append(mark, info);
+         li.addEventListener('click', () => service?.toggleDate(habit.id, today));
+         this.$tasks.appendChild(li);
+      }
    }
 
    renderTasks(blockTasks) {

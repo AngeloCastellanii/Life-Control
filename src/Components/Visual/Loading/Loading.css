@@ -1,56 +1,60 @@
-/* Container principal - ahora sin position hardcoded */
 .full-screen {
   width: 100%;
   height: 100%;
-  /* position se maneja desde JavaScript */
-  inset: 0; /* top: 0, right: 0, bottom: 0, left: 0 */
-  background: rgba(90, 90, 90, 0.5);
+  inset: 0;
   z-index: 500;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: #141816;
 }
 
-.pizza-container {
-  width: 100%;
-  height: 100%;
+.lc-boot__mark {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  position: relative;
-  z-index: 501;
+  gap: 1.1rem;
 }
 
-@keyframes spin {
+.lc-boot__brand {
+  margin: 0;
+  color: #f4f1ea;
+  font-family: "Times New Roman", Georgia, serif;
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  animation: lc-boot-in 0.9s ease both;
+}
+
+.lc-boot__line {
+  display: block;
+  height: 1px;
+  width: 7.5rem;
+  background: #c4b59a;
+  transform-origin: center;
+  animation: lc-boot-line 1.4s ease-in-out infinite;
+}
+
+@keyframes lc-boot-in {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    letter-spacing: 0.7em;
   }
-
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    letter-spacing: 0.42em;
   }
 }
 
-@keyframes fade {
-  0% {
-    opacity: 0;
+@keyframes lc-boot-line {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scaleX(0.45);
   }
-
   50% {
     opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-.slice_logo {
-  animation: spin 0.1s linear infinite;
-  height: 50px;
-  width: 50px;
-
-  path {
-    fill: var(--primary-color);
+    transform: scaleX(1);
   }
 }

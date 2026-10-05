@@ -1,7 +1,8 @@
 import {
    notificationPermission,
    notificationsSupported,
-   requestNotificationPermission
+   requestNotificationPermission,
+   setNotificationsEnabled
 } from '../notifications.js';
 
 const ICON_ARCHIVE =
@@ -101,9 +102,45 @@ export default class NotesSection extends HTMLElement {
       this.$reminderCta.hidden = !shouldAsk || this._view === 'archived';
    }
 
+   editChecklistItem(noteId, item, button) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'lc-input notes-section__check-edit';
+      input.value = item.text;
+      input.setAttribute('aria-label', 'Editar ítem');
+      button.replaceWith(input);
+      input.focus();
+      input.select();
+
+      let done = false;
+      const commit = async (save) => {
+         if (done) {
+            return;
+         }
+         done = true;
+         const next = input.value.trim();
+         if (save && next && next !== item.text) {
+            await this.notesService.renameChecklistItem(noteId, item.id, next);
+            return;
+         }
+         this.renderList();
+      };
+      input.addEventListener('keydown', (event) => {
+         if (event.key === 'Enter') {
+            event.preventDefault();
+            commit(true);
+         } else if (event.key === 'Escape') {
+            event.preventDefault();
+            commit(false);
+         }
+      });
+      input.addEventListener('blur', () => commit(true));
+   }
+
    async enableNotifications() {
       const result = await requestNotificationPermission();
       if (result === 'granted') {
+         setNotificationsEnabled(true);
          slice.getComponent('reminder-service')?.check?.();
       }
       this.syncReminderCta();
@@ -330,9 +367,14 @@ export default class NotesSection extends HTMLElement {
                   );
                }
 
-               const text = document.createElement('span');
+               const text = document.createElement('button');
+               text.type = 'button';
                text.className = 'notes-section__check-text';
                text.textContent = item.text;
+               text.disabled = Boolean(note.archived);
+               if (!note.archived) {
+                  text.addEventListener('click', () => this.editChecklistItem(note.id, item, text));
+               }
 
                li.append(num, check, text);
                checklist.appendChild(li);

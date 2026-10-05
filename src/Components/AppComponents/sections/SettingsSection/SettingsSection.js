@@ -9,8 +9,10 @@ import {
 } from '../dataBackup.js';
 import {
    notificationPermission,
+   notificationsEnabled,
    notificationsSupported,
-   requestNotificationPermission
+   requestNotificationPermission,
+   setNotificationsEnabled
 } from '../notifications.js';
 import { CURRENCIES, getPreferredCurrency, setPreferredCurrency } from '../currency.js';
 import { getHidePastBlocks, setHidePastBlocks } from '../plannerPrefs.js';
@@ -40,7 +42,7 @@ export default class SettingsSection extends HTMLElement {
       this.$exportData = this.querySelector('[data-role="export-data"]');
       this.$importData = this.querySelector('[data-role="import-data"]');
       this.$importFile = this.querySelector('[data-role="import-file"]');
-      this.$enableNotifications = this.querySelector('[data-role="enable-notifications"]');
+      this.$notifToggle = this.querySelector('[data-role="notif-toggle"]');
       this.$notifStatus = this.querySelector('[data-role="notif-status"]');
       this.$currencySelect = this.querySelector('[data-role="currency-select"]');
       this.$domainList = this.querySelector('[data-role="domain-list"]');
@@ -51,6 +53,7 @@ export default class SettingsSection extends HTMLElement {
       this.$hidePastBlocks = this.querySelector('[data-role="hide-past-blocks"]');
       this.$navList = this.querySelector('[data-role="nav-list"]');
       this.$guide = this.querySelector('[data-role="guide"]');
+      this.$replayGuide = this.querySelector('[data-role="replay-guide"]');
       this.$guideViews = this.querySelector('[data-role="guide-views"]');
       this.$guideFeatures = this.querySelector('[data-role="guide-features"]');
       slice.controller.setComponentProps(this, props);
@@ -69,7 +72,12 @@ export default class SettingsSection extends HTMLElement {
       this.$exportData.addEventListener('click', () => this.exportData());
       this.$importData.addEventListener('click', () => this.$importFile.click());
       this.$importFile.addEventListener('change', () => this.importData());
-      this.$enableNotifications.addEventListener('click', () => this.enableNotifications());
+      this.$notifToggle?.addEventListener('change', () => this.toggleNotifications());
+      this.$replayGuide?.addEventListener('click', (event) => {
+         event.preventDefault();
+         event.stopPropagation();
+         slice.events.emit('ui:onboarding:open');
+      });
       this.syncNotificationState();
       this.setupCurrency();
       this.setupPlannerPrefs();
@@ -362,22 +370,22 @@ export default class SettingsSection extends HTMLElement {
    }
 
    syncNotificationState() {
+      if (!this.$notifToggle) {
+         return;
+      }
       if (!notificationsSupported()) {
-         this.$enableNotifications.disabled = true;
-         this.$enableNotifications.textContent = 'No disponible en este dispositivo';
+         this.$notifToggle.disabled = true;
+         this.$notifToggle.checked = false;
+         this.showNotifStatus('Este dispositivo no muestra avisos.');
          return;
       }
 
       const permission = notificationPermission();
-      if (permission === 'granted') {
-         this.$enableNotifications.disabled = true;
-         this.$enableNotifications.textContent = 'Notificaciones activadas';
-      } else if (permission === 'denied') {
-         this.$enableNotifications.disabled = true;
-         this.$enableNotifications.textContent = 'Bloqueadas (revisa ajustes del navegador)';
-      } else {
-         this.$enableNotifications.disabled = false;
-         this.$enableNotifications.textContent = 'Activar notificaciones';
+      const on = notificationsEnabled() && permission === 'granted';
+      this.$notifToggle.disabled = permission === 'denied';
+      this.$notifToggle.checked = on;
+      if (permission === 'denied') {
+         this.showNotifStatus('Bloqueadas en el navegador. Actívalas desde sus ajustes.', true);
       }
    }
 
@@ -387,20 +395,28 @@ export default class SettingsSection extends HTMLElement {
       this.$notifStatus.classList.toggle('settings-section__status--error', isError);
    }
 
-   async enableNotifications() {
-      const result = await requestNotificationPermission();
-      this.syncNotificationState();
-
-      if (result === 'granted') {
-         slice.getComponent('reminder-service')?.check?.();
-         this.showNotifStatus('Listo. Instala la app en el teléfono (Añadir a inicio) para que los avisos salgan en la barra del sistema.');
-      } else if (result === 'denied') {
-         this.showNotifStatus('Permiso denegado. Actívalo desde los ajustes del navegador.', true);
-      } else if (result === 'unsupported') {
-         this.showNotifStatus('Tu dispositivo no soporta notificaciones web.', true);
-      } else {
-         this.showNotifStatus('No se activaron las notificaciones.', true);
+   async toggleNotifications() {
+      const wantOn = Boolean(this.$notifToggle?.checked);
+      if (!wantOn) {
+         setNotificationsEnabled(false);
+         this.showNotifStatus('Avisos del teléfono apagados. Los de la app siguen en el botón Avisos.');
+         this.syncNotificationState();
+         return;
       }
+
+      const result = await requestNotificationPermission();
+      if (result === 'granted') {
+         setNotificationsEnabled(true);
+         slice.getComponent('reminder-service')?.check?.();
+         this.showNotifStatus('Avisos activados.');
+      } else if (result === 'denied') {
+         setNotificationsEnabled(false);
+         this.showNotifStatus('Permiso denegado. Actívalo en los ajustes del navegador.', true);
+      } else {
+         setNotificationsEnabled(false);
+         this.showNotifStatus('No se activaron los avisos.', true);
+      }
+      this.syncNotificationState();
    }
 
    async ensureStorageService() {

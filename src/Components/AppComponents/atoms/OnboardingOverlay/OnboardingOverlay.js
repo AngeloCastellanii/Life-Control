@@ -1,59 +1,31 @@
 const STORAGE_KEY = 'lc_onboarded';
 
 const THEME_OPTIONS = [
-   { id: 'Light', label: 'Claro', bg: '#dbeafe', fg: '#0f172a', accent: '#2563eb' },
-   { id: 'Dark', label: 'Oscuro', bg: '#070b14', fg: '#fafafa', accent: '#3b82f6' },
-   { id: 'DarkRed', label: 'Dark Red', bg: '#0d0609', fg: '#fafafa', accent: '#c41e5a' },
-   { id: 'Slice', label: 'Slice', bg: '#b7cec0', fg: '#171717', accent: '#3f7359' },
+   { id: 'Light', label: 'Claro', bg: '#eef6ff', fg: '#0f172a', accent: '#2563eb' },
+   { id: 'Dark', label: 'Oscuro', bg: '#09090b', fg: '#fafafa', accent: '#3b82f6' },
+   { id: 'Pink', label: 'Rosa', bg: '#fff1f5', fg: '#3f1d2e', accent: '#db2777' },
+   { id: 'Purple', label: 'Morado', bg: '#f5f3ff', fg: '#2e1065', accent: '#7c3aed' },
+   { id: 'Slice', label: 'Verde', bg: '#b7cec0', fg: '#171717', accent: '#3f7359' },
    { id: 'Obsidian', label: 'Obsidiana', bg: '#0b0f19', fg: '#e2e8f0', accent: '#22d3ee' }
 ];
 
 const STEPS = [
    {
-      title: 'Bienvenido a Life Control',
-      text: 'Tu vida organizada en un solo lugar: tareas, tiempo, finanzas, compras, notas, hábitos y metas. Todo se guarda en tu dispositivo.',
+      kicker: 'Life Control',
+      title: 'Tu día, en un solo lugar',
+      text: 'Tareas, dinero, compras, notas y hábitos. Todo queda en este dispositivo.',
       askName: true
    },
    {
-      title: 'Elige tu tema',
-      text: 'Escoge el estilo que más te guste. Puedes cambiarlo cuando quieras desde Perfil.',
+      kicker: 'Estilo',
+      title: 'Elige un tema',
+      text: 'Lo cambias después en Perfil.',
       chooseTheme: true
    },
    {
-      title: 'Dashboard',
-      text: 'Tareas primero (Todas, Vence hoy, Urgentes…). Abajo finanzas y compras por separado, el Vision Board y estadísticas plegables.'
-   },
-   {
-      title: 'Planificador',
-      text: 'Organiza tus tareas en bloques de tiempo (mañana, tarde, noche). Márcalas por urgencia y hazlas recurrentes para que se repitan solas.'
-   },
-   {
-      title: 'Finanzas',
-      text: 'Registra pagos y cobros pendientes, controla tu saldo y consulta el cambio del día en tu moneda (Bs, € o US$).'
-   },
-   {
-      title: 'Compras',
-      text: 'Tu lista de compras con cantidades, precios y fechas. Lo que vence hoy aparece en el Dashboard.'
-   },
-   {
-      title: 'Notas y recordatorios',
-      text: 'Guarda notas y listas. Archívalas al terminar y ponles un recordatorio si hace falta.'
-   },
-   {
-      title: 'Hábitos',
-      text: 'Define frecuencia, meta semanal, calendario y un aviso a una hora. Puedes saltar un día sin romper la racha.'
-   },
-   {
-      title: 'Enfoque',
-      text: 'El botón flotante Enfoque abre el bloque actual. Eliges qué hacer y sales sin cambiar de vista.'
-   },
-   {
-      title: 'Vision Board',
-      text: 'Un tablero visual con tus metas e imágenes que te inspiran a seguir adelante.'
-   },
-   {
-      title: 'Perfil',
-      text: 'Aquí ajustas nombre, tema, el orden de las vistas, notificaciones del teléfono y el respaldo.'
+      kicker: 'Cómo se usa',
+      title: 'Tres gestos',
+      points: ['+ crea lo que necesites', 'Enfoque deja solo lo de ahora', 'Perfil guarda nombre, avisos y respaldo']
    }
 ];
 
@@ -78,6 +50,7 @@ export default class OnboardingOverlay extends HTMLElement {
       this.$step = this.querySelector('[data-role="step-indicator"]');
       this.$title = this.querySelector('[data-role="title"]');
       this.$text = this.querySelector('[data-role="text"]');
+      this.$points = this.querySelector('[data-role="points"]');
       this.$nameField = this.querySelector('[data-role="name-field"]');
       this.$nameInput = this.querySelector('[data-role="name-input"]');
       this.$themeField = this.querySelector('[data-role="theme-field"]');
@@ -160,9 +133,18 @@ export default class OnboardingOverlay extends HTMLElement {
 
    renderStep() {
       const step = STEPS[this._index];
-      this.$step.textContent = `${this._index + 1} / ${STEPS.length}`;
+      this.$step.textContent = step.kicker || '';
       this.$title.textContent = step.title;
-      this.$text.textContent = step.text;
+      this.$text.textContent = step.text || '';
+      this.$text.hidden = !step.text;
+
+      this.$points.innerHTML = '';
+      this.$points.hidden = !step.points;
+      for (const point of step.points ?? []) {
+         const li = document.createElement('li');
+         li.textContent = point;
+         this.$points.appendChild(li);
+      }
 
       this.$nameField.hidden = !step.askName;
       this.$themeField.hidden = !step.chooseTheme;

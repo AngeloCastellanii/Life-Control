@@ -1,4 +1,4 @@
-const THEMES = ['Light', 'Dark', 'DarkRed', 'Slice', 'Obsidian'];
+const THEMES = ['Light', 'Dark', 'Pink', 'Purple', 'DarkRed', 'Slice', 'Obsidian'];
 
 export default class ThemeSelector extends HTMLElement {
    static props = {

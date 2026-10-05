@@ -204,6 +204,21 @@ export default class NotesService {
       });
    }
 
+   async renameChecklistItem(noteId, itemId, text) {
+      const existing = this.getById(noteId);
+      if (!existing || existing.type !== 'list' || existing.archived) {
+         return null;
+      }
+      const nextText = String(text ?? '').trim();
+      if (!nextText) {
+         return null;
+      }
+      const checklist = existing.checklist.map((item) =>
+         item.id === itemId ? { ...item, text: nextText } : item
+      );
+      return this.update(noteId, { checklist });
+   }
+
    async toggleChecklistItem(noteId, itemId) {
       const existing = this.getById(noteId);
       if (!existing || existing.type !== 'list' || existing.archived) {

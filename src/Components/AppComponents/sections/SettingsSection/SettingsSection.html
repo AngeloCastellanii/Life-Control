@@ -3,7 +3,7 @@
     <div class="settings-section__avatar" data-role="avatar" aria-hidden="true">LC</div>
     <div class="lc-view-hero__text settings-section__hero-text">
       <h1 class="lc-section-title lc-view-hero__title settings-section__title">Perfil</h1>
-      <p class="lc-view-hero__subtitle settings-section__subtitle">Personaliza tu experiencia en Life Control.</p>
+      <p class="lc-view-hero__subtitle">Nombre, tema, avisos y respaldo.</p>
     </div>
   </header>
 
@@ -161,12 +161,13 @@
         </span>
         <div>
           <h2 class="settings-section__card-label">Recordatorios</h2>
-          <p class="settings-section__hint">En el teléfono: instala la app (Añadir a inicio) y activa el permiso. Los avisos salen en la barra del sistema, no solo dentro de la app.</p>
+          <p class="settings-section__hint">Avisos del teléfono para tareas, hábitos y notas.</p>
         </div>
       </div>
-      <button type="button" class="settings-section__save settings-section__notif-btn" data-role="enable-notifications">
-        Activar notificaciones
-      </button>
+      <label class="settings-section__check">
+        <input type="checkbox" data-role="notif-toggle" />
+        <span>Avisos activados</span>
+      </label>
       <p class="settings-section__status" data-role="notif-status" hidden></p>
     </div>
 
@@ -187,6 +188,12 @@
     </div>
   </div>
 
+  <div class="settings-section__replay-row">
+    <button type="button" class="settings-section__save settings-section__replay" data-role="replay-guide">
+      Ver presentación
+    </button>
+  </div>
+
   <details class="lc-card settings-section__guide" data-role="guide">
     <summary class="settings-section__guide-head lc-collapse-summary">
       <span class="settings-section__card-icon settings-section__card-icon--guide" aria-hidden="true">
@@ -195,10 +202,10 @@
         </svg>
       </span>
       <div>
-        <h2 class="settings-section__card-label">Guía rápida</h2>
-        <p class="settings-section__hint">Toca para expandir o plegar.</p>
-      </div>
-    </summary>
+          <h2 class="settings-section__card-label">Guía rápida</h2>
+          <p class="settings-section__hint">Detalle de cada vista, si lo necesitas.</p>
+        </div>
+      </summary>
     <details class="settings-section__guide-block" data-role="guide-views">
     <summary class="settings-section__guide-group lc-collapse-summary">Vistas</summary>
     <dl class="settings-section__guide-list">
@@ -400,7 +407,7 @@
         </span>
         <div>
           <dt>Tema</dt>
-          <dd>Cambia entre Claro, Oscuro y Obsidiana cuando quieras. Se recuerda en tu dispositivo.</dd>
+          <dd>Claro, oscuro, rosa, morado y el resto. Se recuerda en este dispositivo.</dd>
         </div>
       </div>
       <div class="settings-section__guide-item">

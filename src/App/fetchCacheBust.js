@@ -2,7 +2,7 @@ import { STYLE_VERSION } from './styleVersion.js';
 
 const STYLE_PATH = /\/Styles\/[^/?]+\.css(\?.*)?$/i;
 const THEME_PATH = /\/Themes\/[^/?]+\.css(\?.*)?$/i;
-const THEME_NAMES = ['Light', 'Dark', 'DarkRed', 'Slice', 'Obsidian'];
+const THEME_NAMES = ['Light', 'Dark', 'Pink', 'Purple', 'DarkRed', 'Slice', 'Obsidian'];
 const LC_STYLE_V_KEY = 'lc_style_v';
 
 export function getStyleCacheKey() {

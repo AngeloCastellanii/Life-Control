@@ -1,5 +1,23 @@
 const INBOX_KEY = 'lc_notification_inbox';
+const ENABLED_KEY = 'lc_notifications_enabled';
 const MAX_INBOX = 40;
+
+export function notificationsEnabled() {
+   try {
+      return localStorage.getItem(ENABLED_KEY) !== 'off';
+   } catch {
+      return true;
+   }
+}
+
+export function setNotificationsEnabled(on) {
+   try {
+      localStorage.setItem(ENABLED_KEY, on ? 'on' : 'off');
+   } catch {
+      /* ignore */
+   }
+   slice.events?.emit?.('notifications:changed', { enabled: Boolean(on) });
+}
 
 export function notificationsSupported() {
    return typeof window !== 'undefined' && 'Notification' in window;
@@ -89,6 +107,9 @@ export async function getServiceWorkerRegistration() {
 }
 
 export async function showOsNotification({ title, body, tag, route }) {
+   if (!notificationsEnabled()) {
+      return false;
+   }
    const permission = notificationPermission();
    if (permission !== 'granted') {
       return false;

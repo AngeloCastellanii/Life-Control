@@ -1286,6 +1286,15 @@
     color: var(--font-secondary-color);
   }
 
+  .notes-section__check-text {
+    @apply m-0 min-w-0 flex-1 cursor-text border-0 bg-transparent p-0 text-left text-sm;
+    color: inherit;
+  }
+
+  .notes-section__check-edit {
+    @apply min-w-0 flex-1 py-0.5 text-sm;
+  }
+
   .notes-section__check-item--done .notes-section__check-text {
     @apply line-through opacity-60;
   }
@@ -1438,12 +1447,54 @@
     @apply mt-0.5;
   }
 
+  .habits-section__more {
+    @apply rounded-xl;
+  }
+
+  .habits-section__more-summary {
+    @apply flex items-center text-xs font-semibold;
+    color: var(--font-secondary-color);
+  }
+
   .habits-section__item--paused {
     opacity: 0.6;
   }
 
-  .habits-section__summary {
-    @apply px-3 py-2 text-sm font-medium;
+  .settings-section__replay-row {
+    @apply mb-3;
+  }
+
+  .habits-section__toolbar {
+    @apply mb-3 flex flex-col gap-2;
+  }
+
+  .habits-section__filters {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .habits-section__filter {
+    @apply cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold;
+    border-color: var(--tertiary-background-color);
+    background: transparent;
+    color: var(--font-secondary-color);
+  }
+
+  .habits-section__filter--active {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    color: var(--primary-color);
+  }
+
+  .habits-section__progress {
+    @apply m-0 text-sm font-medium;
+    color: var(--font-primary-color);
+  }
+
+  .habits-section__focus {
+    @apply ml-auto shrink-0 cursor-pointer self-center rounded-full border px-3 py-1.5 text-sm font-semibold;
+    border-color: var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
   }
 
   .habits-section__day--skip {
@@ -1955,7 +2006,17 @@
   }
 
   .onboarding__card {
-    @apply relative z-10 flex w-full max-w-md flex-col gap-3;
+    @apply relative z-10 flex w-full max-w-md flex-col gap-4 px-6 py-7;
+  }
+
+  .onboarding__points {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+
+  .onboarding__points li {
+    @apply rounded-xl px-3 py-2.5 text-sm;
+    background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+    color: var(--font-primary-color);
   }
 
   .onboarding__step {
@@ -1964,7 +2025,7 @@
   }
 
   .onboarding__title {
-    @apply m-0 text-xl font-bold;
+    @apply m-0 text-2xl font-semibold tracking-tight;
     color: var(--font-primary-color);
   }
 

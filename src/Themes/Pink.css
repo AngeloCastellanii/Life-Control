@@ -1,0 +1,91 @@
+:root {
+  --font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+
+  --font-primary-color: #3f1d2e;
+  --font-secondary-color: #9d6b80;
+
+  --primary-color: #db2777;
+  --primary-color-rgb: 219, 39, 119;
+  --primary-background-color: #fff1f5;
+  --primary-color-contrast: #ffffff;
+  --primary-color-shade: #be185d;
+
+  --secondary-color: #f472b6;
+  --secondary-color-rgb: 244, 114, 182;
+  --secondary-background-color: #ffffff;
+  --secondary-color-contrast: #ffffff;
+
+  --tertiary-background-color: #fbcfe8;
+
+  --success-color: #10b981;
+  --success-contrast: #ffffff;
+  --warning-color: #f59e0b;
+  --warning-contrast: #3f1d2e;
+  --danger-color: #e11d48;
+  --danger-contrast: #ffffff;
+  --accent-warning-soft: #fb7185;
+
+  --medium-color: #d4a3b5;
+  --medium-contrast: #3f1d2e;
+  --disabled-color: #f3d5e0;
+
+  --accent-color: #ec4899;
+
+  --surface-glass: color-mix(in srgb, #ffffff 74%, transparent);
+  --surface-elevated: #ffffff;
+  --surface-blur: blur(18px);
+  --border-glow: color-mix(in srgb, var(--primary-color) 38%, #f9a8d4);
+
+  --app-background: linear-gradient(
+    155deg,
+    #fce7f3 0%,
+    #fff1f5 22%,
+    #fff7fb 48%,
+    #fbcfe8 72%,
+    #fff1f5 100%
+  );
+
+  --box-shadow-primary: 0 10px 40px rgb(219 39 119 / 22%);
+  --box-shadow-secondary: 0 4px 20px rgb(244 114 182 / 20%);
+
+  --lc-radius-lg: 1rem;
+  --lc-radius-xl: 1.5rem;
+  --lc-shadow:
+    0 1px 2px rgb(63 29 46 / 5%),
+    0 8px 32px rgb(219 39 119 / 14%);
+}
+
+:root .lc-card,
+:root .sidebar,
+:root .task-card,
+:root .time-block,
+:root .modal-shell__dialog,
+:root .finances-section__wallet,
+:root .finances-section__col,
+:root .shopping-section__col,
+:root .shopping-section__detail,
+:root .domains-section__item,
+:root .dashboard-section__due-item,
+:root .settings-section__guide-item {
+  background: var(--surface-glass);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
+  border-color: var(--border-glow);
+  box-shadow: var(--lc-shadow);
+}
+
+:root .sidebar__item--active .sidebar__link {
+  background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+}
+
+:root .sidebar__logo,
+:root .settings-section__save,
+:root .fab {
+  background: linear-gradient(135deg, #be185d, #f472b6) !important;
+  color: #ffffff !important;
+}
+
+:root .planner-section__view-btn--active {
+  background: linear-gradient(135deg, #be185d, #f472b6);
+  color: #ffffff;
+}

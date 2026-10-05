@@ -40,6 +40,10 @@ export default class HabitsSection extends HTMLElement {
       this.$list = this.querySelector('[data-role="list"]');
       this.$empty = this.querySelector('[data-role="empty"]');
       this.$summary = this.querySelector('[data-role="summary"]');
+      this.$progress = this.querySelector('[data-role="progress"]');
+      this.$focus = this.querySelector('[data-role="focus"]');
+      this.$filters = this.querySelectorAll('[data-habit-filter]');
+      this._filter = 'today';
       this._openMonth = null;
       slice.controller.setComponentProps(this, props);
    }
@@ -58,6 +62,14 @@ export default class HabitsSection extends HTMLElement {
          (state) => ({ habits: state?.habits ?? [] })
       );
 
+      this.$focus?.addEventListener('click', () => slice.events.emit('ui:focus:open'));
+      for (const button of this.$filters) {
+         button.addEventListener('click', () => {
+            this._filter = button.dataset.habitFilter;
+            this.renderList();
+         });
+      }
+
       this.renderList();
    }
 
@@ -74,22 +86,47 @@ export default class HabitsSection extends HTMLElement {
       const active = habits.filter((habit) => !habit.paused);
       const dueToday = active.filter((habit) => isHabitDueOn(habit, today));
       const doneToday = dueToday.filter((habit) => habit.doneDates.includes(today)).length;
-      this.$summary.hidden = habits.length === 0;
-      this.$summary.textContent = dueToday.length
-         ? `Hoy ${doneToday}/${dueToday.length} · ${active.length} activo${active.length === 1 ? '' : 's'}`
-         : `${active.length} hábito${active.length === 1 ? '' : 's'} activo${active.length === 1 ? '' : 's'}`;
+      if (this.$summary) {
+         this.$summary.hidden = true;
+      }
+      if (!this.$progress) {
+         return;
+      }
+      this.$progress.hidden = habits.length === 0;
+      this.$progress.textContent = dueToday.length
+         ? `Hoy ${doneToday} de ${dueToday.length}`
+         : 'Hoy no toca ningún hábito';
+      for (const button of this.$filters) {
+         button.classList.toggle('habits-section__filter--active', button.dataset.habitFilter === this._filter);
+      }
    }
 
    renderList() {
       const habits = this.habitsService.getAll();
       this.$list.innerHTML = '';
-      this.$empty.hidden = habits.length > 0;
       this.renderSummary(habits);
 
       const today = todayISO();
       const days = lastDays(7, today);
+      const visible = habits.filter((habit) => {
+         if (this._filter === 'paused') {
+            return habit.paused;
+         }
+         if (this._filter === 'today') {
+            return !habit.paused && isHabitDueOn(habit, today);
+         }
+         return !habit.paused;
+      });
 
-      for (const habit of habits) {
+      this.$empty.hidden = visible.length > 0;
+      this.$empty.textContent =
+         habits.length === 0
+            ? 'Aún no hay hábitos. El botón + crea el primero.'
+            : this._filter === 'today'
+              ? 'Hoy no toca ninguno. Mira Todos.'
+              : 'Nada en esta lista.';
+
+      for (const habit of visible) {
          const done = new Set(habit.doneDates);
          const skipped = new Set(habit.skippedDates);
          const todayDone = done.has(today);
@@ -130,8 +167,9 @@ export default class HabitsSection extends HTMLElement {
          meta.className = 'habits-section__meta';
          meta.textContent = [
             frequencyLabel(habit),
-            `${week.done}/${week.target} sem`,
-            habit.remindAt ? `⏰ ${habit.remindAt}` : null,
+            `${week.done}/${week.target} esta semana`,
+            best ? `récord ${best}d` : null,
+            habit.remindAt ? habit.remindAt : null,
             habit.paused ? 'Pausado' : null
          ]
             .filter(Boolean)
@@ -146,7 +184,7 @@ export default class HabitsSection extends HTMLElement {
 
          const streakEl = document.createElement('span');
          streakEl.className = 'habits-section__streak';
-         streakEl.textContent = streak ? `${streak}d` : '—';
+         streakEl.textContent = streak ? `${streak} días` : '0';
          streakEl.title = `Racha ${streak} · récord ${best}`;
 
          row.append(check, text, streakEl);
@@ -181,8 +219,13 @@ export default class HabitsSection extends HTMLElement {
             this.fillMonth(monthWrap, habit, done, skipped, today);
          }
 
-         const actions = document.createElement('div');
-         actions.className = 'habits-section__actions';
+         const actions = document.createElement('details');
+         actions.className = 'habits-section__more';
+         const summary = document.createElement('summary');
+         summary.className = 'lc-collapse-summary habits-section__more-summary';
+         summary.textContent = 'Opciones';
+         const body = document.createElement('div');
+         body.className = 'habits-section__actions';
 
          const skipBtn = document.createElement('button');
          skipBtn.type = 'button';
@@ -221,7 +264,8 @@ export default class HabitsSection extends HTMLElement {
             }
          });
 
-         actions.append(skipBtn, monthBtn, pauseBtn, editBtn, deleteBtn);
+         body.append(skipBtn, monthBtn, pauseBtn, editBtn, deleteBtn);
+         actions.append(summary, body);
          item.append(row, strip, monthWrap, actions);
          this.$list.appendChild(item);
       }

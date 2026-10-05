@@ -52,20 +52,28 @@ export default class AppShell extends HTMLElement {
 
       this.setupSwipeNavigation();
       slice.events.subscribe('nav:items-changed', () => this.refreshNav(), { component: this });
+      slice.events.subscribe('ui:onboarding:open', () => this.openOnboarding(), { component: this });
 
       if (window.location.pathname.replace(/\/+$/, '') === '/stats') {
          requestAnimationFrame(() => document.getElementById('dashboard-stats')?.scrollIntoView({ behavior: 'smooth' }));
       }
 
       try {
-         if (shouldShowOnboarding() && !slice.controller.activeComponents?.has?.('onboarding-overlay')) {
-            const onboarding = await slice.build('OnboardingOverlay', { sliceId: 'onboarding-overlay' });
-            if (onboarding) {
-               this.appendChild(onboarding);
-            }
+         if (shouldShowOnboarding()) {
+            await this.openOnboarding();
          }
       } catch (error) {
          console.error('No se pudo mostrar el onboarding:', error);
+      }
+   }
+
+   async openOnboarding() {
+      if (slice.controller.activeComponents?.has?.('onboarding-overlay')) {
+         return;
+      }
+      const onboarding = await slice.build('OnboardingOverlay', { sliceId: 'onboarding-overlay' });
+      if (onboarding) {
+         this.appendChild(onboarding);
       }
    }
 
