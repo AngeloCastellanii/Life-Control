@@ -1,7 +1,8 @@
 @layer components {
   /* AppShell — top navbar */
   .app-shell {
-    @apply min-h-screen;
+    @apply min-h-screen min-w-0;
+    overflow-x: clip;
   }
 
   .app-shell__sidebar {
@@ -11,12 +12,15 @@
   }
 
   .app-shell__stage {
-    @apply min-h-screen;
+    @apply min-h-screen min-w-0;
     padding-top: var(--lc-nav-height, 3.5rem);
+    overflow-x: clip;
   }
 
   .app-shell__content {
-    @apply mx-auto max-w-275 px-5 pb-8 pt-5;
+    @apply mx-auto w-full min-w-0 pb-24 pt-4;
+    max-width: 68.75rem;
+    padding-inline: clamp(0.9rem, 4vw, 1.5rem);
     transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
   }
 
@@ -73,7 +77,11 @@
   }
 
   .sidebar__list {
-    @apply relative m-0 flex w-max min-w-full list-none flex-row items-center gap-0.5 px-2 py-1.5;
+    @apply relative m-0 flex w-full min-w-0 list-none flex-row items-center gap-0.5 px-1 py-1.5;
+  }
+
+  .sidebar__item {
+    @apply relative z-1 min-w-0 flex-1;
   }
 
   .sidebar__indicator {
@@ -95,12 +103,8 @@
     transition: none;
   }
 
-  .sidebar__item {
-    @apply relative z-1;
-  }
-
   .sidebar__link {
-    @apply block whitespace-nowrap rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium no-underline transition-colors;
+    @apply block overflow-hidden text-ellipsis whitespace-nowrap rounded-lg px-2 py-1.5 text-center text-[0.8125rem] font-medium no-underline transition-colors;
     color: var(--font-secondary-color);
   }
 
@@ -684,7 +688,7 @@
 
   /* Shared view chrome (estilo Perfil) */
   .lc-view-hero {
-    @apply mb-4 flex items-center gap-4;
+    @apply mb-4 flex min-w-0 items-center gap-3;
   }
 
   .lc-view-hero__icon {
@@ -821,8 +825,14 @@
   }
 
   .lc-view-stat-grid {
-    @apply mb-5 grid gap-4;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    @apply mb-4 grid gap-3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 960px) {
+    .lc-view-stat-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   .lc-view-grid-3 {
@@ -830,16 +840,18 @@
   }
 
   .lc-view-stat {
-    @apply flex flex-col gap-2;
+    @apply flex h-full min-h-28 min-w-0 flex-col justify-between gap-2;
   }
 
   .lc-view-stat__label {
     @apply text-xs font-medium;
     color: var(--font-secondary-color);
+    min-height: 2.4em;
   }
 
   .lc-view-stat__value {
-    @apply text-3xl font-bold leading-none;
+    font-size: clamp(1.2rem, 4.2vw, 1.75rem);
+    @apply font-bold leading-none wrap-break-word;
     color: var(--font-primary-color);
   }
 
@@ -902,7 +914,14 @@
   }
 
   .settings-section__grid {
-    @apply grid gap-4 md:grid-cols-2;
+    @apply grid min-w-0 gap-3;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 960px) {
+    .settings-section__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   .settings-section__card {
@@ -1248,8 +1267,24 @@
     color: var(--primary-color);
   }
 
-  .notes-section__grid {
-    @apply grid gap-3 sm:grid-cols-2 lg:grid-cols-3;
+  .notes-section__grid,
+  .vision-section__grid {
+    @apply grid min-w-0 gap-3;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 720px) {
+    .notes-section__grid,
+    .vision-section__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .notes-section__grid,
+    .vision-section__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   .notes-section__card {
@@ -1744,7 +1779,7 @@
 
   /* Vision Board */
   .vision-section__grid {
-    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+    @apply min-w-0;
   }
 
   .vision-section__card {
@@ -2632,7 +2667,20 @@
 
   /* Shopping */
   .shopping-section__board {
-    @apply grid gap-4 sm:grid-cols-2 xl:grid-cols-4;
+    @apply grid min-w-0 gap-3;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 720px) {
+    .shopping-section__board {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .shopping-section__board {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   .shopping-section__col-head {
@@ -2757,22 +2805,38 @@
 
   /* Dashboard: Finanzas y Compras separadas */
   .dashboard-section__launch {
-    @apply mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4;
+    @apply mb-3 grid gap-3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 960px) {
+    .dashboard-section__launch {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   .dashboard-section__launch-card {
-    @apply flex cursor-pointer flex-col items-start gap-3 p-4 text-left;
+    @apply flex h-full min-h-28 min-w-0 cursor-pointer flex-col items-start justify-between gap-3 p-4 text-left;
     font: inherit;
     color: var(--font-primary-color);
   }
 
   .dashboard-section__launch-name {
-    @apply text-base font-semibold;
+    @apply text-sm font-semibold leading-tight;
     font-family: Fraunces, Georgia, serif;
+    min-height: 2.4em;
   }
 
   .dashboard-section__money-grid {
-    @apply mb-4 grid gap-4 sm:grid-cols-2;
+    @apply mb-3 grid min-w-0 gap-3;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 960px) {
+    .dashboard-section__money-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+    }
   }
 
   .dashboard-section__today {
@@ -2951,7 +3015,13 @@
 
   /* Planner */
   .planner-section__toolbar {
-    @apply mb-5 flex flex-wrap items-center justify-between gap-4;
+    @apply mb-4 flex flex-col items-stretch gap-3;
+  }
+
+  @media (min-width: 720px) {
+    .planner-section__toolbar {
+      @apply flex-row items-center justify-between;
+    }
   }
 
   .planner-section__add-block {
@@ -3231,15 +3301,25 @@
   }
 
   .finances-section__total-value {
-    @apply m-0 cursor-pointer border-0 bg-transparent p-0 text-left text-4xl font-semibold tabular-nums;
+    @apply m-0 max-w-full cursor-pointer border-0 bg-transparent p-0 text-left font-semibold wrap-break-word tabular-nums;
     font-family: Fraunces, Georgia, serif;
+    font-size: clamp(1.75rem, 8vw, 2.25rem);
     letter-spacing: -0.03em;
     color: var(--font-primary-color);
   }
 
-  .finances-section__hero-actions,
-  .finances-section__filter {
+  .finances-section__hero-actions {
     @apply flex flex-wrap gap-2;
+  }
+
+  .finances-section__filter {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .finances-section__filter .lc-segment__btn {
+    @apply px-1 text-center;
   }
 
   .finances-section__methods {
@@ -3285,7 +3365,19 @@
   }
 
   .planner-week {
-    @apply grid min-w-0 gap-3 md:grid-cols-7;
+    @apply grid min-w-0 gap-3;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(7.5rem, 1fr);
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  @media (min-width: 960px) {
+    .planner-week {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      overflow: visible;
+    }
   }
 
   .planner-week__day {
@@ -3815,7 +3907,14 @@
   }
 
   .dashboard-section__vision .vision-section__grid {
-    @apply gap-3 sm:grid-cols-2 lg:grid-cols-3;
+    @apply gap-3;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 720px) {
+    .dashboard-section__vision .vision-section__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   .dashboard-section__vision .vision-section__media {
@@ -4052,5 +4151,108 @@
   .task-card__action--danger {
     color: var(--danger-color);
     background: color-mix(in srgb, var(--danger-color) 12%, transparent);
+  }
+
+  slice-dashboard-section,
+  slice-planner-section,
+  slice-finances-section,
+  slice-shopping-section,
+  slice-notes-section,
+  slice-habits-section,
+  slice-vision-section,
+  slice-settings-section,
+  .dashboard-section,
+  .planner-section,
+  .finances-section,
+  .shopping-section,
+  .notes-section,
+  .habits-section,
+  .vision-section,
+  .settings-section {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .lc-view-stat {
+    min-height: 8.75rem;
+  }
+
+  .dashboard-section__capacity .capacity-ring__svg {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .dashboard-section__money-grid > .lc-card,
+  .shopping-section__col,
+  .notes-section__grid > .lc-card,
+  .vision-section__card {
+    height: 100%;
+    min-width: 0;
+  }
+
+  .dashboard-section__finance-value {
+    font-size: clamp(1rem, 4.5vw, 1.25rem);
+    overflow-wrap: anywhere;
+  }
+
+  .planner-section__nav,
+  .planner-section__controls {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .planner-section__period {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .planner-section__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .planner-section__controls .lc-segment {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .planner-month__weekdays,
+  .planner-month__grid {
+    gap: 0.35rem;
+  }
+
+  .planner-month__cell {
+    min-width: 0;
+    min-height: 3.1rem;
+    padding: 0.3rem;
+  }
+
+  .planner-week__day {
+    height: 100%;
+  }
+
+  @media (min-width: 720px) {
+    .planner-section__nav,
+    .planner-section__controls {
+      width: auto;
+    }
+
+    .planner-section__controls {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .planner-section__controls .lc-segment {
+      display: inline-flex;
+      width: auto;
+    }
+
+    .planner-month__weekdays,
+    .planner-month__grid {
+      gap: 0.5rem;
+    }
   }
 }
