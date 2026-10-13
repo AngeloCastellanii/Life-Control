@@ -2,7 +2,10 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
+  readdirSync,
+  readFileSync,
   rmSync,
+  statSync,
   writeFileSync
 } from 'node:fs';
 import { join } from 'node:path';
@@ -30,6 +33,37 @@ if (!existsSync(sliceSrcDir)) {
 // carga sus clases estructurales como módulos individuales desde /Slice/Components/...
 cpSync(sliceSrcDir, sliceDestDir, { recursive: true });
 console.log('✅ Carpeta Slice copiada a dist/Slice (framework completo).');
+
+function collectPrecache(dir, base, out) {
+  for (const name of readdirSync(dir)) {
+    if (name.startsWith('.') || name === 'service-worker.js') {
+      continue;
+    }
+    const abs = join(dir, name);
+    const rel = `${base}/${name}`.replace(/\/{2,}/g, '/');
+    if (statSync(abs).isDirectory()) {
+      collectPrecache(abs, rel, out);
+      continue;
+    }
+    if (/\.(js|mjs|css|html|json|svg|png|webmanifest|woff2?|ico)$/i.test(name)) {
+      out.push(rel.startsWith('/') ? rel : `/${rel}`);
+    }
+  }
+}
+
+const precache = [];
+collectPrecache(distDir, '', precache);
+writeFileSync(join(distDir, 'precache-manifest.json'), JSON.stringify(precache), 'utf8');
+console.log(`✅ Precache: ${precache.length} archivos.`);
+
+const swPath = join(distDir, 'service-worker.js');
+if (existsSync(swPath)) {
+  const bumped = readFileSync(swPath, 'utf8').replace(
+    /const CACHE = 'life-control-[^']+'/,
+    `const CACHE = 'life-control-${Date.now()}'`
+  );
+  writeFileSync(swPath, bumped, 'utf8');
+}
 
 rmSync(outputDir, { recursive: true, force: true });
 mkdirSync(staticDir, { recursive: true });

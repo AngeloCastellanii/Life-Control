@@ -100,7 +100,15 @@ export async function getServiceWorkerRegistration() {
       return null;
    }
    try {
-      return (await navigator.serviceWorker.getRegistration()) ?? (await navigator.serviceWorker.ready);
+      const existing = await navigator.serviceWorker.getRegistration();
+      if (existing?.active) {
+         return existing;
+      }
+      const ready = navigator.serviceWorker.ready;
+      const timeout = new Promise((resolve) => {
+         window.setTimeout(() => resolve(null), 8000);
+      });
+      return (await Promise.race([ready, timeout])) || existing || null;
    } catch {
       return null;
    }
@@ -116,10 +124,8 @@ export async function showOsNotification({ title, body, tag, route }) {
    }
 
    const options = {
-      body,
+      body: body || '',
       tag: tag || 'lc-pending-digest',
-      renotify: true,
-      vibrate: [120, 40, 120],
       icon: '/images/icon-192.png',
       badge: '/images/icon-192.png',
       data: { route: route || '/' }
@@ -131,7 +137,16 @@ export async function showOsNotification({ title, body, tag, route }) {
          await registration.showNotification(title || 'Life Control', options);
          return true;
       } catch {
-         /* fallback */
+         try {
+            await registration.showNotification(title || 'Life Control', {
+               body: options.body,
+               tag: options.tag,
+               data: options.data
+            });
+            return true;
+         } catch {
+            /* fallback */
+         }
       }
    }
 

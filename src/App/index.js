@@ -71,7 +71,10 @@ async function bootstrapLifeControl() {
 
 slice.router.afterEach((to) => {
    document.title = `${to.metadata?.title ?? 'Life Control'} · Life Control`;
+   window.setTimeout(syncOfflineCache, 600);
 });
+
+registerServiceWorker();
 
 try {
    await bootstrapLifeControl();
@@ -111,22 +114,30 @@ function collectCacheableUrls() {
    return [...urls];
 }
 
-if ('serviceWorker' in navigator) {
-   window.addEventListener('load', () => {
-      navigator.serviceWorker
-         .register('/service-worker.js', { updateViaCache: 'none' })
-         .then(async (registration) => {
-            await navigator.serviceWorker.ready;
-            const worker = registration.active;
-            worker?.postMessage({ type: 'CACHE_URLS', urls: collectCacheableUrls() });
-            window.setTimeout(() => {
-               worker?.postMessage({ type: 'CACHE_URLS', urls: collectCacheableUrls() });
-            }, 2500);
-         })
-         .catch((error) => {
-            console.warn('No se pudo registrar el Service Worker:', error);
-         });
-   });
+function syncOfflineCache() {
+   if (!('serviceWorker' in navigator)) {
+      return;
+   }
+   const worker = navigator.serviceWorker.controller;
+   worker?.postMessage({ type: 'CACHE_URLS', urls: collectCacheableUrls() });
+}
+
+function registerServiceWorker() {
+   if (!('serviceWorker' in navigator)) {
+      return;
+   }
+
+   navigator.serviceWorker
+      .register('/service-worker.js', { updateViaCache: 'none' })
+      .then(async (registration) => {
+         await navigator.serviceWorker.ready;
+         const worker = registration.active || navigator.serviceWorker.controller;
+         worker?.postMessage({ type: 'CACHE_URLS', urls: collectCacheableUrls() });
+         window.setTimeout(syncOfflineCache, 1500);
+      })
+      .catch((error) => {
+         console.warn('No se pudo registrar el Service Worker:', error);
+      });
 
    navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data?.type === 'NAVIGATE' && event.data.route) {

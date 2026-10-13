@@ -1,5 +1,5 @@
 // Life Control — Service Worker (offline PWA + notificaciones)
-const CACHE = 'life-control-v6';
+const CACHE = 'life-control-v7';
 const PLAN_CACHE = 'life-control-plan-v1';
 const APP_SHELL = '/App/index.html';
 const PLAN_URL = '/__lc-reminder-plan';
@@ -53,7 +53,26 @@ self.addEventListener('install', (event) => {
    event.waitUntil(
       (async () => {
          const cache = await caches.open(CACHE);
-         await Promise.all(PRECACHE.map((url) => cacheUrl(cache, url)));
+         const urls = new Set(PRECACHE);
+         try {
+            const response = await fetch('/precache-manifest.json', { cache: 'reload' });
+            if (response.ok) {
+               const list = await response.json();
+               if (Array.isArray(list)) {
+                  for (const url of list) {
+                     if (typeof url === 'string' && url.startsWith('/')) {
+                        urls.add(url);
+                     }
+                  }
+               }
+            }
+         } catch {
+            /* sin manifiesto se precachea el shell y luego las visitas */
+         }
+         const list = [...urls].filter((url) => url !== '/service-worker.js');
+         for (let index = 0; index < list.length; index += 12) {
+            await Promise.all(list.slice(index, index + 12).map((url) => cacheUrl(cache, url)));
+         }
          await mirrorHtmlShell(cache);
          await self.skipWaiting();
       })()
@@ -83,14 +102,15 @@ function pathnameOf(requestOrUrl) {
 }
 
 function isHtmlRequest(request) {
-   return request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html');
+   return request.mode === 'navigate' || request.destination === 'document';
 }
 
-function stripNoStore(response) {
+function asStorable(response) {
    const headers = new Headers(response.headers);
    headers.delete('Pragma');
-   headers.set('Cache-Control', 'max-age=86400');
-   return new Response(response.body, {
+   headers.delete('Expires');
+   headers.set('Cache-Control', 'public, max-age=604800');
+   return new Response(response.clone().body, {
       status: response.status,
       statusText: response.statusText,
       headers
@@ -114,8 +134,10 @@ async function cacheUrl(cache, url) {
          return;
       }
       const path = pathnameOf(url);
-      const stored = path.endsWith('.html') || path === '/' ? stripNoStore(response) : response;
-      await cache.put(path, stored);
+      if (!path || path === '/service-worker.js') {
+         return;
+      }
+      await cache.put(path, asStorable(response));
    } catch {
       /* un archivo que falte no debe tumbar el precache entero */
    }
@@ -140,7 +162,7 @@ async function storeHtmlShell(response) {
    }
    try {
       const cache = await caches.open(CACHE);
-      const stored = stripNoStore(response.clone());
+      const stored = asStorable(response);
       await cache.put('/', stored.clone());
       await cache.put('/index.html', stored.clone());
       await cache.put(APP_SHELL, stored.clone());
@@ -159,8 +181,10 @@ async function putInCache(request, response) {
    try {
       const cache = await caches.open(CACHE);
       const path = pathnameOf(request);
-      const stored = isHtmlRequest(request) ? stripNoStore(response.clone()) : response.clone();
-      await cache.put(path, stored);
+      if (!path || path === '/service-worker.js') {
+         return;
+      }
+      await cache.put(path, asStorable(response));
    } catch {
       /* ignore quota / opaque */
    }
@@ -183,43 +207,29 @@ async function matchCached(requestOrUrl) {
    return cache.match(path, { ignoreSearch: true, ignoreMethod: true });
 }
 
-async function handleNavigation(request) {
+async function refresh(request) {
    try {
       const response = await fetch(request);
-      if (response && response.ok) {
-         await storeHtmlShell(response);
+      if (!response || !response.ok) {
          return response;
       }
+      if (isHtmlRequest(request)) {
+         await storeHtmlShell(response);
+      } else if (response.status === 200 && (response.type === 'basic' || response.type === 'cors')) {
+         await putInCache(request, response);
+      }
+      return response;
    } catch {
-      /* offline / conexión interrumpida */
+      return null;
    }
+}
 
+async function cachedNavigation() {
    return (
       (await matchCached('/')) ||
       (await matchCached(APP_SHELL)) ||
-      (await matchCached('/index.html')) ||
-      offlineHtmlFallback()
+      (await matchCached('/index.html'))
    );
-}
-
-async function networkFirst(request) {
-   try {
-      const response = await fetch(request);
-      if (response && response.status === 200 && (response.type === 'basic' || response.type === 'cors')) {
-         await putInCache(request, response);
-      }
-      if (response) {
-         return response;
-      }
-   } catch {
-      /* offline */
-   }
-
-   const cached = await matchCached(request);
-   if (cached) {
-      return cached;
-   }
-   return new Response('', { status: 503, statusText: 'Offline' });
 }
 
 self.addEventListener('fetch', (event) => {
@@ -233,16 +243,42 @@ self.addEventListener('fetch', (event) => {
    if (url.origin !== self.location.origin) {
       return;
    }
-   if (url.pathname.startsWith('/api/')) {
+   if (url.pathname.startsWith('/api/') || url.pathname === '/service-worker.js') {
       return;
    }
 
    if (isHtmlRequest(request)) {
-      event.respondWith(handleNavigation(request));
+      event.respondWith(
+         (async () => {
+            const cached = (await matchCached(request)) || (await cachedNavigation());
+            if (cached) {
+               event.waitUntil(refresh(request));
+               return cached;
+            }
+            const fresh = await refresh(request);
+            if (fresh && fresh.ok) {
+               return fresh;
+            }
+            return (await cachedNavigation()) || offlineHtmlFallback();
+         })()
+      );
       return;
    }
 
-   event.respondWith(networkFirst(request));
+   event.respondWith(
+      (async () => {
+         const cached = await matchCached(request);
+         if (cached) {
+            event.waitUntil(refresh(request));
+            return cached;
+         }
+         const fresh = await refresh(request);
+         if (fresh) {
+            return fresh;
+         }
+         return new Response('', { status: 503, statusText: 'Offline' });
+      })()
+   );
 });
 
 async function readReminderPlan() {
@@ -281,31 +317,56 @@ function digestBody(items) {
    return `Oye, tienes ${titles.length} actividades pendientes: ${titles[0]}, ${titles[1]} y ${rest} más.`;
 }
 
+let nextAlarm = 0;
+
+function armAlarm(items) {
+   if (nextAlarm) {
+      clearTimeout(nextAlarm);
+      nextAlarm = 0;
+   }
+   const now = Date.now();
+   const upcoming = (items ?? [])
+      .filter((item) => !item.shown && Number(item.at) > now)
+      .sort((a, b) => a.at - b.at)[0];
+   if (!upcoming) {
+      return;
+   }
+   const delay = Math.max(0, Math.min(upcoming.at - now, 2147483647));
+   nextAlarm = setTimeout(() => {
+      flushDueReminders()
+         .then(() => readReminderPlan())
+         .then((plan) => armAlarm(plan))
+         .catch(() => {});
+   }, delay);
+}
+
+function notificationOptions(item) {
+   return {
+      body: item.body || '',
+      tag: item.tag || item.id || 'lc-pending',
+      icon: '/images/icon-192.png',
+      badge: '/images/icon-192.png',
+      data: { route: item.route || '/', ids: item.id ? [item.id] : [] }
+   };
+}
+
 async function flushDueReminders() {
    const items = await readReminderPlan();
    const now = Date.now();
    const due = items.filter((item) => Number(item.at) <= now && !item.shown);
    if (due.length === 0) {
+      armAlarm(items);
       return;
    }
 
    for (const item of due) {
-      await self.registration.showNotification(item.title || 'Life Control', {
-         body: item.body || digestBody([item]),
-         tag: item.tag || item.id || 'lc-pending',
-         renotify: true,
-         requireInteraction: true,
-         vibrate: [120, 40, 120],
-         icon: '/images/icon-192.png',
-         badge: '/images/icon-192.png',
-         data: { route: item.route || '/', ids: [item.id] }
-      });
+      await self.registration.showNotification(item.title || 'Life Control', notificationOptions(item));
    }
 
    const shownIds = new Set(due.map((item) => item.id));
-   await writeReminderPlan({
-      items: items.map((item) => (shownIds.has(item.id) ? { ...item, shown: true } : item))
-   });
+   const next = items.map((item) => (shownIds.has(item.id) ? { ...item, shown: true } : item));
+   await writeReminderPlan({ items: next });
+   armAlarm(next);
 }
 
 self.addEventListener('periodicsync', (event) => {
@@ -335,7 +396,12 @@ self.addEventListener('message', (event) => {
    }
 
    if (data.type === 'SET_REMINDER_PLAN') {
-      event.waitUntil(writeReminderPlan(data.plan));
+      event.waitUntil(
+         writeReminderPlan(data.plan).then(() => {
+            const items = Array.isArray(data.plan?.items) ? data.plan.items : [];
+            armAlarm(items);
+         })
+      );
    }
 
    if (data.type === 'FLUSH_REMINDERS') {
@@ -344,15 +410,14 @@ self.addEventListener('message', (event) => {
 
    if (data.type === 'SHOW_NOTIFICATION') {
       event.waitUntil(
-         self.registration.showNotification(data.title || 'Life Control', {
-            body: data.body || '',
-            tag: data.tag || 'lc-pending-digest',
-            renotify: Boolean(data.renotify),
-            vibrate: [120, 40, 120],
-            icon: '/images/icon-192.png',
-            badge: '/images/icon-192.png',
-            data: { route: data.route || '/' }
-         })
+         self.registration.showNotification(
+            data.title || 'Life Control',
+            notificationOptions({
+               body: data.body || '',
+               tag: data.tag || 'lc-pending-digest',
+               route: data.route || '/'
+            })
+         )
       );
    }
 });

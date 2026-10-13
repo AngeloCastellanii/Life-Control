@@ -153,10 +153,15 @@ export default class ReminderService {
       this._wakeLock = null;
       this._timeouts = new Map();
       this._delivered = new Set();
+      this._osPending = new Map();
       this._readyAt = Date.now();
 
       renderInboxUi();
       slice.events.subscribe('reminder:inbox-changed', () => renderInboxUi());
+
+      window.addEventListener('pagehide', () => {
+         this.flushPendingOs();
+      });
 
       document.addEventListener('visibilitychange', () => {
          if (document.visibilityState === 'visible') {
@@ -164,7 +169,7 @@ export default class ReminderService {
             this.syncPlan();
          } else {
             this.releaseWakeLock();
-            this.flushIfSupported();
+            this.flushPendingOs();
          }
       });
 
@@ -190,7 +195,10 @@ export default class ReminderService {
       if (this._timer) {
          return;
       }
-      this._timer = setInterval(() => this.checkJustDue(), CHECK_INTERVAL_MS);
+      this._timer = setInterval(() => {
+         this.checkJustDue();
+         this.syncPlan();
+      }, CHECK_INTERVAL_MS);
    }
 
    stop() {
@@ -238,6 +246,29 @@ export default class ReminderService {
       } catch {
          /* no permitido */
       }
+   }
+
+   flushPendingOs() {
+      const pending = [...this._osPending.values()];
+      this._osPending.clear();
+      const worker = navigator.serviceWorker?.controller;
+      for (const item of pending) {
+         worker?.postMessage({
+            type: 'SHOW_NOTIFICATION',
+            title: item.title || 'Life Control',
+            body: item.body || '',
+            tag: item.tag || item.id || 'lc-pending',
+            route: item.route || '/'
+         });
+         if (item.kind) {
+            this.markDelivered(item);
+         }
+      }
+      this.flushIfSupported();
+   }
+
+   queueOs(item) {
+      this._osPending.set(item.tag || item.id, item);
    }
 
    async flushIfSupported() {
@@ -352,9 +383,28 @@ export default class ReminderService {
             });
             renderInboxUi();
          }
-         for (const item of missed) {
-            this._delivered.add(item.id);
-            await this.markDelivered(item);
+         const shown = await showOsNotification({
+            title: 'Pendientes',
+            body: digestBody(missed),
+            tag: digestId,
+            route: missed[0].route || '/'
+         });
+         this.queueOs({
+            id: digestId,
+            title: 'Pendientes',
+            body: digestBody(missed),
+            tag: digestId,
+            route: missed[0].route || '/'
+         });
+         const inBackground = document.visibilityState !== 'visible';
+         if (inBackground || shown || notificationPermission() !== 'granted') {
+            for (const item of missed) {
+               this._delivered.add(item.id);
+               await this.markDelivered(item);
+            }
+            if (inBackground || notificationPermission() !== 'granted') {
+               this._osPending.delete(digestId);
+            }
          }
       }
 
@@ -436,19 +486,43 @@ export default class ReminderService {
       });
       renderInboxUi();
 
+      let shown = !skipOsDump ? false : notificationPermission() !== 'granted';
       if (!skipOsDump) {
+         shown = notificationPermission() !== 'granted';
          for (const item of unique) {
-            await showOsNotification({
+            const ok = await showOsNotification({
                title: item.title || 'Life Control',
                body: item.body || digestBody([item]),
                tag: item.tag || item.id,
                route: item.route || '/'
             });
+            shown = shown || ok;
+            this.queueOs(item);
+         }
+      } else {
+         for (const item of unique) {
+            this.queueOs({
+               ...item,
+               title: item.title || 'Life Control',
+               body: item.body || digestBody([item])
+            });
          }
       }
 
-      for (const item of unique) {
-         await this.markDelivered(item);
+      const inBackground = document.visibilityState !== 'visible';
+      if (inBackground || shown || notificationPermission() !== 'granted') {
+         for (const item of unique) {
+            await this.markDelivered(item);
+         }
+         if (inBackground || notificationPermission() !== 'granted') {
+            for (const item of unique) {
+               this._osPending.delete(item.tag || item.id);
+            }
+         }
+      } else {
+         for (const item of unique) {
+            this._delivered.delete(item.id);
+         }
       }
       await this.syncPlan();
    }
