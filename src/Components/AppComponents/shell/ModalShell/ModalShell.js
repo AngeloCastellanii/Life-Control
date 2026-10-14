@@ -51,8 +51,13 @@ export default class ModalShell extends HTMLElement {
          payload.visionId ??
          payload.paymentMethodId ??
          payload.ledgerAccountId ??
+         payload.entryType ??
          null;
-      return `modal-${payload.form?.toLowerCase() ?? 'form'}${resourceId ? `-${resourceId}` : ''}`;
+      const entry =
+         payload.entryType && (payload.paymentMethodId || payload.ledgerAccountId)
+            ? `-${payload.entryType}`
+            : '';
+      return `modal-${payload.form?.toLowerCase() ?? 'form'}${resourceId ? `-${resourceId}` : ''}${entry}`;
    }
 
    unmountForm(sliceId = null) {
@@ -121,7 +126,8 @@ export default class ModalShell extends HTMLElement {
          noteId: payload.noteId ?? null,
          habitId: payload.habitId ?? null,
          visionId: payload.visionId ?? null,
-         paymentMethodId: payload.paymentMethodId ?? payload.ledgerAccountId ?? null
+         paymentMethodId: payload.paymentMethodId ?? payload.ledgerAccountId ?? null,
+         entryType: payload.entryType ?? null
       });
 
       if (token !== this._openToken) {

@@ -23,6 +23,8 @@ export default class FinanceDetailPanel extends HTMLElement {
       this.$settled = this.querySelector('[data-role="settled"]');
       this.$settledAtRow = this.querySelector('[data-role="settled-at-row"]');
       this.$settledAt = this.querySelector('[data-role="settled-at"]');
+      this.$noteRow = this.querySelector('[data-role="note-row"]');
+      this.$note = this.querySelector('[data-role="note"]');
       this.$created = this.querySelector('[data-role="created"]');
       this.$toggleSettled = this.querySelector('[data-role="toggle-settled"]');
       this.$edit = this.querySelector('[data-role="edit"]');
@@ -125,6 +127,11 @@ export default class FinanceDetailPanel extends HTMLElement {
       this.$settled.textContent = settled ? (isPay ? 'Pagado' : 'Cobrado') : 'Pendiente';
       this.$settledAtRow.hidden = !settled;
       this.$settledAt.textContent = this.formatDate(item.settledAt ?? item.dueDate);
+      if (this.$noteRow && this.$note) {
+         const note = String(item.note ?? '').trim();
+         this.$noteRow.hidden = !note;
+         this.$note.textContent = note;
+      }
       this.$created.textContent = this.formatDateTime(item.createdAt);
 
       this.$toggleSettled.hidden = false;

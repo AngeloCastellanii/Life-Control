@@ -1,0 +1,112 @@
+:root {
+  --font-family: Outfit, system-ui, sans-serif;
+
+  /* Wine — vinotinto con blanco */
+  --font-primary-color: #ffffff;
+  --font-secondary-color: #f3d5dc;
+
+  --primary-color: #ffffff;
+  --primary-color-rgb: 255, 255, 255;
+  --primary-background-color: #5c1a28;
+  --primary-color-contrast: #5c1a28;
+  --primary-color-shade: #f4e7ea;
+
+  --secondary-color: #ffffff;
+  --secondary-color-rgb: 255, 255, 255;
+  --secondary-background-color: #6e2434;
+  --secondary-color-contrast: #5c1a28;
+
+  --tertiary-background-color: #8d4454;
+
+  --success-color: #b7f0d4;
+  --success-contrast: #143028;
+  --warning-color: #ffe08a;
+  --warning-contrast: #3a2a10;
+  --danger-color: #ffe1e1;
+  --danger-contrast: #5c1a28;
+  --accent-warning-soft: #ffd0c2;
+
+  --medium-color: #e7c3cb;
+  --disabled-color: #a56b78;
+
+  --accent-color: #ffffff;
+
+  --surface-glass: color-mix(in srgb, #732838 88%, #ffffff);
+  --surface-elevated: #7a2c3c;
+  --surface-blur: blur(18px);
+  --border-glow: color-mix(in srgb, #ffffff 42%, #8d4454);
+
+  --app-background: linear-gradient(
+    165deg,
+    #4a1420 0%,
+    #6b2030 38%,
+    #5a1a28 70%,
+    #43111c 100%
+  );
+
+  --box-shadow-primary: 0 10px 28px rgb(28 6 12 / 28%);
+  --box-shadow-secondary: 0 4px 14px rgb(28 6 12 / 22%);
+
+  --lc-radius-lg: 1rem;
+  --lc-radius-xl: 1.5rem;
+  --lc-shadow: 0 1px 2px rgb(28 6 12 / 18%);
+}
+
+:root .lc-card,
+:root .sidebar,
+:root .task-card,
+:root .time-block,
+:root .modal-shell__dialog,
+:root .finances-section__wallet,
+:root .finances-section__col,
+:root .shopping-section__col,
+:root .shopping-section__detail,
+:root .domains-section__item,
+:root .dashboard-section__due-item,
+:root .settings-section__guide-item {
+  background: var(--surface-glass);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
+  border-color: var(--border-glow);
+  box-shadow: var(--lc-shadow);
+}
+
+:root .sidebar__item--active .sidebar__link {
+  background: color-mix(in srgb, #ffffff 18%, transparent);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 55%, transparent);
+}
+
+:root .sidebar__link:hover {
+  background: color-mix(in srgb, #ffffff 12%, transparent);
+}
+
+:root .sidebar__logo,
+:root .settings-section__save,
+:root .fab {
+  background: #ffffff !important;
+  color: #5c1a28 !important;
+}
+
+:root .fab {
+  box-shadow: 0 8px 20px rgb(28 6 12 / 28%);
+}
+
+:root .lc-view-hero__icon {
+  background: #ffffff;
+  color: #5c1a28;
+  box-shadow: none;
+}
+
+:root .planner-week__day--today,
+:root .planner-month__cell--today {
+  border-color: #ffffff;
+  background: color-mix(in srgb, #ffffff 14%, #6e2434);
+  box-shadow: none;
+}
+
+:root .planner-section__view-btn--active {
+  background: #ffffff;
+  color: #5c1a28;
+  box-shadow: none;
+}

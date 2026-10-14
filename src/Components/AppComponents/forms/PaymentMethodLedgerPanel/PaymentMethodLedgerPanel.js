@@ -21,6 +21,8 @@ export default class PaymentMethodLedgerPanel extends HTMLElement {
       this.$methodActions = this.querySelector('[data-role="method-actions"]');
       this.$editMethod = this.querySelector('[data-role="edit-method"]');
       this.$deleteMethod = this.querySelector('[data-role="delete-method"]');
+      this.$cashIn = this.querySelector('[data-role="cash-in"]');
+      this.$cashOut = this.querySelector('[data-role="cash-out"]');
       /** @type {null | 'in' | 'out'} */
       this._typeFilter = null;
       slice.controller.setComponentProps(this, props);
@@ -74,6 +76,9 @@ export default class PaymentMethodLedgerPanel extends HTMLElement {
 
       bind(this.$filterIn, 'in');
       bind(this.$filterOut, 'out');
+
+      this.$cashIn?.addEventListener('click', () => this.openCashEntry('receive'));
+      this.$cashOut?.addEventListener('click', () => this.openCashEntry('pay'));
 
       this.$editMethod?.addEventListener('click', () => {
          const method = this.method();
@@ -143,6 +148,17 @@ export default class PaymentMethodLedgerPanel extends HTMLElement {
 
    transactionSortKey(item) {
       return item.settledAt || item.dueDate || item.createdAt || '';
+   }
+
+   openCashEntry(entryType) {
+      const incoming = entryType === 'receive';
+      const methodId = this.isAll() ? null : this.paymentMethodId;
+      slice.events.emit('ui:modal:open', {
+         title: incoming ? 'Registrar dinero' : 'Descontar dinero',
+         form: 'CashEntryForm',
+         entryType: incoming ? 'receive' : 'pay',
+         paymentMethodId: methodId
+      });
    }
 
    openDetail(financeId) {

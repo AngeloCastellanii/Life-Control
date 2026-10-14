@@ -19,6 +19,7 @@ const PRECACHE = [
    '/Styles/sliceStyles.css',
    '/Styles/lifeControlBase.css',
    '/Themes/Light.css',
+   '/Themes/Wine.css',
    '/images/icon-192.png',
    '/images/icon-512.png',
    '/images/icon.svg',

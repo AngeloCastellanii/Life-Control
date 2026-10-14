@@ -42,6 +42,17 @@ export default class FinancesSection extends HTMLElement {
          this.openMethodLedger('all');
       });
 
+      this.querySelector('[data-role="cash-in"]')?.addEventListener('click', (event) => {
+         event.preventDefault();
+         event.stopPropagation();
+         this.openCashEntry('receive');
+      });
+      this.querySelector('[data-role="cash-out"]')?.addEventListener('click', (event) => {
+         event.preventDefault();
+         event.stopPropagation();
+         this.openCashEntry('pay');
+      });
+
       this.$filter?.addEventListener('click', (event) => {
          const button = event.target.closest('[data-filter]');
          if (!button) {
@@ -107,6 +118,16 @@ export default class FinancesSection extends HTMLElement {
          title: paymentMethodId ? 'Editar método de pago' : 'Nuevo método de pago',
          form: 'PaymentMethodForm',
          paymentMethodId
+      });
+   }
+
+   openCashEntry(entryType, paymentMethodId = null) {
+      const incoming = entryType === 'receive';
+      slice.events.emit('ui:modal:open', {
+         title: incoming ? 'Registrar dinero' : 'Descontar dinero',
+         form: 'CashEntryForm',
+         entryType: incoming ? 'receive' : 'pay',
+         paymentMethodId: paymentMethodId && paymentMethodId !== 'all' ? paymentMethodId : null
       });
    }
 

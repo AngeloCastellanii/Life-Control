@@ -3015,17 +3015,65 @@
     color: var(--font-secondary-color);
   }
 
+  .shopping-detail__head {
+    @apply mb-4 flex items-start justify-between gap-3;
+  }
+
   .shopping-detail__name {
-    @apply m-0 mb-2 text-lg font-semibold leading-snug;
+    @apply m-0 min-w-0 text-lg font-semibold leading-snug;
     color: var(--font-primary-color);
   }
 
-  .shopping-detail__meta {
-    @apply m-0 text-sm leading-relaxed text-lc-muted;
+  .shopping-detail__status {
+    @apply shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold;
+    color: var(--font-secondary-color);
+    background: color-mix(in srgb, var(--font-secondary-color) 14%, transparent);
+  }
+
+  .shopping-detail__status--overdue,
+  .shopping-detail__status--renew,
+  .shopping-detail__status--today {
+    color: var(--danger-color);
+    background: color-mix(in srgb, var(--danger-color) 14%, transparent);
+  }
+
+  .shopping-detail__status--done,
+  .shopping-detail__status--paused {
+    color: var(--font-secondary-color);
+    background: color-mix(in srgb, var(--font-secondary-color) 12%, transparent);
+  }
+
+  .shopping-detail__grid {
+    @apply m-0 grid gap-2.5;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shopping-detail__cell {
+    @apply m-0 flex min-w-0 flex-col gap-1 rounded-xl px-3 py-2.5;
+    background: color-mix(in srgb, var(--primary-color) 6%, transparent);
+  }
+
+  .shopping-detail__cell dt {
+    @apply m-0 text-xs font-medium;
+    color: var(--font-secondary-color);
+  }
+
+  .shopping-detail__cell dd {
+    @apply m-0 text-sm font-semibold;
+    color: var(--font-primary-color);
   }
 
   .shopping-detail__actions {
-    @apply mt-4 flex flex-wrap items-center gap-2;
+    @apply mt-4 flex items-center justify-between gap-3 border-t pt-4;
+    border-color: var(--tertiary-background-color);
+  }
+
+  .shopping-detail__pause {
+    @apply min-w-0;
+  }
+
+  .shopping-detail__icons {
+    @apply flex shrink-0 gap-2;
   }
 
   .shopping-form__hint {
@@ -3373,6 +3421,17 @@
 
   .finances-section__hero-actions {
     @apply flex flex-wrap gap-2;
+  }
+
+  .finances-section__cash,
+  .payment-method-ledger__cash {
+    @apply grid gap-2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .finances-section__cash .lc-btn-outline,
+  .payment-method-ledger__cash .lc-btn-outline {
+    @apply w-full;
   }
 
   .finances-section__filter {

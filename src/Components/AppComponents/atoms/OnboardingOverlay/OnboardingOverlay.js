@@ -5,6 +5,7 @@ const THEME_OPTIONS = [
    { id: 'Dark', label: 'Oscuro', bg: '#09090b', fg: '#fafafa', accent: '#3b82f6' },
    { id: 'Pink', label: 'Rosa', bg: '#fff1f5', fg: '#3f1d2e', accent: '#db2777' },
    { id: 'Purple', label: 'Morado', bg: '#f5f3ff', fg: '#2e1065', accent: '#7c3aed' },
+   { id: 'Wine', label: 'Wine', bg: '#5c1a28', fg: '#ffffff', accent: '#ffffff' },
    { id: 'Slice', label: 'Verde', bg: '#b7cec0', fg: '#171717', accent: '#3f7359' },
    { id: 'Obsidian', label: 'Obsidiana', bg: '#0b0f19', fg: '#e2e8f0', accent: '#22d3ee' }
 ];
@@ -19,7 +20,7 @@ const STEPS = [
    {
       kicker: 'Estilo',
       title: 'Elige un tema',
-      text: 'Claro, oscuro, rosa, morado o verde. Lo cambias cuando quieras desde Perfil.',
+      text: 'Claro, oscuro, rosa, morado, wine o verde. Lo cambias cuando quieras desde Perfil.',
       chooseTheme: true
    },
    {

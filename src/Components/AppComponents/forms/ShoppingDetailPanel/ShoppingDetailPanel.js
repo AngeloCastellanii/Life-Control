@@ -19,7 +19,11 @@ export default class ShoppingDetailPanel extends HTMLElement {
       super();
       slice.attachTemplate(this);
       this.$name = this.querySelector('[data-role="name"]');
-      this.$meta = this.querySelector('[data-role="meta"]');
+      this.$status = this.querySelector('[data-role="status"]');
+      this.$frequency = this.querySelector('[data-role="frequency"]');
+      this.$price = this.querySelector('[data-role="price"]');
+      this.$last = this.querySelector('[data-role="last"]');
+      this.$next = this.querySelector('[data-role="next"]');
       this.$pause = this.querySelector('[data-role="pause"]');
       this.$edit = this.querySelector('[data-role="edit"]');
       this.$delete = this.querySelector('[data-role="delete"]');
@@ -49,28 +53,26 @@ export default class ShoppingDetailPanel extends HTMLElement {
       const item = this.item();
       if (!item) {
          this.$name.textContent = 'Artículo no encontrado';
-         this.$meta.textContent = '';
+         this.$status.textContent = '';
+         this.$frequency.textContent = '—';
+         this.$price.textContent = '—';
+         this.$last.textContent = '—';
+         this.$next.textContent = '—';
          this.$pause.hidden = true;
          this.$edit.hidden = true;
          this.$delete.hidden = true;
          return;
       }
 
-      const period = FREQUENCY_LABELS[item.frequency] ?? item.frequency;
       const status = getDueStatus(item);
-      const parts = [`Lista ${period.toLowerCase()}`, status.label];
-      if (item.price != null && Number(item.price) > 0) {
-         parts.push(`$${Number(item.price).toFixed(2)}`);
-      }
-      if (item.lastDoneAt) {
-         parts.push(`Última vez: ${formatShortDate(item.lastDoneAt)}`);
-      }
-      if (item.nextDueAt && !status.label.startsWith('Próximo:') && !item.paused) {
-         parts.push(`Próximo: ${formatShortDate(item.nextDueAt)}`);
-      }
-
       this.$name.textContent = item.name;
-      this.$meta.textContent = parts.join(' · ');
+      this.$status.textContent = status.label;
+      this.$status.className = `shopping-detail__status shopping-detail__status--${status.state}`;
+      this.$frequency.textContent = FREQUENCY_LABELS[item.frequency] ?? item.frequency;
+      this.$price.textContent =
+         item.price != null && Number(item.price) > 0 ? `$${Number(item.price).toFixed(2)}` : '—';
+      this.$last.textContent = item.lastDoneAt ? formatShortDate(item.lastDoneAt) : '—';
+      this.$next.textContent = item.nextDueAt ? formatShortDate(item.nextDueAt) : '—';
       this.$pause.hidden = false;
       this.$pause.textContent = item.paused ? 'Activar' : 'Poner en reposo';
       this.$edit.hidden = false;

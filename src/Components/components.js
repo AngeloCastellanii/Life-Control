@@ -17,6 +17,7 @@ const components = {
   "DomainForm": "forms",
   "TaskForm": "forms",
   "FinanceForm": "forms",
+  "CashEntryForm": "forms",
   "WalletForm": "forms",
   "PaymentMethodForm": "forms",
   "PaymentMethodLedgerPanel": "forms",

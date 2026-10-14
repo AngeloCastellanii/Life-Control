@@ -170,6 +170,38 @@ export default class FinanceService {
       return item;
    }
 
+   async recordCash({ description, amount, type, date, accountId, note = null }) {
+      const trimmed = description?.trim();
+      const value = Number(amount);
+      const when = date || new Date().toISOString().slice(0, 10);
+      const resolvedAccount = this.resolveAccountId(accountId);
+      if (!trimmed || !Number.isFinite(value) || value <= 0 || !resolvedAccount) {
+         return null;
+      }
+
+      const kind = type === FINANCE_TYPE.RECEIVE ? FINANCE_TYPE.RECEIVE : FINANCE_TYPE.PAY;
+      const detail = String(note ?? '').trim();
+      const item = {
+         id: crypto.randomUUID(),
+         description: trimmed,
+         amount: value,
+         type: kind,
+         dueDate: when,
+         domainId: null,
+         accountId: resolvedAccount,
+         shoppingItemId: null,
+         note: detail || null,
+         settled: true,
+         settledAt: when,
+         createdAt: new Date().toISOString()
+      };
+
+      await this.storage.put(STORE, item);
+      await this.adjustAccount(resolvedAccount, this.walletDeltaFor(item, true));
+      slice.events.emit('finance:changed', { action: 'create', item });
+      return item;
+   }
+
    async update(id, patch) {
       const items = await this.storage.getAll(STORE);
       const existing = items.find((item) => item.id === id);

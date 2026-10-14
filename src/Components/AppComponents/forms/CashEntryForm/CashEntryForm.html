@@ -1,0 +1,27 @@
+<form class="flex flex-col gap-4" data-role="form">
+  <p class="lc-hint" data-role="hint"></p>
+  <div>
+    <label class="lc-label" for="cash-entry-amount">Cantidad (USD)</label>
+    <input class="lc-input" id="cash-entry-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required />
+  </div>
+  <div>
+    <label class="lc-label" for="cash-entry-date">Fecha</label>
+    <input class="lc-input" id="cash-entry-date" type="date" required />
+  </div>
+  <div>
+    <label class="lc-label" for="cash-entry-account">Método de pago</label>
+    <select class="lc-input" id="cash-entry-account" required>
+      <option value="">Elegir</option>
+    </select>
+  </div>
+  <div>
+    <label class="lc-label" for="cash-entry-name">Nombre</label>
+    <input class="lc-input" id="cash-entry-name" type="text" placeholder="Qué pagaste o recibiste" required />
+  </div>
+  <div>
+    <label class="lc-label" for="cash-entry-note">Nota</label>
+    <textarea class="lc-input" id="cash-entry-note" rows="3" placeholder="Detalle opcional"></textarea>
+  </div>
+  <p class="block-form__error" data-role="error" hidden></p>
+  <div class="flex gap-2.5 [&_slice-button]:flex-1" data-role="actions"></div>
+</form>

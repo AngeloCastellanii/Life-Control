@@ -6,7 +6,11 @@ import Slice from '/Slice/Slice.js';
 
 // Forzar tema fresco desde /Themes (sin CSS viejo en memoria/localStorage).
 try {
-   const themeName = localStorage.getItem('sliceTheme') || slice.theme || 'Light';
+   let themeName = localStorage.getItem('sliceTheme') || slice.theme || 'Light';
+   if (themeName === 'DarkRed') {
+      themeName = 'Wine';
+      localStorage.setItem('sliceTheme', 'Wine');
+   }
    slice.stylesManager?.themeManager?.themeStyles?.delete(themeName);
    localStorage.removeItem(`sliceTheme-${themeName}`);
    await slice.setTheme(themeName);
