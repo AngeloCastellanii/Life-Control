@@ -29,6 +29,10 @@ export function getReminderWindowDays(frequency) {
 }
 
 export function getDueStatus(item) {
+   if (item?.paused) {
+      return { state: 'paused', label: 'En reposo', priority: 80 };
+   }
+
    const today = todayISO();
    const next = item.nextDueAt ?? today;
 

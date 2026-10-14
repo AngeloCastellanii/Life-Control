@@ -15,6 +15,25 @@ export const TASK_RECURRENCE = {
    MONTHLY: 'monthly'
 };
 
+export function normalizeSteps(steps) {
+   if (!Array.isArray(steps)) {
+      return [];
+   }
+   const clean = [];
+   for (const step of steps) {
+      const title = String(step?.title ?? '').trim();
+      if (!title) {
+         continue;
+      }
+      clean.push({
+         id: step?.id || crypto.randomUUID(),
+         title,
+         done: Boolean(step?.done)
+      });
+   }
+   return clean;
+}
+
 function addPeriodISO(iso, recurrence) {
    const d = new Date(`${iso}T12:00:00`);
    if (recurrence === TASK_RECURRENCE.DAILY) {
@@ -68,7 +87,7 @@ export default class TaskService {
       return this.getAll().find((t) => t.id === id) ?? null;
    }
 
-   async create({ title, urgency, minutes, domainId, blockId = null, startDate = null, dueDate = null, scheduledDate = null, slotStart = null, slotEnd = null, recurrence = TASK_RECURRENCE.NONE }) {
+   async create({ title, urgency, minutes, domainId, blockId = null, startDate = null, dueDate = null, scheduledDate = null, slotStart = null, slotEnd = null, recurrence = TASK_RECURRENCE.NONE, steps = [] }) {
       const trimmed = title?.trim();
       if (!trimmed || !domainId) {
          return null;
@@ -93,7 +112,8 @@ export default class TaskService {
          recurrence: recurrence || TASK_RECURRENCE.NONE,
          completed: false,
          dueNotified: false,
-         dueNotifiedDate: null
+         dueNotifiedDate: null,
+         steps: normalizeSteps(steps)
       };
 
       await this.storage.put(STORE, task);
@@ -153,6 +173,8 @@ export default class TaskService {
          updated.slotEnd = null;
       }
 
+      updated.steps = patch.steps !== undefined ? normalizeSteps(patch.steps) : normalizeSteps(existing.steps);
+
       await this.storage.put(STORE, updated);
       await this.syncToContext();
       slice.events.emit('task:changed', { action: 'update', task: updated });
@@ -186,7 +208,12 @@ export default class TaskService {
          dueNotifiedDate: null,
          startDate: nextStart ?? nextDue ?? todayISO(),
          dueDate: nextDue,
-         scheduledDate: nextDue
+         scheduledDate: nextDue,
+         steps: normalizeSteps(task.steps).map((step) => ({
+            ...step,
+            id: crypto.randomUUID(),
+            done: false
+         }))
       };
 
       await this.storage.put(STORE, clone);

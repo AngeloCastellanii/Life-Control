@@ -25,6 +25,7 @@ export default class TaskCard extends HTMLElement {
       this.$urgency = this.querySelector('[data-role="urgency"]');
       this.$slot = this.querySelector('[data-role="slot"]');
       this.$minutes = this.querySelector('[data-role="minutes"]');
+      this.$steps = this.querySelector('[data-role="steps"]');
       this.$accent = this.querySelector('[data-role="accent"]');
       this.$assign = this.querySelector('[data-role="assign-wrap"]');
       this.$blockSelect = this.querySelector('[data-role="block-select"]');
@@ -125,6 +126,16 @@ export default class TaskCard extends HTMLElement {
          }
       }
       this.$minutes.textContent = formatDuration(task.minutes ?? 0, { short: true });
+      const steps = Array.isArray(task.steps) ? task.steps : [];
+      if (this.$steps) {
+         if (steps.length > 0) {
+            const done = steps.filter((step) => step.done).length;
+            this.$steps.textContent = `${done}/${steps.length}`;
+            this.$steps.hidden = false;
+         } else {
+            this.$steps.hidden = true;
+         }
+      }
       if (this.$domain) {
          const name = this.domainName?.trim();
          if (name) {

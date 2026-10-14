@@ -24,6 +24,8 @@ export default class TaskDetailPanel extends HTMLElement {
       this.$place = this.querySelector('[data-role="place"]');
       this.$slotRow = this.querySelector('[data-role="slot-row"]');
       this.$slot = this.querySelector('[data-role="slot"]');
+      this.$stepsWrap = this.querySelector('[data-role="steps-wrap"]');
+      this.$steps = this.querySelector('[data-role="steps"]');
       this.$edit = this.querySelector('[data-role="edit"]');
       slice.controller.setComponentProps(this, props);
    }
@@ -112,6 +114,49 @@ export default class TaskDetailPanel extends HTMLElement {
          this.$slot.textContent = slotLabel || '—';
       }
       this.$edit.hidden = false;
+      this.paintSteps(task);
+   }
+
+   paintSteps(task) {
+      const steps = Array.isArray(task.steps) ? task.steps : [];
+      if (!this.$stepsWrap || !this.$steps) {
+         return;
+      }
+      this.$stepsWrap.hidden = steps.length === 0;
+      this.$steps.replaceChildren();
+      for (const step of steps) {
+         const li = document.createElement('li');
+         li.className = 'task-detail-panel__step';
+
+         const label = document.createElement('label');
+         label.className = 'task-detail-panel__step-label';
+
+         const check = document.createElement('input');
+         check.type = 'checkbox';
+         check.checked = !!step.done;
+         check.addEventListener('change', () => this.toggleStep(step.id, check.checked));
+
+         const text = document.createElement('span');
+         text.textContent = step.title;
+         if (step.done) {
+            text.className = 'task-detail-panel__step-text task-detail-panel__step-text--done';
+         } else {
+            text.className = 'task-detail-panel__step-text';
+         }
+
+         label.append(check, text);
+         li.appendChild(label);
+         this.$steps.appendChild(li);
+      }
+   }
+
+   async toggleStep(stepId, done) {
+      const task = this.task();
+      if (!task || !this.taskService?.update) {
+         return;
+      }
+      const steps = (task.steps ?? []).map((step) => (step.id === stepId ? { ...step, done } : step));
+      await this.taskService.update(task.id, { steps });
    }
 }
 

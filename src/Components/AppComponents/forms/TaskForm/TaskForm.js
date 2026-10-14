@@ -48,6 +48,8 @@ export default class TaskForm extends HTMLElement {
       this.$slotStart = this.querySelector('#task-form-slot-start');
       this.$slotEnd = this.querySelector('#task-form-slot-end');
       this.$more = this.querySelector('[data-role="more"]');
+      this.$steps = this.querySelector('[data-role="steps"]');
+      this.$addStep = this.querySelector('[data-role="add-step"]');
       this.$error = this.querySelector('[data-role="error"]');
       this._buttonsReady = false;
       this._syncingSlot = false;
@@ -88,6 +90,7 @@ export default class TaskForm extends HTMLElement {
       this.$durationUnit.addEventListener('change', () => this.onDurationChange());
       this.$slotStart.addEventListener('change', () => this.onSlotStartChange());
       this.$slotEnd.addEventListener('change', () => this.onSlotEndChange());
+      this.$addStep?.addEventListener('click', () => this.addStepRow());
       this._formBound = true;
    }
 
@@ -133,6 +136,7 @@ export default class TaskForm extends HTMLElement {
          this.$durationUnit.value = 'minutes';
          this.$slotStart.value = '';
          this.$slotEnd.value = '';
+         this.renderSteps([]);
          this.updateSlotFieldsVisibility();
          if (this.$more) {
             this.$more.open = false;
@@ -403,6 +407,7 @@ export default class TaskForm extends HTMLElement {
       const { start, end } = taskDateRange(task);
       this.$startInput.value = start ?? '';
       this.$dueInput.value = end ?? '';
+      this.renderSteps(task.steps);
       this.updateSlotFieldsVisibility();
       if (this.$more) {
          const extra =
@@ -419,6 +424,62 @@ export default class TaskForm extends HTMLElement {
          this.$slotEnd.value = slotEnd ?? '';
       }
       this._loadingTask = false;
+   }
+
+   readSteps() {
+      const steps = [];
+      for (const row of this.$steps?.querySelectorAll('[data-role="step"]') ?? []) {
+         const title = row.querySelector('input')?.value?.trim() ?? '';
+         if (!title) {
+            continue;
+         }
+         steps.push({
+            id: row.dataset.id || crypto.randomUUID(),
+            title,
+            done: row.dataset.done === '1'
+         });
+      }
+      return steps;
+   }
+
+   renderSteps(steps) {
+      if (!this.$steps) {
+         return;
+      }
+      this.$steps.replaceChildren();
+      for (const step of steps ?? []) {
+         this.addStepRow(step);
+      }
+   }
+
+   addStepRow(step = null) {
+      if (!this.$steps) {
+         return;
+      }
+      const row = document.createElement('li');
+      row.className = 'task-form__step';
+      row.dataset.role = 'step';
+      row.dataset.id = step?.id || '';
+      row.dataset.done = step?.done ? '1' : '0';
+
+      const input = document.createElement('input');
+      input.className = 'lc-input';
+      input.type = 'text';
+      input.placeholder = 'Paso';
+      input.value = step?.title || '';
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'lc-icon-btn lc-icon-btn--danger';
+      remove.setAttribute('aria-label', 'Quitar paso');
+      remove.textContent = '×';
+      remove.addEventListener('click', () => row.remove());
+
+      row.append(input, remove);
+      this.$steps.appendChild(row);
+      if (!step) {
+         input.focus();
+      }
    }
 
    async handleSubmit() {
@@ -478,7 +539,8 @@ export default class TaskForm extends HTMLElement {
          startDate: startDate || (dueDate ? dueDate : todayISO()),
          dueDate,
          slotStart: slotResult.slotStart,
-         slotEnd: slotResult.slotEnd
+         slotEnd: slotResult.slotEnd,
+         steps: this.readSteps()
       };
 
       this._submitting = true;

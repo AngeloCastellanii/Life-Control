@@ -63,6 +63,10 @@ export function getReminderWindowDays(frequency) {
 }
 
 export function getDueStatus(item) {
+   if (item?.paused) {
+      return { state: 'paused', label: 'En reposo', priority: 80 };
+   }
+
    const today = todayISO();
    const next = item.nextDueAt ?? today;
 
@@ -161,6 +165,7 @@ function normalizeItem(item) {
    }
 
    normalized.lastReminderDate = normalized.lastReminderDate ?? null;
+   normalized.paused = Boolean(item.paused);
 
    return normalized;
 }
@@ -231,6 +236,9 @@ export default class ShoppingService {
    getDueOnDate(isoDate) {
       const today = todayISO();
       return this.getAll().filter((item) => {
+         if (item.paused) {
+            return false;
+         }
          const next = item.nextDueAt ?? today;
          if (next === isoDate) {
             return true;
@@ -246,6 +254,9 @@ export default class ShoppingService {
       const today = todayISO();
       return this.getAll()
          .filter((item) => {
+            if (item.paused) {
+               return false;
+            }
             const next = item.nextDueAt ?? today;
             const daysLeft = daysBetween(today, next);
             const window =
@@ -305,7 +316,8 @@ export default class ShoppingService {
          lastDoneAt: dates.lastDoneAt,
          nextDueAt: dates.nextDueAt,
          lastFinanceId: null,
-         lastFinanceAt: null
+         lastFinanceAt: null,
+         paused: false
       };
 
       await this.storage.put(STORE, item);
@@ -423,6 +435,19 @@ export default class ShoppingService {
          checked: dates.checked
       };
 
+      await this.storage.put(STORE, updated);
+      await this.syncToContext();
+      slice.events.emit('shopping:changed', { action: 'update', item: updated });
+      return updated;
+   }
+
+   async setPaused(id, paused) {
+      const existing = this.getById(id);
+      if (!existing) {
+         return null;
+      }
+
+      const updated = { ...existing, paused: Boolean(paused) };
       await this.storage.put(STORE, updated);
       await this.syncToContext();
       slice.events.emit('shopping:changed', { action: 'update', item: updated });

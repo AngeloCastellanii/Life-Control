@@ -256,6 +256,11 @@
     @apply text-xs text-lc-muted;
   }
 
+  .task-card__steps {
+    @apply text-xs font-semibold tabular-nums;
+    color: var(--primary-color);
+  }
+
   .task-card__slot {
     @apply block max-w-full text-xs font-medium text-lc-text tabular-nums;
     white-space: nowrap;
@@ -2998,6 +3003,31 @@
     @apply m-0 text-sm leading-relaxed text-lc-muted;
   }
 
+  .shopping-section__rest {
+    @apply mt-3;
+  }
+
+  .shopping-section__item--paused {
+    opacity: 0.8;
+  }
+
+  .shopping-section__item-due--paused {
+    color: var(--font-secondary-color);
+  }
+
+  .shopping-detail__name {
+    @apply m-0 mb-2 text-lg font-semibold leading-snug;
+    color: var(--font-primary-color);
+  }
+
+  .shopping-detail__meta {
+    @apply m-0 text-sm leading-relaxed text-lc-muted;
+  }
+
+  .shopping-detail__actions {
+    @apply mt-4 flex flex-wrap items-center gap-2;
+  }
+
   .shopping-form__hint {
     @apply m-0 mt-1 text-xs leading-relaxed text-lc-muted;
   }
@@ -3157,6 +3187,39 @@
   .task-detail-panel__actions {
     @apply mt-5 flex justify-end gap-2 border-t pt-4;
     border-color: var(--tertiary-background-color);
+  }
+
+  .task-detail-panel__steps-wrap {
+    @apply mt-4;
+  }
+
+  .task-detail-panel__steps {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+
+  .task-detail-panel__step-label {
+    @apply flex items-center gap-2 text-sm;
+    color: var(--font-primary-color);
+  }
+
+  .task-detail-panel__step-text--done {
+    @apply line-through opacity-60;
+  }
+
+  .task-form__steps {
+    @apply m-0 mb-2 flex list-none flex-col gap-2 p-0;
+  }
+
+  .task-form__step {
+    @apply flex items-center gap-2;
+  }
+
+  .task-form__step .lc-input {
+    @apply min-w-0 flex-1;
+  }
+
+  .task-form__add-step {
+    @apply mt-1;
   }
 
   .planner-section__today {

@@ -25,6 +25,7 @@ const components = {
   "FinanceDetailPanel": "forms",
   "ExchangeCalculatorPanel": "forms",
   "ShoppingForm": "forms",
+  "ShoppingDetailPanel": "forms",
   "NoteForm": "forms",
   "HabitForm": "forms",
   "VisionForm": "forms",

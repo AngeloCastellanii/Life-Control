@@ -1,5 +1,5 @@
 import { SHOPPING_FREQUENCY } from '../lifeControlConstants.js';
-import { formatShortDate, getDueStatus } from '../shoppingDue.js';
+import { getDueStatus } from '../shoppingDue.js';
 import { getService } from '../../forms/formHelpers.js';
 import { shoppingItemById } from '../shoppingLookup.js';
 
@@ -28,12 +28,9 @@ export default class ShoppingSection extends HTMLElement {
       super();
       slice.attachTemplate(this);
       this._selectedByFrequency = {};
-      this._detailItemId = null;
 
-      this.$detail = this.querySelector('[data-role="detail"]');
-      this.$detailPeriod = this.querySelector('[data-role="detail-period"]');
-      this.$detailName = this.querySelector('[data-role="detail-name"]');
-      this.$detailMeta = this.querySelector('[data-role="detail-meta"]');
+      this.$rest = this.querySelector('[data-role="rest"]');
+      this.$restList = this.querySelector('[data-role="rest-list"]');
 
       this.$columns = COLUMNS.map((col) => {
          const $col = this.querySelector(`[data-frequency="${col.frequency}"]`);
@@ -147,39 +144,16 @@ export default class ShoppingSection extends HTMLElement {
          return;
       }
       await service.remove(item.id);
-      if (this._detailItemId === item.id) {
-         this.hideDetail();
-      }
       delete this._selectedByFrequency[frequency];
    }
 
-   showDetail(item) {
-      this._detailItemId = item.id;
+   openDetail(item) {
       this.setSelected(item.frequency, item.id);
-
-      const period = FREQUENCY_LABELS[item.frequency] ?? item.frequency;
-      const status = getDueStatus(item);
-      this.$detailPeriod.textContent = `Lista ${period.toLowerCase()}`;
-      this.$detailName.textContent = item.name;
-
-      const parts = [status.label];
-      if (item.price != null && Number(item.price) > 0) {
-         parts.push(`$${Number(item.price).toFixed(2)}`);
-      }
-      if (item.lastDoneAt) {
-         parts.push(`Última vez: ${formatShortDate(item.lastDoneAt)}`);
-      }
-      if (item.nextDueAt && !status.label.startsWith('Próximo:')) {
-         parts.push(`Próximo: ${formatShortDate(item.nextDueAt)}`);
-      }
-      this.$detailMeta.textContent = parts.join(' · ');
-
-      this.$detail.hidden = false;
-   }
-
-   hideDetail() {
-      this._detailItemId = null;
-      this.$detail.hidden = true;
+      slice.events.emit('ui:modal:open', {
+         title: FREQUENCY_LABELS[item.frequency] ?? 'Compra',
+         form: 'ShoppingDetailPanel',
+         shoppingId: item.id
+      });
    }
 
    renderColumn(frequency, listEl, emptyEl, items) {
@@ -189,12 +163,7 @@ export default class ShoppingSection extends HTMLElement {
       const selectedId = this.getSelectedId(frequency);
       if (selectedId && !items.some((item) => item.id === selectedId)) {
          delete this._selectedByFrequency[frequency];
-         if (this._detailItemId === selectedId) {
-            this.hideDetail();
-         }
       }
-
-      const service = this.getShoppingService();
 
       for (const item of items) {
          const row = document.createElement('li');
@@ -224,7 +193,7 @@ export default class ShoppingSection extends HTMLElement {
          nameBtn.className = 'shopping-section__item-name';
          nameBtn.textContent = item.name;
          nameBtn.title = item.name;
-         nameBtn.addEventListener('click', () => this.showDetail(item));
+         nameBtn.addEventListener('click', () => this.openDetail(item));
 
          const meta = document.createElement('div');
          meta.className = 'shopping-section__item-meta';
@@ -258,19 +227,43 @@ export default class ShoppingSection extends HTMLElement {
          : (service?.getAll?.() ?? slice.context.getState('lifeControl')?.shopping ?? []);
 
       for (const col of this.$columns) {
-         const items = list.filter((item) => item.frequency === col.frequency);
+         const items = list.filter((item) => item.frequency === col.frequency && !item.paused);
          this.renderColumn(col.frequency, col.$list, col.$empty, items);
       }
 
+      this.renderRest(list.filter((item) => item.paused));
       this.syncColumnButtons();
+   }
 
-      if (this._detailItemId) {
-         const detailItem = shoppingItemById(this._detailItemId, service);
-         if (detailItem) {
-            this.showDetail(detailItem);
-         } else {
-            this.hideDetail();
-         }
+   renderRest(items) {
+      if (!this.$rest || !this.$restList) {
+         return;
+      }
+      this.$rest.hidden = items.length === 0;
+      this.$restList.replaceChildren();
+      for (const item of items) {
+         const row = document.createElement('li');
+         row.className = 'shopping-section__item shopping-section__item--paused';
+
+         const body = document.createElement('div');
+         body.className = 'shopping-section__item-body';
+
+         const nameBtn = document.createElement('button');
+         nameBtn.type = 'button';
+         nameBtn.className = 'shopping-section__item-name';
+         nameBtn.textContent = item.name;
+         nameBtn.addEventListener('click', () => this.openDetail(item));
+
+         const meta = document.createElement('div');
+         meta.className = 'shopping-section__item-meta';
+         const due = document.createElement('span');
+         due.className = 'shopping-section__item-due shopping-section__item-due--paused';
+         due.textContent = `${FREQUENCY_LABELS[item.frequency] ?? 'Compra'} · En reposo`;
+         meta.appendChild(due);
+
+         body.append(nameBtn, meta);
+         row.appendChild(body);
+         this.$restList.appendChild(row);
       }
    }
 }
