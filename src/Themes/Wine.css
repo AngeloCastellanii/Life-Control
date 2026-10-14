@@ -1,55 +1,57 @@
 :root {
   --font-family: Outfit, system-ui, sans-serif;
 
-  /* Wine — vinotinto con blanco */
-  --font-primary-color: #ffffff;
-  --font-secondary-color: #f3d5dc;
+  /* Wine — blanco con toques vinotinto oscuro */
+  --font-primary-color: #1a0c10;
+  --font-secondary-color: #7a5560;
 
-  --primary-color: #ffffff;
-  --primary-color-rgb: 255, 255, 255;
-  --primary-background-color: #5c1a28;
-  --primary-color-contrast: #5c1a28;
-  --primary-color-shade: #f4e7ea;
+  --primary-color: #6e1224;
+  --primary-color-rgb: 110, 18, 36;
+  --primary-background-color: #ffffff;
+  --primary-color-contrast: #ffffff;
+  --primary-color-shade: #4c0c18;
 
-  --secondary-color: #ffffff;
-  --secondary-color-rgb: 255, 255, 255;
-  --secondary-background-color: #6e2434;
-  --secondary-color-contrast: #5c1a28;
+  --secondary-color: #8f1d32;
+  --secondary-color-rgb: 143, 29, 50;
+  --secondary-background-color: #ffffff;
+  --secondary-color-contrast: #ffffff;
 
-  --tertiary-background-color: #8d4454;
+  --tertiary-background-color: #f3e4e7;
 
-  --success-color: #b7f0d4;
-  --success-contrast: #143028;
-  --warning-color: #ffe08a;
-  --warning-contrast: #3a2a10;
-  --danger-color: #ffe1e1;
-  --danger-contrast: #5c1a28;
-  --accent-warning-soft: #ffd0c2;
+  --success-color: #0f766e;
+  --success-contrast: #ffffff;
+  --warning-color: #b45309;
+  --warning-contrast: #ffffff;
+  --danger-color: #9f1239;
+  --danger-contrast: #ffffff;
+  --accent-warning-soft: #e11d48;
 
-  --medium-color: #e7c3cb;
-  --disabled-color: #a56b78;
+  --medium-color: #c4a8ae;
+  --medium-contrast: #1a0c10;
+  --disabled-color: #eadfe1;
 
-  --accent-color: #ffffff;
+  --accent-color: #6e1224;
 
-  --surface-glass: color-mix(in srgb, #732838 88%, #ffffff);
-  --surface-elevated: #7a2c3c;
+  --surface-glass: color-mix(in srgb, #ffffff 92%, transparent);
+  --surface-elevated: #ffffff;
   --surface-blur: blur(18px);
-  --border-glow: color-mix(in srgb, #ffffff 42%, #8d4454);
+  --border-glow: color-mix(in srgb, #6e1224 22%, #f0dfe3);
 
   --app-background: linear-gradient(
     165deg,
-    #4a1420 0%,
-    #6b2030 38%,
-    #5a1a28 70%,
-    #43111c 100%
+    #ffffff 0%,
+    #fffdfd 42%,
+    #faf7f7 100%
   );
 
-  --box-shadow-primary: 0 10px 28px rgb(28 6 12 / 28%);
-  --box-shadow-secondary: 0 4px 14px rgb(28 6 12 / 22%);
+  --box-shadow-primary: 0 10px 28px rgb(110 18 36 / 12%);
+  --box-shadow-secondary: 0 4px 16px rgb(110 18 36 / 8%);
 
   --lc-radius-lg: 1rem;
   --lc-radius-xl: 1.5rem;
-  --lc-shadow: 0 1px 2px rgb(28 6 12 / 18%);
+  --lc-shadow:
+    0 1px 2px rgb(26 12 16 / 4%),
+    0 8px 24px rgb(110 18 36 / 7%);
 }
 
 :root .lc-card,
@@ -72,41 +74,38 @@
 }
 
 :root .sidebar__item--active .sidebar__link {
-  background: color-mix(in srgb, #ffffff 18%, transparent);
-  color: #ffffff;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 55%, transparent);
+  background: color-mix(in srgb, #6e1224 10%, transparent);
+  color: #6e1224;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #6e1224 28%, transparent);
 }
 
 :root .sidebar__link:hover {
-  background: color-mix(in srgb, #ffffff 12%, transparent);
+  background: color-mix(in srgb, #6e1224 6%, transparent);
 }
 
 :root .sidebar__logo,
 :root .settings-section__save,
 :root .fab {
-  background: #ffffff !important;
-  color: #5c1a28 !important;
-}
-
-:root .fab {
-  box-shadow: 0 8px 20px rgb(28 6 12 / 28%);
+  background: #6e1224 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px rgb(110 18 36 / 22%);
 }
 
 :root .lc-view-hero__icon {
-  background: #ffffff;
-  color: #5c1a28;
+  background: #6e1224;
+  color: #ffffff;
   box-shadow: none;
 }
 
 :root .planner-week__day--today,
 :root .planner-month__cell--today {
-  border-color: #ffffff;
-  background: color-mix(in srgb, #ffffff 14%, #6e2434);
+  border-color: #6e1224;
+  background: color-mix(in srgb, #6e1224 8%, #ffffff);
   box-shadow: none;
 }
 
 :root .planner-section__view-btn--active {
-  background: #ffffff;
-  color: #5c1a28;
+  background: #6e1224;
+  color: #ffffff;
   box-shadow: none;
 }
